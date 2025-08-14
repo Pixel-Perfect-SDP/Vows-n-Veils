@@ -1,0 +1,35 @@
+# Angular & frontend
+/frontend/dist
+/frontend/tmp
+/frontend/out-tsc
+/frontend/.angular/cache
+/frontend/node_modules
+/frontend/coverage
+/frontend/.DS_Store
+
+# Node.js & backend
+/backend/node_modules
+/backend/.env
+/backend/.DS_Store
+npm-debug.log
+yarn-error.log
+
+# Global
+.DS_Store
+Thumbs.db
+
+# IDEs
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history/
+
+# Misc
+*.log
+/connect.lock
+/libpeerconnection.log
+testem.log
+typings/
