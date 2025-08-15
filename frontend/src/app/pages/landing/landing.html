@@ -1,0 +1,19 @@
+<h1>Welcome</h1>
+
+@if (auth.user(); as u) {
+  <p>Hi {{ u.email ?? 'there' }} 👋</p>
+
+  <button (click)="loadRecent()" [disabled]="loading">Load recent test-users</button>
+
+  @if (docs.length) {
+    <ul>
+      @for (d of docs; track d.id) {
+        <li>
+          <strong>{{ d.name || '(no name)' }}</strong> — {{ d.email }}
+        </li>
+      }
+    </ul>
+  }
+} @else {
+  <p>You’re not signed in. <a routerLink="/login">Go to Login</a></p>
+}

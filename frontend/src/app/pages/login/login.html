@@ -1,0 +1,46 @@
+<h2>Account</h2>
+
+<form [formGroup]="form" (ngSubmit)="onSignIn()" style="display:grid;gap:12px;max-width:360px;">
+  <input type="text" formControlName="name" placeholder="Name" />
+  <input type="email" formControlName="email" placeholder="Email" />
+  @if (form.controls.email.touched && form.controls.email.invalid) {
+    <small>Email is required and must be valid.</small>
+  }
+
+  <input type="password" formControlName="password" placeholder="Password" />
+  @if (form.controls.password.touched && form.controls.password.invalid) {
+    <small>Password is required (min 6 chars).</small>
+  }
+
+  <div style="display:flex; gap:8px; flex-wrap:wrap;">
+    <button type="submit" [disabled]="form.invalid || auth.loading()">Sign In</button>
+    <button type="button" (click)="onSignUp()" [disabled]="form.invalid || auth.loading()">Create account</button>
+    <button type="button" (click)="onSignOut()" [disabled]="!auth.user()">Sign out</button>
+    <button type="button" (click)="onVerifyEmail()" [disabled]="!auth.user()">Verify email</button>
+    <button type="button" (click)="onResetPassword()" [disabled]="!form.controls.email.value">Reset password</button>
+  </div>
+
+  <div style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap;">
+    <button type="button" (click)="onGoogle()" [disabled]="auth.loading()">Continue with Google</button>
+    <button type="button" (click)="onLinkGoogle()" [disabled]="!auth.user() || auth.loading()">Link Google</button>
+  </div>
+  
+</form>
+
+<hr />
+
+<button (click)="writeTestDoc()" [disabled]="!auth.user()">Write test doc</button>
+
+<ng-container *ngIf="auth.user() as u; else notSignedIn">
+  <p>Signed in as: {{ u.email ?? '(no email)' }}</p>
+</ng-container>
+<ng-template #notSignedIn>
+  <p>Not signed in</p>
+</ng-template>
+
+@if (auth.error()) {
+  <p style="color:#c00">{{ auth.error() }}</p>
+}
+@if (auth.error()) {
+  <p style="color:#c00">{{ auth.error() }}</p>
+}
