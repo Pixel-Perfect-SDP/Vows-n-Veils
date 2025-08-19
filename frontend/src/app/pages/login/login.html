@@ -1,46 +1,55 @@
-<h2>Account</h2>
+<section class="auth-layout">
+  <!-- LEFT: vertical stack of 3 slides -->
+  <aside class="media-stack">
+    <!-- Brand bar: logo + title -->
+    <div class="brand-bar">
+      <img class="brand-logo" src="assets/logo.jpg" alt="Vows & Veils logo" />
+      <h1 class="brand-title">Vows & Veils</h1>
+    </div>
 
-<form [formGroup]="form" (ngSubmit)="onSignIn()" style="display:grid;gap:12px;max-width:360px;">
-  <input type="text" formControlName="name" placeholder="Name" />
-  <input type="email" formControlName="email" placeholder="Email" />
-  @if (form.controls.email.touched && form.controls.email.invalid) {
-    <small>Email is required and must be valid.</small>
-  }
+    <!-- Image panels -->
+    <div class="media-rail">
+      <div class="media">
+        <img [src]="currentA" alt="Panel A" loading="eager" (error)="onImageError('A')" />
+        <div class="overlay"></div>
+      </div>
 
-  <input type="password" formControlName="password" placeholder="Password" />
-  @if (form.controls.password.touched && form.controls.password.invalid) {
-    <small>Password is required (min 6 chars).</small>
-  }
+      <div class="media">
+        <img [src]="currentB" alt="Panel B" loading="eager" (error)="onImageError('B')" />
+        <div class="overlay"></div>
+      </div>
 
-  <div style="display:flex; gap:8px; flex-wrap:wrap;">
-    <button type="submit" [disabled]="form.invalid || auth.loading()">Sign In</button>
-    <button type="button" (click)="onSignUp()" [disabled]="form.invalid || auth.loading()">Create account</button>
-    <button type="button" (click)="onSignOut()" [disabled]="!auth.user()">Sign out</button>
-    <button type="button" (click)="onVerifyEmail()" [disabled]="!auth.user()">Verify email</button>
-    <button type="button" (click)="onResetPassword()" [disabled]="!form.controls.email.value">Reset password</button>
-  </div>
+      <div class="media">
+        <img [src]="currentC" alt="Panel C" loading="eager" (error)="onImageError('C')" />
+        <div class="overlay"></div>
+      </div>
+    </div>
+  </aside>
 
-  <div style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap;">
-    <button type="button" (click)="onGoogle()" [disabled]="auth.loading()">Continue with Google</button>
-    <button type="button" (click)="onLinkGoogle()" [disabled]="!auth.user() || auth.loading()">Link Google</button>
-  </div>
-  
-</form>
+  <!-- RIGHT: panel with ONLY the Google button -->
+  <main class="panel">
+    <header class="panel-head">
+      <h2>Welcome back</h2>
+      <p class="sub">Sign in to continue planning your day.</p>
+    </header>
 
-<hr />
+    <div class="actions">
+      <button type="button" class="btn btn-primary" (click)="onGoogle()" [disabled]="auth.loading()">
+        Continue with Google
+      </button>
+    </div>
 
-<button (click)="writeTestDoc()" [disabled]="!auth.user()">Write test doc</button>
+    <footer class="signed">
+      <ng-container *ngIf="auth.user() as u; else notSignedIn">
+        <p class="signed-in">Signed in as <strong>{{ u.email ?? '(no email)' }}</strong></p>
+      </ng-container>
+      <ng-template #notSignedIn>
+        <p class="signed-out">Not signed in</p>
+      </ng-template>
 
-<ng-container *ngIf="auth.user() as u; else notSignedIn">
-  <p>Signed in as: {{ u.email ?? '(no email)' }}</p>
-</ng-container>
-<ng-template #notSignedIn>
-  <p>Not signed in</p>
-</ng-template>
-
-@if (auth.error()) {
-  <p style="color:#c00">{{ auth.error() }}</p>
-}
-@if (auth.error()) {
-  <p style="color:#c00">{{ auth.error() }}</p>
-}
+      @if (auth.error()) {
+        <p class="error-line">{{ auth.error() }}</p>
+      }
+    </footer>
+  </main>
+</section>

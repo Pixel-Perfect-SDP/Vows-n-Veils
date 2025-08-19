@@ -1,19 +1,52 @@
-<h1>Welcome</h1>
+<div class="landing-container">
+  <!-- Hero -->
+  <header class="hero">
+    <img src="assets/logo.jpg" alt="Vows & Veils logo" class="logo" />
+    <h1>Welcome to Vows & Veils</h1>
+    <p class="subtitle">Crafting timeless memories for your special day</p>
+  </header>
 
-@if (auth.user(); as u) {
-  <p>Hi {{ u.email ?? 'there' }} 👋</p>
+  <!-- Info panels (2 only) -->
+  <section class="image-panels">
+    <div class="panel">
+      <h2>Venues & Invitations</h2>
+      <p>Discover elegant venues and bespoke invitations tailored to you.</p>
+    </div>
 
-  <button (click)="loadRecent()" [disabled]="loading">Load recent test-users</button>
+    <div class="panel">
+      <h2>Cakes & Catering</h2>
+      <p>Indulge in delightful creations for your guests to enjoy.</p>
+    </div>
+  </section>
 
-  @if (docs.length) {
-    <ul>
-      @for (d of docs; track d.id) {
-        <li>
-          <strong>{{ d.name || '(no name)' }}</strong> — {{ d.email }}
-        </li>
+  <!-- Account / actions -->
+  @if (auth.user(); as u) {
+    <section class="account-area">
+      <p class="greeting">Hi {{ u.email ?? 'there' }} 👋</p>
+
+      <!-- Removed the 'Load recent test-users' button -->
+
+      @if (docs.length) {
+        <ul class="recent-list">
+          @for (d of docs; track d.id) {
+            <li class="recent-item">
+              <strong>{{ d.name || '(no name)' }}</strong>
+              <span class="sep">—</span>
+              <span class="muted">{{ d.email }}</span>
+            </li>
+          }
+        </ul>
       }
-    </ul>
+    </section>
+  } @else {
+    <section class="account-area">
+      <p class="muted">You’re not signed in.</p>
+      <a class="btn" routerLink="/login">Go to Login</a>
+    </section>
   }
-} @else {
-  <p>You’re not signed in. <a routerLink="/login">Go to Login</a></p>
-}
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <span>© {{ year }} Vows & Veils</span>
+  </footer>
+</div>

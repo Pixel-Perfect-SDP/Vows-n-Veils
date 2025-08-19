@@ -8,11 +8,13 @@ import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
   selector: 'app-landing',
   standalone: true,
   imports: [CommonModule, RouterModule],
-  templateUrl: './landing.html'
+  templateUrl: './landing.html',
+  styleUrls: ['./landing.css']
 })
 export class Landing {
   loading = false;
   docs: any[] = [];
+  year = new Date().getFullYear();
 
   constructor(public auth: AuthService) {}
 
