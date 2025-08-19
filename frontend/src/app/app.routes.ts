@@ -5,7 +5,7 @@ export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'landing' },
   {
     path: 'landing',
-    canActivate: [authGuard],
+    //canActivate: [authGuard],
     loadComponent: () => import('./pages/landing/landing').then(m => m.Landing),
   },
   {
