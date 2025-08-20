@@ -35,6 +35,7 @@ jobs:
         uses: codecov/codecov-action@v4
         with:
           files: frontend/coverage/frontend/lcov.info
+          token: ${{ secrets.CODECOV_TOKEN }}
 
 
       - name: Build Angular App
@@ -63,6 +64,7 @@ jobs:
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_MANGO_MUSHROOM_00C4CE01E }}
           action: close
+
 
 
 
