@@ -1,0 +1,36 @@
+<section *ngIf="hasEvent === null">
+    <p>Loading...</p>
+</section>
+
+
+<section *ngIf="hasEvent && eventData">
+    <nav class="sidebar">
+      <ul>
+        <li><a routerLink="/guest-list" routerLinkActive="active">Guest List</a></li>
+        <li><a routerLink="/invitations" routerLinkActive="active">Invitations</a></li>
+        <li><a routerLink="/venues-couples" routerLinkActive="active">Venues</a></li>
+        <li><a routerLink="/vendors-couples" routerLinkActive="active">Vendors</a></li>
+      </ul>      
+  </nav>
+  <h2>Welcome </h2>
+  <p>{{ eventData.Name1 }} and {{ eventData.Name2 }}</p>
+  <p>{{ eventData.Date_Time.toDate() | date:'medium' }}</p>
+</section>
+
+<section *ngIf="hasEvent === false">
+  <form [formGroup]="form" (ngSubmit)="createEvent()">
+    <label>Partner 1:</label>
+    <input formControlName="name1" />
+
+    <label>Partner 2:</label>
+    <input formControlName="name2" />
+
+    <label>Date:</label>
+    <input type="date" formControlName="date" />
+
+    <label>Time:</label>
+    <input type="time" formControlName="time" />
+
+    <button type="submit" [disabled]="form.invalid">Create our wedding</button>
+  </form>
+</section>
