@@ -12,18 +12,20 @@ interface Venue {
   email: string;
   phonenumber: string;
   price: number;
+  images?: string[];
 }
 
 @Component({
   selector: 'app-venues',
   standalone: true,
-  imports: [CommonModule,HttpClientModule],
+  imports: [CommonModule, HttpClientModule],
   templateUrl: './venues.html',
   styleUrls: ['./venues.css']
 })
-export class Venues implements OnInit {
 
+export class Venues implements OnInit {
   venues: Venue[] = [];
+  selectedVenue: Venue | null = null; 
   loading = true;
   error: string | null = null;
 
@@ -37,7 +39,6 @@ export class Venues implements OnInit {
     this.http.get<Venue[]>('https://vows-n-veils-2.onrender.com/venues')
       .subscribe({
         next: (data) => {
-          console.log(data);
           this.venues = data;
           this.loading = false;
         },
@@ -46,5 +47,21 @@ export class Venues implements OnInit {
           this.loading = false;
         }
       });
+  }
+
+  viewVenue(id: string): void {
+    this.http.get<Venue>(`https://vows-n-veils-2.onrender.com/venues/${id}`)
+      .subscribe({
+        next: (data) => {
+          console.log('Selected venue:', data);
+          this.selectedVenue = data; 
+        },
+        error: (err) => {
+          this.error = 'Failed to load venue: ' + err.message;
+        }
+      });
+  }
+  backToList(): void {
+    this.selectedVenue = null; 
   }
 }

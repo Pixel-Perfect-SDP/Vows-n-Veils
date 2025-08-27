@@ -1,24 +1,45 @@
 <main>
   <header>
-    <p>Choose a venue:</p>
+    <p *ngIf="!selectedVenue">Choose a venue:</p>
+    <p *ngIf="selectedVenue">
+      <button class="btn" (click)="backToList()">← Back to all venues</button>
+    </p>
   </header>
 
-  <section *ngIf="venues.length > 0; else noVenues">
+  <section *ngIf="!selectedVenue && venues.length > 0;">
     <ul>
       <li *ngFor="let venue of venues">
         <h3>{{ venue.venuename }}</h3>
         <p>{{ venue.address }}</p>
-        <p>{{ venue.description }}</p>
-        <p>Email: {{ venue.email }}</p>
-        <p>Phone: {{ venue.phonenumber }}</p>
         <p>Capacity: {{ venue.capacity }}</p>
         <p>Price: {{ venue.price }}</p>
-        <button id="btn">View Venue</button>
+        <button class="btn" (click)="viewVenue(venue.id)">View Venue</button>
       </li>
     </ul>
   </section>
 
-  <ng-template #noVenues>
+  <section *ngIf="!selectedVenue && venues.length == 0;">
     <p>No venues available.</p>
-  </ng-template>
+  </section>
+
+
+  <!-- detail of chosen venue -->
+  <section *ngIf="selectedVenue">
+    <h2>{{ selectedVenue.venuename }}</h2>
+    <p>{{ selectedVenue.address }}</p>
+    <p>Capacity: {{ selectedVenue.capacity }}</p>
+    <p>Price: {{ selectedVenue.price }}</p>
+    <p>{{ selectedVenue.description }}</p>
+    <p>Email: {{ selectedVenue.email }}</p>
+    <p>Phone: {{ selectedVenue.phonenumber }}</p>
+
+  <!--  <div *ngIf="selectedVenue?.images?.length > 0">
+      <h4>Images:</h4>
+      <div *ngFor="let img of selectedVenue?.images">
+        <img [src]="img" alt="venue image" width="200">
+      </div>
+    </div>
+    -->
+  </section>
 </main>
+

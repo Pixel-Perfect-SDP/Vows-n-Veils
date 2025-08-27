@@ -1,26 +1,122 @@
+:host {
+  --bg: #FAF7F2;
+  --surface: #FFFFFF;
+  --beige-100: #F5EFE6;
+  --beige-300: #DCCFBE;
+  --stone-800: #3F3A34;
+  --line: #E7DFD6;
+  --accent: #C57E6D;
+  --accent-700: #A76858;
+  --shadow-sm: 0 2px 12px rgba(0,0,0,.06);
+  --shadow-md: 0 10px 36px rgba(0,0,0,.10);
+  display: block;
+  background: var(--bg);
+}
+
+main {
+  max-width: 1200px;
+  margin: 24px auto;
+  padding: 24px;
+  display: grid;
+  align-content: start;
+  gap: 24px;
+}
+
+header {
+  text-align: center;
+}
+
+header p {
+  margin: 0 0 6px;
+  color: var(--stone-800);
+  font-size: clamp(1.5rem, 2.5vw, 2rem);
+  letter-spacing: -0.012em;
+  font-weight: 700;
+}
+
+section {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+section ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: contents;
+}
+
+section li {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  box-shadow: var(--shadow-sm);
+  padding: 16px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
 section li:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+  box-shadow: var(--shadow-md);
 }
 
 section h3 {
-  margin-top: 0;
-  color: #333;
-  font-size: 1.4rem;
+  margin: 0;
+  color: var(--stone-800);
+  font-size: clamp(1.2rem, 2vw, 1.4rem);
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 section p {
-  margin: 5px 0;
-  color: #555;
+  margin: 4px 0;
+  color: #7e776f;
+  font-size: 0.95rem;
 }
 
 section p strong {
-  color: #000;
+  color: var(--stone-800);
+  font-weight: 600;
 }
+
 .btn {
-  display: inline-flex; align-items: center; justify-content: center;
-  padding: 12px 18px; border-radius: 12px;
-  border: 1px solid var(--line); background: #fff; color: var(--stone-800);
-  cursor: pointer; font-weight: 600; letter-spacing: .02em;
-  
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--stone-800);
+  cursor: pointer;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.06s ease;
+}
+
+.btn:hover {
+  background: var(--beige-100);
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-primary:hover {
+  background: var(--accent-700);
+}
+
+section + p {
+  color: #7e776f;
+  margin: 0;
+  text-align: center;
+  font-size: 1rem;
 }
