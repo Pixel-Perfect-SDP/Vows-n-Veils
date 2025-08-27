@@ -1,11 +1,50 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { CommonModule } from '@angular/common';
+
+interface Venue {
+  id: string;
+  venuename: string;
+  address: string;
+  capacity: number;
+  companyID: string;
+  description: string;
+  email: string;
+  phonenumber: string;
+  price: number;
+}
 
 @Component({
   selector: 'app-venues',
-  imports: [],
+  standalone: true,
+  imports: [CommonModule,HttpClientModule],
   templateUrl: './venues.html',
-  styleUrl: './venues.css'
+  styleUrls: ['./venues.css']
 })
-export class Venues {
+export class Venues implements OnInit {
 
+  venues: Venue[] = [];
+  loading = true;
+  error: string | null = null;
+
+  constructor(private http: HttpClient) { }
+
+  ngOnInit(): void {
+    this.getVenues();
+  }
+
+  getVenues(): void {
+    this.http.get<Venue[]>('https://vows-n-veils-2.onrender.com/venues')
+      .subscribe({
+        next: (data) => {
+          console.log(data);
+          this.venues = data;
+          this.loading = false;
+        },
+        error: (err) => {
+          this.error = 'Failed to load venues: ' + err.message;
+          this.loading = false;
+        }
+      });
+  }
 }

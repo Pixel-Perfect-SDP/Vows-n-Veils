@@ -1,12 +1,11 @@
-<!--<main>
+<main>
   <header>
     <p>Choose a venue:</p>
   </header>
 
-  <section *@If="venues.length > 0; else noVenues">
+  <section *ngIf="venues.length > 0; else noVenues">
     <ul>
-    
-     <li *ngFor="let venue of venues">
+      <li *ngFor="let venue of venues">
         <h3>{{ venue.venuename }}</h3>
         <p>{{ venue.address }}</p>
         <p>{{ venue.description }}</p>
@@ -14,35 +13,12 @@
         <p>Phone: {{ venue.phonenumber }}</p>
         <p>Capacity: {{ venue.capacity }}</p>
         <p>Price: {{ venue.price }}</p>
-      </li> 
-    
+        <button id="btn">View Venue</button>
+      </li>
+    </ul>
+  </section>
+
   <ng-template #noVenues>
     <p>No venues available.</p>
   </ng-template>
- 
-</main>
--->
-
-
-<main>
-  <header>
-    <p>Choose a venue:</p>
-  </header>
-
-  <section>
-
-    <ul>
-      <li>
-        <h3>Shepstone Gardens</h3>
-        <p>12 Hope Rd, Mountain View, Johannesburg, 2192, South Africa</p>
-        <p>Award-winning venue featuring lush gardens, floating pavilions, koi ponds, and garden chapels, ideal for weddings and elegant gatherings.</p>
-        <p>Email: shepstonegardens@gmail.com</p>
-        <p>Phone: 0234567891</p>
-        <p>Capacity: 200 people</p>
-        <p>Price: R 2100</p>
-        <button id ="btn">View Venue</button>
-      </li> 
-    </ul>
-
-  </section>
 </main>
