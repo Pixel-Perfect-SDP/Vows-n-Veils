@@ -53,3 +53,19 @@
   </footer>
 </div>
 <section>
+
+<!-- Companies button and popup -->
+ <button (click)="toggleCompaniesPopup()" class="companies-button">Companies</button>
+
+<section class="companies-popup" *ngIf="companiesPopup">
+  <section class="popup-content">
+    <button (click)="toggleCompaniesPopup()" class="close-button">X</button>
+    <h3>Choose a section</h3>
+    <section class="popup-buttons">
+      <button>Venue company</button>
+      <button>Vendor company</button>
+      <button>Admin</button>
+    </section>
+  
+  </section>
+  </section>

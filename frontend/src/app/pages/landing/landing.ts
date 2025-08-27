@@ -16,6 +16,8 @@ export class Landing {
   docs: any[] = [];
   year = new Date().getFullYear();
 
+  companiesPopup=false;
+
   constructor(public auth: AuthService) {}
 
   async loadRecent() {
@@ -28,5 +30,9 @@ export class Landing {
     } finally {
       this.loading = false;
     }
+  }
+
+    toggleCompaniesPopup() {
+    this.companiesPopup = !this.companiesPopup;
   }
 }
