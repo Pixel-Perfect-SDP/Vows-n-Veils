@@ -5,7 +5,8 @@ const app = express();
 app.use(express.json());
 
 // Routes
-const exampleRoutes = require('./routes/example.routes');
-app.use('/api/example', exampleRoutes);
+const venueRoutes = require('./routes/venues.routes');
+app.use('/api/venues', venueRoutes);
 
 module.exports = app;
+
