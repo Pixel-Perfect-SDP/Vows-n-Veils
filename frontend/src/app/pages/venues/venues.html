@@ -13,12 +13,12 @@
 
 <section *ngIf="selectedVenue">
   <h2>{{ selectedVenue.venuename }}</h2>
-  <p>{{ selectedVenue.address }}</p>
-  <p>Capacity: {{ selectedVenue.capacity }}</p>
-  <p>Price: {{ selectedVenue.price }}</p>
-  <p>{{ selectedVenue.description }}</p>
-  <p>Email: {{ selectedVenue.email }}</p>
-  <p>Phone: {{ selectedVenue.phonenumber }}</p>
+  <p class="view">{{ selectedVenue.address }}</p>
+  <p class="view">Capacity: {{ selectedVenue.capacity }}</p>
+  <p class="view">Price: {{ selectedVenue.price }}</p>
+  <p class="view">{{ selectedVenue.description }}</p>
+  <p class="view">Email: {{ selectedVenue.email }}</p>
+  <p class="view">Phone: {{ selectedVenue.phonenumber }}</p>
   <div *ngIf="selectedVenue.images?.length">
     <img *ngFor="let img of selectedVenue.images" [src]="img" width="200" />
   </div>
