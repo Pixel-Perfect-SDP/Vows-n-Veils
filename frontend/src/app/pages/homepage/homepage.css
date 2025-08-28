@@ -88,6 +88,7 @@
     margin: 0;
     line-height: 1.2;
     text-transform: uppercase;
+    transition: transform 0.3s ease, text-shadow 0.3s ease;
     animation: slideIn 1s ease-out forwards;
 }
 
