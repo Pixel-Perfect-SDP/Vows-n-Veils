@@ -48,7 +48,7 @@ export class Landing {
     }
 
     onGoogleVendor() {
-      this.signInAndRedirect('/homepage');
+      this.signInAndRedirect('/vendors-company');
     }
 
     onGoogleVenue() {

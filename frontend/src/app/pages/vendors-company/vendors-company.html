@@ -1,0 +1,53 @@
+<section class="vendors-company-section">
+
+  <!-- Loading -->
+  <section class="loading-container" *ngIf="hasVendorCompany === null">
+    <section class="Loading-1"></section>
+    <section class="Loading-2"></section>
+  </section>
+
+  <!-- If vendor company exists -->
+  <section class="has-vendor-company" *ngIf="hasVendorCompany && companyVendorData">
+    <nav class="sidebar">
+      <section class="sidebar-header">
+
+        <h1>Vows & Veils</h1>
+        <button>Add service</button>
+        <button>Delete service</button>
+        <button>Track orders</button>
+      </section>     
+    </nav>
+
+    <section class="company-details">
+      <h2>Welcome, {{ companyVendorData.companyName }}</h2>
+      <p>Email: {{ companyVendorData.email }}</p>
+      <p>Phone: {{ companyVendorData.phoneNumber }}</p>
+      <p class="tag">Vendor Company</p>
+    </section>
+  </section>
+
+  <!-- If no vendor company -->
+  <section class="create-vendor-company" *ngIf="hasVendorCompany === false">
+    <section class="company-card">
+      <img src="assets/logo.jpg" alt="Vows & Veils logo" class="logo" />
+      <h2>Create your Vendor Company</h2>
+      <p>Fill in the details below to get started!</p>
+    </section>
+
+    <section class="company-form">
+      <form [formGroup]="form" (ngSubmit)="createVendorCompany()">
+        <label>Company Name:</label>
+        <input formControlName="companyName" />
+
+        <label>Company Email:</label>
+        <input type="email" formControlName="companyEmail" />
+
+        <label>Company Phone Number:</label>
+        <input formControlName="companyNumber" />
+
+        <button type="submit" [disabled]="form.invalid">Create Vendor Company</button>
+      </form>
+    </section>
+  </section>
+
+</section>
