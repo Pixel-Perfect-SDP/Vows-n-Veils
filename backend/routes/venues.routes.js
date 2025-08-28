@@ -26,7 +26,6 @@ router.get('/', async (req, res) => {
       snap.docs.map(async (doc) => {
         const data = { id: doc.id, ...doc.data() };
 
-        // Get all files for this venue
         const [files] = await bucket.getFiles({ prefix: `venues/${doc.id}/` });
 
         const imageUrls = await Promise.all(

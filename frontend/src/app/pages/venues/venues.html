@@ -1,22 +1,30 @@
 <main>
     <h1>Venues</h1>
-<section *ngIf="!selectedVenue && venues.length > 0;" class="venues">
-    <ul>
-        <li *ngFor="let venue of venues">
-            <h3>{{ venue.venuename }}</h3>
-            <div *ngIf="venue.images?.length" class="images">
-                <img *ngFor="let img of venue.images" [src]="img" />
-            </div>
-            <p>{{ venue.address }}</p>
-            <p>Capacity: {{ venue.capacity }}</p>
-            <button class="btn" (click)="viewVenue(venue.id)">View Venue</button>
-        </li>
-    </ul>
-</section>
+    <section *ngIf="!selectedVenue && venues.length > 0;" class="venues">
+
+        <section class="chosen-venue">
+            <p *ngIf="!chosenVenueName">No chosen venue yet</p>
+            <p *ngIf="chosenVenueName">Chosen Venue: {{ chosenVenueName }}</p>
+        </section>
+
+        <ul>
+            <li *ngFor="let venue of venues">
+                <h3>{{ venue.venuename }}</h3>
+                <div class="images">
+                    <img *ngIf="venue.images?.length" [src]="venue.images?.[1] || venue.images?.[0]" width="300" />
+                </div>
+
+                <p>{{ venue.address }}</p>
+                <p>Capacity: {{ venue.capacity }}</p>
+                <button class="btn" (click)="viewVenue(venue.id)">View Venue</button>
+            </li>
+        </ul>
+    </section>
 
 
     <section *ngIf="selectedVenue">
-        <button class="btn back-btn" (click)="backToList()">← Back to all Venues</button>
+        <button class="btn " (click)="backToList()">← Back to all Venues</button>
+        <button class="btn" (click)="selectVenue(selectedVenue.id)">Choose Venue</button>
 
         <h2>{{ selectedVenue.venuename }}</h2>
         <p class="view">{{ selectedVenue.address }}</p>
@@ -29,6 +37,7 @@
         <div *ngIf="selectedVenue.images?.length">
             <img *ngFor="let img of selectedVenue.images" [src]="img" width="200" />
         </div>
+
     </section>
 
 </main>
