@@ -1,4 +1,3 @@
-// invitations.ts
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
@@ -85,6 +84,7 @@ export class Invitations {
       groom:   curr.groom   || data?.Name2 || '',
       date:    curr.date    || dateStr,
       time:    curr.time    || timeStr,
+      venue:   curr.venue   || (data?.VenueID ?? '')
     });
 }
 
@@ -312,9 +312,6 @@ export class Invitations {
 
         // No invitation yet — prefill entirely from Events
         await this.loadDefaultsFromEvent();
-
-        // Optionally pick a default template so the user sees something immediately
-        this.selected = this.selected || this.templates[0];
       }
     } catch (err) {
       console.error('Error fetching invitation:', err);
@@ -365,4 +362,3 @@ export class Invitations {
     }
   }
 }
-
