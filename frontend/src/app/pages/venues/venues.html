@@ -1,25 +1,26 @@
 <section *ngIf="!selectedVenue && venues.length > 0;">
-  <ul>
-    <li *ngFor="let venue of venues">
-      <h3>{{ venue.venuename }}</h3>
-      <p>{{ venue.address }}</p>
-      <p>Capacity: {{ venue.capacity }}</p>
-      <p>Price: {{ venue.price }}</p>
-      <img *ngIf="venue.image" [src]="venue.image" alt="venue image" width="200" />
-      <button class="btn" (click)="viewVenue(venue.id)">View Venue</button>
-    </li>
-  </ul>
+    <ul>
+        <li *ngFor="let venue of venues">
+            <h3>{{ venue.venuename }}</h3>
+            <p>{{ venue.address }}</p>
+            <p>Capacity: {{ venue.capacity }}</p>
+            <p>Price: {{ venue.price }}</p>
+            <img [src]="venue.images?.[0]" width="200" />
+            <p class=" view">{{ venue.images}}</p>
+            <button class="btn" (click)="viewVenue(venue.id)">View Venue</button>
+        </li>
+    </ul>
 </section>
 
 <section *ngIf="selectedVenue">
-  <h2>{{ selectedVenue.venuename }}</h2>
-  <p class="view">{{ selectedVenue.address }}</p>
-  <p class="view">Capacity: {{ selectedVenue.capacity }}</p>
-  <p class="view">Price: {{ selectedVenue.price }}</p>
-  <p class="view">{{ selectedVenue.description }}</p>
-  <p class="view">Email: {{ selectedVenue.email }}</p>
-  <p class="view">Phone: {{ selectedVenue.phonenumber }}</p>
-  <div *ngIf="selectedVenue.images?.length">
-    <img *ngFor="let img of selectedVenue.images" [src]="img" width="200" />
-  </div>
+    <h2>{{ selectedVenue.venuename }}</h2>
+    <p class="view">{{ selectedVenue.address }}</p>
+    <p class="view">Capacity: {{ selectedVenue.capacity }}</p>
+    <p class="view">Price: {{ selectedVenue.price }}</p>
+    <p class="view">{{ selectedVenue.description }}</p>
+    <p class="view">Email: {{ selectedVenue.email }}</p>
+    <p class="view">Phone: {{ selectedVenue.phonenumber }}</p>
+    <div *ngIf="selectedVenue.images?.length">
+        <img *ngFor="let img of selectedVenue.images" [src]="img" width="200" />
+    </div>
 </section>

@@ -1,25 +1,26 @@
 :host {
-  --bg: #FAF7F2;
+  --bg: #FFFFFF; /* White background */
   --surface: #FFFFFF;
-  --beige-100: #F5EFE6;
-  --beige-300: #DCCFBE;
-  --stone-800: #3F3A34;
-  --line: #E7DFD6;
-  --accent: #C57E6D;
-  --accent-700: #A76858;
-  --shadow-sm: 0 2px 12px rgba(0,0,0,.06);
-  --shadow-md: 0 10px 36px rgba(0,0,0,.10);
+  --beige-100: #F5F5F5;
+  --beige-300: #E0E0E0;
+  --stone-800: #2D2D2D;
+  --line: #E0E0E0;
+  --accent: #E57373;
+  --accent-700: #D32F2F;
+  --shadow-sm: 0 4px 16px rgba(0,0,0,0.08);
+  --shadow-md: 0 12px 40px rgba(0,0,0,0.12);
   display: block;
   background: var(--bg);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 main {
-  max-width: 1200px;
-  margin: 24px auto;
+  max-width: 1280px;
+  margin: 32px auto;
   padding: 24px;
   display: grid;
   align-content: start;
-  gap: 24px;
+  gap: 32px;
 }
 
 header {
@@ -27,17 +28,17 @@ header {
 }
 
 header p {
-  margin: 0 0 6px;
+  margin: 0 0 8px;
   color: var(--stone-800);
-  font-size: clamp(1.5rem, 2.5vw, 2rem);
-  letter-spacing: -0.012em;
+  font-size: clamp(1.75rem, 2.8vw, 2.25rem);
+  letter-spacing: -0.015em;
   font-weight: 700;
 }
 
 section {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
 }
 
 section ul {
@@ -50,29 +51,33 @@ section ul {
 section li {
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: 16px;
+  border-radius: 12px;
   box-shadow: var(--shadow-sm);
-  padding: 16px;
+  padding: 20px;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 section li:hover {
-  transform: translateY(-5px);
+  transform: translateY(-8px);
   box-shadow: var(--shadow-md);
 }
 
 section h3 {
   margin: 0;
   color: var(--stone-800);
-  font-size: clamp(1.2rem, 2vw, 1.4rem);
+  font-size: clamp(1.25rem, 2.2vw, 1.5rem);
   font-weight: 600;
   letter-spacing: -0.01em;
 }
 
 section p {
-  margin: 4px 0;
-  color: #7e776f;
+  margin: 6px 0;
+  color: #616161;
   font-size: 0.95rem;
+  line-height: 1.5;
 }
 
 section p strong {
@@ -80,27 +85,37 @@ section p strong {
   font-weight: 600;
 }
 
+section img {
+  width: 100%;
+  max-width: 200px;
+  height: auto;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 10px 16px;
-  border-radius: 10px;
+  padding: 12px 20px;
+  border-radius: 12px;
   border: 1px solid var(--line);
   background: var(--surface);
   color: var(--stone-800);
   cursor: pointer;
   font-weight: 600;
+  font-size: 0.95rem;
   letter-spacing: 0.02em;
-  transition: background 0.2s ease, border-color 0.2s ease, transform 0.06s ease;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.1s ease;
 }
 
 .btn:hover {
   background: var(--beige-100);
+  border-color: var(--beige-300);
 }
 
 .btn:active {
-  transform: translateY(1px);
+  transform: scale(0.98);
 }
 
 .btn-primary {
@@ -112,11 +127,61 @@ section p strong {
 
 .btn-primary:hover {
   background: var(--accent-700);
+  border-color: transparent;
 }
 
 section + p {
-  color: #7e776f;
-  margin: 0;
+  color: #616161;
+  margin: 16px 0 0;
   text-align: center;
   font-size: 1rem;
+}
+
+/* Styling for selected venue section */
+section:nth-child(2) {
+  grid-template-columns: 1fr;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.3s ease;
+}
+
+section:nth-child(2):hover {
+  box-shadow: var(--shadow-md);
+}
+
+section:nth-child(2) h2 {
+  margin: 0 0 16px;
+  color: var(--stone-800);
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+
+.view {
+  margin: 8px 0;
+  color: #616161;
+  font-size: 1rem;
+  line-height: 1.6;
+  background: var(--beige-100);
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+}
+
+section:nth-child(2) img {
+  width: 100%;
+  max-width: 250px;
+  height: auto;
+  border-radius: 8px;
+  margin: 8px 0;
+}
+
+section:nth-child(2) div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
 }

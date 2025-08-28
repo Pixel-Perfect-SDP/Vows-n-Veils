@@ -28,16 +28,16 @@ router.get('/', async (req, res) => {
 
         const [files]= await bucket.getFiles({ prefix: `venues/${doc.id}/`, maxResults: 1 });
 
-        if (files.length > 0) {
-          const [url] = await files[0].getSignedUrl({
-            action: 'read',
-            expires: Date.now() + 60 * 60 * 1000,
-          });
-          data.image = url; 
-        } else {
-          data.image = null; 
-        }
-
+      const imageUrls = await Promise.all(
+      files.map(async (file) => {
+        const [url] = await file.getSignedUrl({
+          action: 'read',
+          expires: Date.now() + 60 * 60 * 1000,
+        });
+        return url;
+      })
+    );
+        data.images=imageUrls;
         return data;
       })
     );
