@@ -1,52 +1,135 @@
 <section class="vendorsCompany-section">
 
-<section class="loading-container" *ngIf="hasVendorCompany === null">
-<section class="Loading-1"></section>
-<section class="Loading-2"></section>
-</section>
+  <!-- Loading -->
+  <section class="loading-container" *ngIf="hasVendorCompany === null">
+    <section class="Loading-1"></section>
+    <section class="Loading-2"></section>
+  </section>
 
-<section class="has-vendor-company" *ngIf="hasVendorCompany && companyVendorData">
+  <!-- If vendor company exists -->
+  <section class="has-vendor-company" *ngIf="hasVendorCompany && companyVendorData">
     <nav class="sidebar">
       <section class="sidebar-header">
         <img src="assets/logo.jpg" alt="Vows & Veils logo" class="logo" />
         <h1>Vows & Veils</h1>
       </section>
-      <button>Add service</button>   
-      <button>Delete service</button>  
-      <button>Track orders</button>
-  </nav>
-  <section class="vendor-company-details">
-  <p class="company-name">Welcome, {{ companyVendorData.companyName }}</p>
-  </section>
+
+      <!-- actions -->
+      <button (click)="toggleServiceForm()">
+        {{ showServiceForm ? 'Close' : 'Add service' }}
+      </button>
+      <button (click)="refreshServices()">Refresh</button>
+      <button disabled>Delete service</button>
+      <button disabled>Track orders</button>
+    </nav>
+
+    <section class="vendor-company-details">
+      <p class="company-name">Welcome, {{ companyVendorData.companyName }}</p>
+    </section>
   </section>
 
+  <!-- Services area -->
   <section class="services" *ngIf="hasVendorCompany && companyVendorData">
     <h3>My services:</h3>
-</section>
 
-<section class="create-vendor-company" *ngIf="hasVendorCompany === false">
-    <section class="vendor-company-card">
-    <img src="assets/logo.jpg" alt="Vows & Veils logo" class="logo" />
-    <h2>Join as a vendor</h2>
-    <p>Fill in the details below to get started!</p>
+    <!-- Add Service form (uses existing .vendor-company-form styles) -->
+    <section class="vendor-company-form" *ngIf="showServiceForm">
+      <form [formGroup]="serviceForm" (ngSubmit)="addService()">
+        <label>Service name *</label>
+        <input formControlName="serviceName" placeholder="e.g. Full-day photography" />
+
+        <label>Type *</label>
+        <select formControlName="type">
+          <option value="" disabled>Select…</option>
+          <option *ngFor="let t of serviceTypes" [value]="t">{{ t }}</option>
+        </select>
+
+        <label>Price (R) *</label>
+        <input type="number" formControlName="price" min="0" step="0.01" />
+
+        <label>Capacity</label>
+        <input type="number" formControlName="capacity" min="0" step="1" placeholder="e.g. 200" />
+
+        <label>Description</label>
+        <textarea rows="3" formControlName="description" placeholder="What’s included…"></textarea>
+
+        <label>Booking notes (optional)</label>
+        <textarea rows="2" formControlName="bookingNotes" placeholder="Lead time, special terms…"></textarea>
+
+        <div style="display:flex; gap:10px; margin-top:10px">
+          <button type="submit" [disabled]="serviceForm.invalid || busy">
+            {{ busy ? 'Saving…' : 'Save service' }}
+          </button>
+          <button type="button" (click)="serviceForm.reset(defaultServiceValues)" [disabled]="busy">Clear</button>
+        </div>
+
+        <p *ngIf="errorMsg" style="color:#b45353;margin-top:8px">{{ errorMsg }}</p>
+        <p *ngIf="successMsg" style="color:#166534;margin-top:8px">{{ successMsg }}</p>
+      </form>
     </section>
 
+    <!-- Services list -->
+    <div *ngIf="loadingServices" style="color:#6b7280">Loading services…</div>
+    <div *ngIf="!loadingServices && services.length === 0" style="color:#6b7280">
+      No services yet — add your first one.
+    </div>
 
-<section class="vendor-company-form">
-    <form [formGroup]="form" (ngSubmit)="createVendorCompany()">
-      <label>Company Name:</label>
-      <input formControlName="companyName" />
+    <div *ngIf="services.length > 0" style="overflow:auto; background:#fff; border-radius:12px; box-shadow:0 6px 20px rgba(0,0,0,0.08);">
+      <table style="width:100%; border-collapse:collapse">
+        <thead>
+          <tr style="text-align:left; border-bottom:1px solid #e5e7eb">
+            <th style="padding:12px">Name</th>
+            <th style="padding:12px">Type</th>
+            <th style="padding:12px">Price</th>
+            <th style="padding:12px">Capacity</th>
+            <th style="padding:12px">Status</th>
+            <th style="padding:12px">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let s of services; trackBy: trackById" style="border-bottom:1px solid #f3f4f6">
+            <td style="padding:12px">{{ s.serviceName }}</td>
+            <td style="padding:12px">{{ s.type }}</td>
+            <td style="padding:12px">R{{ s.price | number:'1.0-2' }}</td>
+            <td style="padding:12px">{{ s.capacity ?? '—' }}</td>
+            <td style="padding:12px">
+              <span style="padding:2px 8px; border-radius:999px; font-size:12px; background:#e5e7eb; color:#374151">
+                {{ s.status || 'active' }}
+              </span>
+            </td>
+            <td style="padding:12px">
+              <button (click)="deleteService(s)" [disabled]="busyId===s.id">
+                {{ busyId===s.id ? 'Deleting…' : 'Delete' }}
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
 
-      <label>Contact Email:</label>
-      <input type="email" formControlName="companyEmail" />
+  <!-- If no vendor company -->
+  <section class="create-vendor-company" *ngIf="hasVendorCompany === false">
+    <section class="vendor-company-card">
+      <img src="assets/logo.jpg" alt="Vows & Veils logo" class="logo" />
+      <h2>Join as a vendor</h2>
+      <p>Fill in the details below to get started!</p>
+    </section>
 
-      <label>Phone Number:</label>
-      <input formControlName="companyNumber" />
+    <section class="vendor-company-form">
+      <form [formGroup]="form" (ngSubmit)="createVendorCompany()">
+        <label>Company Name:</label>
+        <input formControlName="companyName" />
 
-      <button type="submit" [disabled]="form.invalid">Create vendor account</button>
-    </form>
-</section>
-</section>
+        <label>Contact Email:</label>
+        <input type="email" formControlName="companyEmail" />
 
+        <label>Phone Number:</label>
+        <input formControlName="companyNumber" />
+
+        <button type="submit" [disabled]="form.invalid">Create vendor account</button>
+      </form>
+    </section>
+  </section>
 
 </section>
