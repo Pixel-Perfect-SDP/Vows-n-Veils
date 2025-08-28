@@ -1,7 +1,7 @@
 <main>
     <h1>Venues</h1>
     <section *ngIf="!selectedVenue && venues.length > 0;" class="venues">
-
+        <button class="btn " (click)="backTohome()">Back to Homepage</button>
         <section class="chosen-venue">
             <p *ngIf="!chosenVenueName">No chosen venue yet</p>
             <p *ngIf="chosenVenueName">Chosen Venue: {{ chosenVenueName }}</p>

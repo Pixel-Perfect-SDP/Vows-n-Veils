@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
-
+import { Router } from '@angular/router';
 import { collection, query, where, getDocs, updateDoc, doc } from 'firebase/firestore';
 import { auth, db } from '../firebase/firebase-config';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -34,7 +34,7 @@ export class Venues implements OnInit {
   error: string | null = null;
   chosenVenueName: string | null = null;
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient,private router: Router) { }
 
   ngOnInit(): void {
     onAuthStateChanged(auth, (user) => {
@@ -163,5 +163,10 @@ export class Venues implements OnInit {
       .catch(() => {
         this.chosenVenueName = null;
       });
+  }
+
+
+ backTohome(): void {
+  this.router.navigate(['/homepage']);
   }
 }

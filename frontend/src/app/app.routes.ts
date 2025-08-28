@@ -18,7 +18,7 @@ export const routes: Routes = [
   },
 
    {
-    path: 'venue',
+    path: 'venues-couples',
     loadComponent: () => import('./pages/venues/venues').then(m => m.Venues),
   },
 
@@ -34,10 +34,7 @@ export const routes: Routes = [
     path: 'vendors-couples',
     loadComponent: () => import('./pages/vendor-couples/vendor-couples').then(m => m.VendorCouples),
   },
-    { 
-    path: 'venues-couples',
-    loadComponent: () => import('./pages/venues-couples/venues-couples').then(m => m.VenuesCouples),
-  },
+    
   //This must be the last route - define all other routes before this
   { path: '**', redirectTo: 'landing' },
 
