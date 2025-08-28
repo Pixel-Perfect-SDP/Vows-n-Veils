@@ -1,8 +1,9 @@
+<section class="landing-page">
 <div class="landing-container">
   <!-- Hero -->
   <header class="hero">
     <img src="assets/logo.jpg" alt="Vows & Veils logo" class="logo" />
-    <h1>Welcome to Vows & Veils</h1>
+    <h1>Vows & Veils</h1>
     <p class="subtitle">Crafting timeless memories for your special day</p>
   </header>
 
@@ -40,8 +41,9 @@
     </section>
   } @else {
     <section class="account-area">
-      <p class="muted">You’re not signed in.</p>
-      <a class="btn" routerLink="/login">Go to Login</a>
+      <!--<p class="muted">You’re not signed in.</p>-->
+      <a class="btn" routerLink="/login">Find a couple</a>
+      <a class="btn" routerLink="/login">Plan my wedding</a>
     </section>
   }
 
@@ -50,3 +52,20 @@
     <span>© {{ year }} Vows & Veils</span>
   </footer>
 </div>
+<section>
+
+<!-- Companies button and popup -->
+ <button (click)="toggleCompaniesPopup()" class="companies-button">Companies</button>
+
+<section class="companies-popup" *ngIf="companiesPopup">
+  <section class="popup-content">
+    <button (click)="toggleCompaniesPopup()" class="close-button">X</button>
+    <h3>Choose a section</h3>
+    <section class="popup-buttons">
+      <button>Venue company</button>
+      <button>Vendor company</button>
+      <button>Admin</button>
+    </section>
+  
+  </section>
+  </section>

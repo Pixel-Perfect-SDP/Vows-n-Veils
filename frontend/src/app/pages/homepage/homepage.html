@@ -1,0 +1,50 @@
+<section class="homepage-section">
+
+<section class="loading-container" *ngIf="hasEvent === null">
+<section class="Loading-1"></section>
+  <section class="Loading-2"></section>
+</section>
+
+<section class="has-event" *ngIf="hasEvent && eventData">
+    <nav class="sidebar">
+      <section class="sidebar-header">
+        <img src="assets/logo.jpg" alt="Vows & Veils logo" class="logo" />
+        <h1>Vows & Veils</h1>
+      </section>
+      <ul>
+        <li><a routerLink="/guest-list" routerLinkActive="active">Guest List</a></li>
+        <li><a routerLink="/invitations" routerLinkActive="active">Invitations</a></li>
+        <li><a routerLink="/venues-couples" routerLinkActive="active">Venues</a></li>
+        <li><a routerLink="/vendors-couples" routerLinkActive="active">Vendors</a></li>
+      </ul>      
+  </nav>
+  <section class="event-details">
+  <p class="names">Welcome, {{ eventData.Name1 }} and {{ eventData.Name2 }}</p>
+  </section>
+</section>
+
+<section class="create-event" *ngIf="hasEvent === false">
+  <section class="event-card">
+  <img src="assets/logo.jpg" alt="Vows & Veils logo" class="logo" />
+  <h2>Plan your wedding</h2>
+  <p>Fill in the details below to get started!</p>
+  </section>
+
+<section class="event-form">
+  <form [formGroup]="form" (ngSubmit)="createEvent()">
+    <label>Name of first partner:</label>
+    <input formControlName="name1" />
+
+    <label>Name of second partner:</label>
+    <input formControlName="name2" />
+
+    <label>Date of wedding:</label>
+    <input type="date" formControlName="date" />
+
+    <label>Time of wedding:</label>
+    <input type="time" formControlName="time" />
+
+    <button type="submit" [disabled]="form.invalid">Create our wedding</button>
+  </form>
+</section>
+</section>

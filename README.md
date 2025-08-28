@@ -1,4 +1,6 @@
-# Frontend
+# Vows n Veils
+Wedding event management app (Under development) 
+https://mango-mushroom-00c4ce01e.2.azurestaticapps.net/
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.1.3.
 
