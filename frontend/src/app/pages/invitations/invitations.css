@@ -1,0 +1,51 @@
+.page { padding: 1rem; display: grid; gap: 1rem; }
+h1 { margin: 0 0 .5rem 0; }
+
+.picker {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(180px, 1fr));
+  gap: 1rem;
+}
+.card {
+  border: 1px solid #ddd; border-radius: 12px; overflow: hidden;
+  display: grid; grid-template-rows: 1fr auto; background: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,.06);
+}
+.card img { width: 100%; height: 220px; object-fit: cover; display: block; }
+.card-footer { display: flex; justify-content: space-between; align-items: center; padding: .5rem .75rem; }
+.card-footer button { padding: .4rem .7rem; border-radius: 999px; border: 1px solid #ccc; background: #f7f7f7; cursor: pointer; }
+
+.editor { display: grid; grid-template-columns: 320px 1fr; gap: 1rem; align-items: start; }
+.controls {
+  border: 1px solid #eee; border-radius: 12px; padding: 1rem; background: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,.05);
+}
+.form { display: grid; gap: .6rem; }
+.form label { display: grid; gap: .25rem; font-size: .95rem; }
+.form input, .form textarea {
+  border: 1px solid #ddd; border-radius: 10px; padding: .5rem .6rem; font: inherit;
+}
+
+.preview { display: grid; gap: .5rem; }
+.canvas {
+  position: relative; width: 540px; height: 760px;
+  border-radius: 16px; overflow: hidden; background: #fafafa;
+  box-shadow: 0 4px 16px rgba(0,0,0,.1);
+}
+.bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+
+.photo {
+  position: absolute; left: 50%; top: 44%; transform: translate(-50%, -50%);
+  width: 48%; height: 36%; object-fit: cover; border-radius: 12px; box-shadow: 0 6px 20px rgba(0,0,0,.18);
+}
+
+/* Text placements – tweak per design */
+.text { position: absolute; width: 90%; left: 5%; text-align: center; color: #2a2a2a; }
+.text.bride { top: 8%; font-size: 2rem; font-weight: 600; letter-spacing: .5px; }
+.text.amp   { top: 12%; font-size: 1.6rem; }
+.text.groom { top: 16%; font-size: 2rem; font-weight: 600; }
+.text.date  { bottom: 24%; font-size: 1.05rem; }
+.text.venue { bottom: 19%; font-size: 1.05rem; }
+.text.message { bottom: 6%; font-size: .98rem; line-height: 1.3; padding: 0 1rem; }
+
+.hint { font-size: .85rem; color: #666; }
