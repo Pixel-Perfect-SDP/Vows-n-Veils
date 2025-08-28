@@ -25,14 +25,11 @@ router.get('/', async (req, res) => {
       snap.docs.map(async (doc) => {
         const data = { id: doc.id, ...doc.data() };
 
-        const [files] = await bucket.getFiles({ prefix: `venues/${doc.id}/` });
+        const [files] = await bucket.getFiles({ prefix: `venues/${doc.id}/`, maxResults: 1 });
 
         if (files.length > 0) {
-          const [url] = await files[0].getSignedUrl({
-            action: 'read',
-            expires: Date.now() + 60 * 60 * 1000, // 1 hour
-          });
-          data.image = url;
+          const path = encodeURIComponent(files[0].name);
+          data.image = `https://firebasestorage.googleapis.com/v0/b/ppep-2651c.appspot.com/o/${path}?alt=media`;
         } else {
           data.image = null;
         }
@@ -47,21 +44,18 @@ router.get('/', async (req, res) => {
   }
 });
 
+
 router.get('/:id', async (req, res) => {
   try {
     const doc = await db.collection('Venues').doc(req.params.id).get();
     if (!doc.exists) return res.status(404).json({ error: 'Not found' });
 
     const [files] = await bucket.getFiles({ prefix: `venues/${req.params.id}/` });
-    const imageUrls = await Promise.all(
-      files.map(async (file) => {
-        const [url] = await file.getSignedUrl({
-          action: 'read',
-          expires: Date.now() + 60 * 60 * 1000,
-        });
-        return url;
-      })
-    );
+
+    const imageUrls = files.map(file => {
+      const path = encodeURIComponent(file.name);
+      return `https://firebasestorage.googleapis.com/v0/b/ppep-2651c.appspot.com/o/${path}?alt=media`;
+    });
 
     res.json({ id: doc.id, ...doc.data(), images: imageUrls });
   } catch (err) {
