@@ -26,18 +26,20 @@ router.get('/', async (req, res) => {
       snap.docs.map(async (doc) => {
         const data = { id: doc.id, ...doc.data() };
 
-        const [files]= await bucket.getFiles({ prefix: `venues/${doc.id}/`, maxResults: 1 });
+        // Get all files for this venue
+        const [files] = await bucket.getFiles({ prefix: `venues/${doc.id}/` });
 
-      const imageUrls = await Promise.all(
-      files.map(async (file) => {
-        const [url] = await file.getSignedUrl({
-          action: 'read',
-          expires: Date.now() + 60 * 60 * 1000,
-        });
-        return url;
-      })
-    );
-        data.images=imageUrls;
+        const imageUrls = await Promise.all(
+          files.map(async (file) => {
+            const [url] = await file.getSignedUrl({
+              action: 'read',
+              expires: Date.now() + 60 * 60 * 1000,
+            });
+            return url;
+          })
+        );
+
+        data.images = imageUrls;
         return data;
       })
     );
@@ -47,7 +49,6 @@ router.get('/', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
 
 router.get('/:id', async (req, res) => {
   try {

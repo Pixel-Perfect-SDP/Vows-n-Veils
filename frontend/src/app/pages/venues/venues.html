@@ -1,26 +1,34 @@
-<section *ngIf="!selectedVenue && venues.length > 0;">
+<main>
+    <h1>Venues</h1>
+<section *ngIf="!selectedVenue && venues.length > 0;" class="venues">
     <ul>
         <li *ngFor="let venue of venues">
             <h3>{{ venue.venuename }}</h3>
+            <div *ngIf="venue.images?.length" class="images">
+                <img *ngFor="let img of venue.images" [src]="img" />
+            </div>
             <p>{{ venue.address }}</p>
             <p>Capacity: {{ venue.capacity }}</p>
-            <p>Price: {{ venue.price }}</p>
-            <img [src]="venue.images?.[0]" width="200" />
-            <p class=" view">{{ venue.images}}</p>
             <button class="btn" (click)="viewVenue(venue.id)">View Venue</button>
         </li>
     </ul>
 </section>
 
-<section *ngIf="selectedVenue">
-    <h2>{{ selectedVenue.venuename }}</h2>
-    <p class="view">{{ selectedVenue.address }}</p>
-    <p class="view">Capacity: {{ selectedVenue.capacity }}</p>
-    <p class="view">Price: {{ selectedVenue.price }}</p>
-    <p class="view">{{ selectedVenue.description }}</p>
-    <p class="view">Email: {{ selectedVenue.email }}</p>
-    <p class="view">Phone: {{ selectedVenue.phonenumber }}</p>
-    <div *ngIf="selectedVenue.images?.length">
-        <img *ngFor="let img of selectedVenue.images" [src]="img" width="200" />
-    </div>
-</section>
+
+    <section *ngIf="selectedVenue">
+        <button class="btn back-btn" (click)="backToList()">← Back to all Venues</button>
+
+        <h2>{{ selectedVenue.venuename }}</h2>
+        <p class="view">{{ selectedVenue.address }}</p>
+        <p class="view">Capacity: {{ selectedVenue.capacity }}</p>
+        <p class="view">Price: {{ selectedVenue.price }}</p>
+        <p class="view">{{ selectedVenue.description }}</p>
+        <p class="view">Email: {{ selectedVenue.email }}</p>
+        <p class="view">Phone: {{ selectedVenue.phonenumber }}</p>
+        <h3>Images: </h3>
+        <div *ngIf="selectedVenue.images?.length">
+            <img *ngFor="let img of selectedVenue.images" [src]="img" width="200" />
+        </div>
+    </section>
+
+</main>
