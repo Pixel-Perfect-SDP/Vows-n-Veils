@@ -10,7 +10,8 @@ if (!admin.apps.length) {
       clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
       privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
     }),
-    storageBucket: "ppep-2651c.firebasestorage.app" 
+    storageBucket: "ppep-2651c.appspot.com"
+  
   });
 }
 
@@ -25,13 +26,16 @@ router.get('/', async (req, res) => {
       snap.docs.map(async (doc) => {
         const data = { id: doc.id, ...doc.data() };
 
-        const [files] = await bucket.getFiles({ prefix: `venues/${doc.id}/`, maxResults: 1 });
+        const [files]= await bucket.getFiles({ prefix: `venues/${doc.id}/`, maxResults: 1 });
 
         if (files.length > 0) {
-          const path = encodeURIComponent(files[0].name);
-          data.image = `https://firebasestorage.googleapis.com/v0/b/ppep-2651c.appspot.com/o/${path}?alt=media`;
+          const [url] = await files[0].getSignedUrl({
+            action: 'read',
+            expires: Date.now() + 60 * 60 * 1000,
+          });
+          data.image = url; 
         } else {
-          data.image = null;
+          data.image = null; 
         }
 
         return data;
@@ -51,17 +55,22 @@ router.get('/:id', async (req, res) => {
     if (!doc.exists) return res.status(404).json({ error: 'Not found' });
 
     const [files] = await bucket.getFiles({ prefix: `venues/${req.params.id}/` });
-
-    const imageUrls = files.map(file => {
-      const path = encodeURIComponent(file.name);
-      return `https://firebasestorage.googleapis.com/v0/b/ppep-2651c.appspot.com/o/${path}?alt=media`;
-    });
+    const imageUrls = await Promise.all(
+      files.map(async (file) => {
+        const [url] = await file.getSignedUrl({
+          action: 'read',
+          expires: Date.now() + 60 * 60 * 1000,
+        });
+        return url;
+      })
+    );
 
     res.json({ id: doc.id, ...doc.data(), images: imageUrls });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
+
 
 router.post('/', async (req, res) => {
   try {
@@ -77,7 +86,6 @@ router.post('/', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
 
 router.put('/:id', async (req, res) => {
   try {
