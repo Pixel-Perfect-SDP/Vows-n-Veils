@@ -12,6 +12,7 @@ interface Venue {
   email: string;
   phonenumber: string;
   price: number;
+  image?: string;
   images?: string[];
 }
 
@@ -22,7 +23,6 @@ interface Venue {
   templateUrl: './venues.html',
   styleUrls: ['./venues.css']
 })
-
 export class Venues implements OnInit {
   venues: Venue[] = [];
   selectedVenue: Venue | null = null; 
@@ -61,6 +61,7 @@ export class Venues implements OnInit {
         }
       });
   }
+
   backToList(): void {
     this.selectedVenue = null; 
   }

@@ -10,9 +10,7 @@ if (!admin.apps.length) {
       clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
       privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
     }),
-    storageBucket: "ppep-2651c.firebasestorage.app"
-    
-
+    storageBucket: "ppep-2651c.appspot.com" 
   });
 }
 
@@ -27,16 +25,16 @@ router.get('/', async (req, res) => {
       snap.docs.map(async (doc) => {
         const data = { id: doc.id, ...doc.data() };
 
-        const [files] = await bucket.getFiles({ prefix: `venues/${doc.id}/`, maxResults: 1 });
+        const [files] = await bucket.getFiles({ prefix: `venues/${doc.id}/` });
 
         if (files.length > 0) {
           const [url] = await files[0].getSignedUrl({
             action: 'read',
-            expires: Date.now() + 60 * 60 * 1000,
+            expires: Date.now() + 60 * 60 * 1000, // 1 hour
           });
-          data.image = url; 
+          data.image = url;
         } else {
-          data.image = null; 
+          data.image = null;
         }
 
         return data;
@@ -48,7 +46,6 @@ router.get('/', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
 
 router.get('/:id', async (req, res) => {
   try {
@@ -72,7 +69,6 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-
 router.post('/', async (req, res) => {
   try {
     const venue = req.body;
@@ -87,6 +83,7 @@ router.post('/', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
 
 router.put('/:id', async (req, res) => {
   try {
