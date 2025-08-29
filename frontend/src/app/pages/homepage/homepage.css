@@ -70,7 +70,7 @@
 }
 
 .event-card {
-    background: #f9e8e874; /* soft pink */
+    background: #f9e8e874; 
     padding: 40px 30px;
     border-radius: 16px;
     box-shadow: 0 6px 20px rgba(0,0,0,0.08);

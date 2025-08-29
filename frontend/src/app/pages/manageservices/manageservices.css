@@ -6,32 +6,35 @@
   padding: 40px 20px;
 }
 
-/* Loading (heart) */
+/*Loading icon is a heart*/
 .loading-container{
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  min-height: 0vh;
-  padding-top: 20vh;
-  gap: 20px;
-  background: var(--beige-300);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 0vh; 
+    padding-top: 20vh; 
+    gap: 20px;
+    background: var(--beige-300);
 }
 .Loading-1 {
   width: 120px;
   aspect-ratio: 1;
   background: linear-gradient(#dc1818 0 0) bottom/100% 0% no-repeat #ccc;
-  -webkit-mask:
-    radial-gradient(circle at 60% 65%, #000 62%, #0000 65%) top left,
-    radial-gradient(circle at 40% 65%, #000 62%, #0000 65%) top right,
-    linear-gradient(to bottom left, #000 42%,#0000 43%) bottom left,
+  -webkit-mask: 
+    radial-gradient(circle at 60% 65%, #000 62%, #0000 65%) top left, 
+    radial-gradient(circle at 40% 65%, #000 62%, #0000 65%) top right, 
+    linear-gradient(to bottom left, #000 42%,#0000 43%) bottom left , 
     linear-gradient(to bottom right,#000 42%,#0000 43%) bottom right;
   -webkit-mask-size: 50% 50%;
   -webkit-mask-repeat: no-repeat;
   animation: l19 2s infinite linear;
 }
-@keyframes l19 { 90%,100% { background-size:100% 100% } }
+@keyframes l19 {
+    90%,100% {background-size:100% 100%}
+}
 
+/* Loading message */
 .Loading-2 {
   margin-left: 30px;
   font-weight: bold;
@@ -39,8 +42,10 @@
   font-size: 30px;
   animation: l1 1s linear infinite alternate;
 }
-.Loading-2:before { content:"Loading..." }
-@keyframes l1 { to { opacity: 0 } }
+.Loading-2:before {
+  content:"Loading..."
+}
+@keyframes l1 {to{opacity: 0}}
 
 /* Logo */
 .logo {
@@ -66,7 +71,7 @@
 }
 
 .venue-company-card {
-  background: #f9e8e874; /* soft pink */
+  background: #f9e8e874; 
   padding: 40px 30px;
   border-radius: 16px;
   box-shadow: 0 6px 20px rgba(0,0,0,0.08);
@@ -99,10 +104,12 @@
   animation: fadeIn 1.5s ease-out forwards;
   opacity: 0;
 }
-@keyframes slideIn { 0%{opacity:0;transform:translateY(-20px)} 100%{opacity:1;transform:translateY(0)} }
+@keyframes slideIn { 0%{opacity:0;
+    transform:translateY(-20px)} 
+    100%{opacity:1;transform:translateY(0)} }
 @keyframes fadeIn { 0%{opacity:0} 100%{opacity:1} }
 
-/* Vendor company form */
+/* venue company form */
 .venue-company-form {
   display: flex;
   justify-content: center;
@@ -130,9 +137,7 @@
   margin-bottom: 4px;
   font-size: 1.5rem;
 }
-.venue-company-form input,
-.venue-company-form select,
-.venue-company-form textarea {
+.venue-company-form input{
   padding: 12px 16px;
   font-size: 1rem;
   border-radius: 8px;
@@ -140,12 +145,9 @@
   box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
   outline: none;
   transition: border 0.3s, box-shadow 0.3s;
-  background: #fff;
-  color: var(--stone-800);
 }
-.venue-company-form input:focus,
-.venue-company-form select:focus,
-.venue-company-form textarea:focus {
+
+.venue-company-form input:focus{
   border-color: var(--accent);
   box-shadow: 0 0 6px rgba(197, 126, 109, 0.4);
 }
@@ -169,11 +171,11 @@
   transform: translateY(-2px);
 }
 
-/* Vendor area shell */
+
 .has-venue-company {
   display: flex;
   min-height: 100vh;
-  background: #F5EFE6;
+  background:  var(--beige-100);
 }
 
 /* Sidebar */
