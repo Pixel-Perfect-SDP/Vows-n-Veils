@@ -1,0 +1,21 @@
+<main>
+  <div class="button-container">
+    <div class="toggle-switch">
+      <button 
+        (click)="select('Venues')" 
+        [ngClass]="selected === 'Venues' ? 'yes-style' : 'default-style'">
+         Venues 
+      </button>
+      <button 
+        (click)="select('Vendors')" 
+        [ngClass]="selected === 'Vendors' ? 'no-style' : 'default-style'">
+       Vendors 
+      </button>
+    </div>
+  </div>
+
+
+
+</main>
+
+

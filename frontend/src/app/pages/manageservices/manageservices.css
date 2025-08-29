@@ -1,0 +1,36 @@
+/* Container to place buttons at top center */
+.button-container {
+  display: flex;
+  justify-content: center;  /* horizontal center */
+  margin-top: 50px;         /* distance from top */
+}
+
+/* Single rectangle containing both buttons */
+.toggle-switch {
+  display: flex;
+  border: 2px solid rgb(255, 255, 255);  /* outer rectangle border */
+  border-radius: 0;          /* rectangle shape */
+  overflow: hidden;
+}
+
+/* Big rectangular buttons */
+.toggle-switch button {
+  padding: 8px 15px;       /* big size like H2 */
+  font-size: 2rem;
+  font-weight: bold;
+  border: none;             /* remove inner borders */
+  cursor: pointer;
+ transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Active styles */
+.yes-style, .no-style {
+  background-color: brown;
+  color: white;
+}
+
+/* Default style when not selected */
+.default-style {
+  background-color: white;
+  color: black;
+}

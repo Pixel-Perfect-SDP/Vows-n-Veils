@@ -105,4 +105,39 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
+
+router.get('/company/:companyID', async (req, res) => {
+  try {
+    const companyID = req.params.companyID;
+
+    const snap = await db.collection('Venues').where('companyID', '==', companyID).get();
+    if (snap.empty) {
+      return res.status(404).json({ error: 'No venues found for this companyID' });
+    }
+    const venues = await Promise.all(
+      snap.docs.map(async (doc) => {
+        const data = { id: doc.id, ...doc.data() };
+
+        const [files] = await bucket.getFiles({ prefix: `venues/${doc.id}/` });
+        const imageUrls = await Promise.all(
+          files.map(async (file) => {
+            const [url] = await file.getSignedUrl({
+              action: 'read',
+              expires: Date.now() + 60 * 60 * 1000, 
+            });
+            return url;
+          })
+        );
+
+        data.images = imageUrls;
+        return data;
+      })
+    );
+
+    res.json(venues);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;
