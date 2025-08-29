@@ -59,7 +59,7 @@ export class Manageservices {
       if (!user) return;
 
       const db = getFirestore(getApp());
-      const docRef = doc(db, 'Companies', user.uid);
+      const docRef = doc(db, 'CompaniesVenues', user.uid);
       const docSnap = await getDoc(docRef);
 
       //if the company exists, check if type venue
@@ -96,7 +96,7 @@ export class Manageservices {
     const db = getFirestore(getApp());
     const { companyName, companyEmail, companyNumber } = this.form.getRawValue();
 
-    const docRef = doc(db, 'Companies', user.uid);
+    const docRef = doc(db, 'CompaniesVenues', user.uid);
 
     try {
       await setDoc(docRef, {
