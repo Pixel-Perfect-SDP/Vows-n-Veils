@@ -52,10 +52,10 @@ export class Landing {
     }
 
     onGoogleVenue() {
-      this.signInAndRedirect('/homepage');
+      this.signInAndRedirect('/manageservices');
     }
 
     onGoogleAdmin() {
-      this.signInAndRedirect('/homepage');
+      this.signInAndRedirect('/landing');
     }
 }

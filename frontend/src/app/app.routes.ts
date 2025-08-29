@@ -42,6 +42,11 @@ export const routes: Routes = [
     path: 'vendors-company',
     loadComponent: () => import('./pages/vendors-company/vendors-company').then(m => m.VendorsCompany),
   },
+   { 
+    path: 'manageservices',
+    loadComponent: () => import('./pages/manageservices/manageservices').then(m => m.Manageservices),
+  },
+
   //This must be the last route - define all other routes before this
   { path: '**', redirectTo: 'landing' },
 

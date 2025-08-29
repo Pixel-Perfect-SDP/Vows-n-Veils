@@ -1,4 +1,4 @@
-.vendorsCompany-section {
+.manageservices-section {
   background-color: #F5EFE6;
   width: 100%;
   min-height: 100vh;
@@ -52,8 +52,8 @@
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
-/* Create vendor company */
-.create-vendor-company{
+/* Create venue company */
+.create-venue-company{
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -65,7 +65,7 @@
   border-radius: 16px;
 }
 
-.vendor-company-card {
+.venue-company-card {
   background: #f9e8e874; /* soft pink */
   padding: 40px 30px;
   border-radius: 16px;
@@ -73,7 +73,7 @@
   text-align: center;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
-.vendor-company-card h2 {
+.venue-company-card h2 {
   font-size: 2.5rem;
   font-weight: 800;
   background: linear-gradient(90deg, #C57E6D, #A76858);
@@ -85,11 +85,11 @@
   transition: transform 0.3s ease, text-shadow 0.3s ease;
   animation: slideIn 1s ease-out forwards;
 }
-.vendor-company-card h2:hover {
+.venue-company-card h2:hover {
   text-shadow: 0 0 10px #C57E6D, 0 0 30px #C57E6D;
   transform: scale(1.05);
 }
-.vendor-company-card p {
+.venue-company-card p {
   font-size: 1.2rem;
   font-weight: 500;
   color: var(--stone-800);
@@ -103,7 +103,7 @@
 @keyframes fadeIn { 0%{opacity:0} 100%{opacity:1} }
 
 /* Vendor company form */
-.vendor-company-form {
+.venue-company-form {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -117,22 +117,22 @@
   margin: 0 auto;
   flex-direction: column;
 }
-.vendor-company-form form {
+.venue-company-form form {
   display: flex;
   flex-direction: column;
   gap: 15px;
   width: 100%;
   max-width: 400px;
 }
-.vendor-company-form label {
+.venue-company-form label {
   font-weight: 600;
   color: var(--stone-800);
   margin-bottom: 4px;
   font-size: 1.5rem;
 }
-.vendor-company-form input,
-.vendor-company-form select,
-.vendor-company-form textarea {
+.venue-company-form input,
+.venue-company-form select,
+.venue-company-form textarea {
   padding: 12px 16px;
   font-size: 1rem;
   border-radius: 8px;
@@ -143,13 +143,13 @@
   background: #fff;
   color: var(--stone-800);
 }
-.vendor-company-form input:focus,
-.vendor-company-form select:focus,
-.vendor-company-form textarea:focus {
+.venue-company-form input:focus,
+.venue-company-form select:focus,
+.venue-company-form textarea:focus {
   border-color: var(--accent);
   box-shadow: 0 0 6px rgba(197, 126, 109, 0.4);
 }
-.vendor-company-form button {
+.venue-company-form button {
   padding: 14px 16px;
   font-size: 1rem;
   border-radius: 8px;
@@ -159,18 +159,18 @@
   cursor: pointer;
   transition: background-color 0.3s ease, transform 0.2s ease;
 }
-.vendor-company-form button:disabled {
+.venue-company-form button:disabled {
   background-color: var(--accent-700);
   cursor: not-allowed;
   opacity: 0.7;
 }
-.vendor-company-form button:hover:not(:disabled) {
+.venue-company-form button:hover:not(:disabled) {
   background-color: var(--accent-700);
   transform: translateY(-2px);
 }
 
 /* Vendor area shell */
-.has-vendor-company {
+.has-venue-company {
   display: flex;
   min-height: 100vh;
   background: #F5EFE6;
@@ -232,7 +232,7 @@
 }
 
 /* Welcome banner */
-.vendor-company-details {
+.venue-company-details {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -251,7 +251,7 @@
   cursor: pointer;
   box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
-.vendor-company-details .company-name {
+.venue-company-details .company-name {
   font-size: 4.3rem;
   font-weight: 700;
   color: #000000;
@@ -263,7 +263,7 @@
   transition: transform 0.3s ease, text-shadow 0.3s ease;
   animation: fadeInSlide 0.8s ease-out forwards;
 }
-.vendor-company-details:hover {
+.venue-company-details:hover {
   transform: scale(1.002);
   box-shadow: 0 8px 12px rgba(0,0,0,0.2);
 }
@@ -272,9 +272,6 @@
   100% { opacity: 1; transform: translateY(0); }
 }
 
-/* ---------- SERVICES SECTION (fixed) ---------- */
-
-/* Section container (don’t make all text transparent) */
 .services {
   font-size: 1.75rem;
   color: #3F3A34;
@@ -292,63 +289,4 @@
   background: linear-gradient(90deg, #C57E6D, #A76858);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-}
-
-/* Table readability */
-.services table {
-  width: 100%;
-  border-collapse: collapse;
-}
-.services thead th {
-  padding: 12px;
-  font-weight: 700;
-  color: #3F3A34;              /* solid text color */
-  background: #ffffff;         /* ensure not translucent */
-  border-bottom: 1px solid #e5e7eb;
-}
-.services tbody td {
-  padding: 12px;
-  color: #3F3A34;              /* solid text color */
-  background: #ffffff;         /* crisp rows */
-  border-bottom: 1px solid #f3f4f6;
-}
-.services tbody tr:hover {
-  background: #fafafa;
-}
-
-/* Status pill */
-.services td span {
-  padding: 2px 8px;
-  border-radius: 999px;
-  font-size: 12px;
-  background: #e5e7eb;
-  color: #374151;
-}
-
-/* Action buttons inside table */
-.services table button {
-  padding: 8px 12px;
-  border: none;
-  border-radius: 8px;
-  background: #C57E6D;
-  color: #000;
-  font-weight: 700;
-  cursor: pointer;
-}
-.services table button:hover { filter: brightness(0.95); }
-.services table button[disabled] { opacity: .6; cursor: not-allowed; }
-
-/* Responsive tweak */
-@media (max-width: 900px) {
-  .sidebar {
-    position: static;
-    width: 100%;
-    height: auto;
-    border-right: 0;
-  }
-  .vendor-company-details,
-  .services {
-    margin-left: 0;
-    width: 100%;
-  }
 }
