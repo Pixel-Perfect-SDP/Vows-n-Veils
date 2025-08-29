@@ -16,6 +16,12 @@ export const routes: Routes = [
     path: 'homepage',
     loadComponent: () => import('./pages/homepage/homepage').then(m => m.Homepage),
   },
+
+   {
+    path: 'venues',
+    loadComponent: () => import('./pages/venues/venues').then(m => m.Venues),
+  },
+
     { 
     path: 'invitations',
     loadComponent: () => import('./pages/invitations/invitations').then(m => m.Invitations),
@@ -28,7 +34,7 @@ export const routes: Routes = [
     path: 'vendors-couples',
     loadComponent: () => import('./pages/vendor-couples/vendor-couples').then(m => m.VendorCouples),
   },
-  { 
+   { 
     path: 'venues-couples',
     loadComponent: () => import('./pages/venues-couples/venues-couples').then(m => m.VenuesCouples),
   },

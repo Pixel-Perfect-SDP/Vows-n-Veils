@@ -1,0 +1,43 @@
+<main>
+    <h1>Venues</h1>
+    <section *ngIf="!selectedVenue && venues.length > 0;" class="venues">
+        <button class="btn " (click)="backTohome()">Back to Homepage</button>
+        <section class="chosen-venue">
+            <p *ngIf="!chosenVenueName">No chosen venue yet</p>
+            <p *ngIf="chosenVenueName">Chosen Venue: {{ chosenVenueName }}</p>
+        </section>
+
+        <ul>
+            <li *ngFor="let venue of venues">
+                <h3>{{ venue.venuename }}</h3>
+                <div class="images">
+                    <img *ngIf="venue.images?.length" [src]="venue.images?.[1] || venue.images?.[0]" width="300" />
+                </div>
+
+                <p>{{ venue.address }}</p>
+                <p>Capacity: {{ venue.capacity }}</p>
+                <button class="btn" (click)="viewVenue(venue.id)">View Venue</button>
+            </li>
+        </ul>
+    </section>
+
+
+    <section *ngIf="selectedVenue">
+        <button class="btn " (click)="backToList()">← Back to all Venues</button>
+        <button class="btn" (click)="selectVenue(selectedVenue.id)">Choose Venue</button>
+
+        <h2>{{ selectedVenue.venuename }}</h2>
+        <p class="view">{{ selectedVenue.address }}</p>
+        <p class="view">Capacity: {{ selectedVenue.capacity }}</p>
+        <p class="view">Price: {{ selectedVenue.price }}</p>
+        <p class="view">{{ selectedVenue.description }}</p>
+        <p class="view">Email: {{ selectedVenue.email }}</p>
+        <p class="view">Phone: {{ selectedVenue.phonenumber }}</p>
+        <h3>Images: </h3>
+        <div *ngIf="selectedVenue.images?.length">
+            <img *ngFor="let img of selectedVenue.images" [src]="img" width="200" />
+        </div>
+
+    </section>
+
+</main>
