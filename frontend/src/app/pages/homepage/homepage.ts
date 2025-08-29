@@ -6,6 +6,8 @@ import { Firestore, collection, addDoc, doc, getDoc, setDoc, serverTimestamp } f
 import { AuthService } from '../../core/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getApp } from 'firebase/app';
+import { auth } from '../firebase/firebase-config';
+import { signOut } from 'firebase/auth';
 
 @Component({
   selector: 'app-homepage',
@@ -120,4 +122,20 @@ export class Homepage {
 
 
   }//createEvent
+
+
+  
+  logout(): void {
+    signOut(auth)
+      .then(() => {
+        console.log('User signed out successfully');
+        // Clear any stored user info in your component if needed
+        this.hasEvent = null;
+        this.eventData = null;
+        this.router.navigate(['/landing']);
+      })
+      .catch((error) => {
+        console.error('Error signing out:', error);
+      });
+  }
  }

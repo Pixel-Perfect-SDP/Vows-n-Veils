@@ -70,7 +70,7 @@
 }
 
 .event-card {
-    background: #f9e8e874; /* soft pink */
+    background: #f9e8e874; 
     padding: 40px 30px;
     border-radius: 16px;
     box-shadow: 0 6px 20px rgba(0,0,0,0.08);
@@ -88,6 +88,7 @@
     margin: 0;
     line-height: 1.2;
     text-transform: uppercase;
+    transition: transform 0.3s ease, text-shadow 0.3s ease;
     animation: slideIn 1s ease-out forwards;
 }
 
@@ -286,7 +287,7 @@
   height: 4.5rem;
   width: 65rem;
   margin-left: 255px;
-  background-image: url('https://images.unsplash.com/photo-1511184150666-9bb7d41a88f4?q=80&w=869&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'); 
+  background-image: url('https://images.unsplash.com/photo-1496661415325-ef852f9e8e7c?q=80&w=927&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'); 
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -329,5 +330,43 @@
 .event-details .names:hover {
   transform: scale(1.05);               
   text-shadow: 0 2px 6px rgba(197,126,109,0.6); 
+}
+
+/* Logout button */
+.LogOut a {
+  display: flex;
+  margin-top: 13rem;
+  text-decoration: none;
+  font-weight: 600;
+  color: var(--stone-800);
+  padding: 10px 16px;
+  border-radius: 8px;
+  position: relative;
+  font-size: 1.6rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.LogOut a::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0%;
+  height: 100%;
+  background: var(--accent-700);
+  border-radius: 8px;
+  z-index: -1;
+  transition: width 0.3s ease;
+}
+
+.LogOut a:hover::before {
+  width: 100%;
+}
+
+.LogOut a:hover {
+  color: #000000;
+  text-shadow: 0 0 8px rgba(197, 126, 109, 0.8);
+  transform: translateX(5px);
 }
 
