@@ -52,7 +52,7 @@ export class Venues implements OnInit {
 
 
   getVenues(): void {
-    this.http.get<Venue[]>('https://vows-n-veils-2.onrender.com/venues')
+    this.http.get<Venue[]>('https://site--vowsandveils--5dl8fyl4jyqm.code.run/venues')
       .subscribe({
         next: (data) => {
           this.venues = data;
@@ -66,7 +66,7 @@ export class Venues implements OnInit {
   }
 
   viewVenue(id: string): void {
-    this.http.get<Venue>(`https://vows-n-veils-2.onrender.com/venues/${id}`)
+    this.http.get<Venue>(`https://site--vowsandveils--5dl8fyl4jyqm.code.run/venues/${id}`)
       .subscribe({
         next: (data) => {
           this.selectedVenue = data;
@@ -150,7 +150,7 @@ export class Venues implements OnInit {
           return;
         }
 
-        this.http.get<Venue>(`https://vows-n-veils-2.onrender.com/venues/${venueId}`)
+        this.http.get<Venue>(`https://site--vowsandveils--5dl8fyl4jyqm.code.run/venues/${venueId}`)
           .subscribe({
             next: (data) => {
               this.chosenVenueName = data.venuename;
