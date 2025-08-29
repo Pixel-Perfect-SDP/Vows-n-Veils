@@ -17,8 +17,8 @@
                     <img *ngIf="venue.images?.length" [src]="venue.images?.[1] || venue.images?.[0]" width="300" />
                 </section>
 
-                <p>{{ venue.address }}</p>
-                <p>Capacity: {{ venue.capacity }}</p>
+                <p class="venue-address">{{ venue.address }}</p>
+                <p class="venue-capacity">Capacity: {{ venue.capacity }}</p>
                 <button class="btn" (click)="viewVenue(venue.id)">View Venue</button>
             </li>
         </ul>

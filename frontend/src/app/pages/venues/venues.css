@@ -205,10 +205,36 @@
   transform: scale(1.05);
 }
 
-.venue-list p {
+
+/* Address styling */
+.venue-address {
   font-size: 1.1rem;
-  color: #3F3A34;
-  margin: 5px 0;
+  color: #4a4a4a;        
+  font-style: italic;     
+  margin: 6px 0;
+  line-height: 1.4;
+  position: relative;
+  padding-left: 24px;
+}
+
+.venue-address::before {
+  content: "📍";         
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-size: 1.2rem;
+}
+
+.venue-capacity {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #2c3e50;         
+  padding: 4px 8px;
+  border-radius: 8px;
+  display: inline-block;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.35);
+  transition: transform 0.2s ease, background 0.2s ease;
+  margin: 6px 0;
 }
 
 .venue-list .btn {
