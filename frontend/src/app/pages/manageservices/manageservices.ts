@@ -24,15 +24,17 @@ export class Manageservices implements OnInit {
   addingVenue: boolean = false;
   newVenueData: any = {};
 
-  user: User | null = null; 
+  user: User | null = null;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   ngOnInit() {
     onAuthStateChanged(auth, (currentUser) => {
       this.user = currentUser;
       if (this.user) {
         console.log("Logged in user:", this.user.uid);
+        this.selected = 'Vendors'
+
       } else {
         console.warn("No user logged in!");
       }
@@ -72,6 +74,9 @@ export class Manageservices implements OnInit {
   SubmitUpdate() {
     if (!this.editingVenue || !this.user) return;
     this.updateData.companyID = this.user.uid;
+
+    delete this.updateData.images;
+
     this.http.put(`https://site--vowsandveils--5dl8fyl4jyqm.code.run/venues/${this.editingVenue.id}`, this.updateData)
       .subscribe({
         next: () => { alert('Venue updated successfully!'); this.editingVenue = null; this.fetchVenues(); },
@@ -81,7 +86,6 @@ export class Manageservices implements OnInit {
 
   CancelUpdate() { this.editingVenue = null; }
 
-  // add new venue
   AddVenue() {
     this.addingVenue = true;
     this.newVenueData = {
@@ -91,8 +95,7 @@ export class Manageservices implements OnInit {
       email: '',
       phonenumber: '',
       capacity: null,
-      price: null,
-      images: ['placeholder-image.jpg']
+      price: null
     };
   }
 
@@ -102,6 +105,9 @@ export class Manageservices implements OnInit {
       return;
     }
     this.newVenueData.companyID = this.user.uid;
+
+    delete this.newVenueData.images;
+
     this.http.post(`https://site--vowsandveils--5dl8fyl4jyqm.code.run/venues`, this.newVenueData)
       .subscribe({
         next: () => { alert('New venue added successfully!'); this.addingVenue = false; this.fetchVenues(); },
@@ -129,4 +135,3 @@ export class Manageservices implements OnInit {
       });
   }
 }
-
