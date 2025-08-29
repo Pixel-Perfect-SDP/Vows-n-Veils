@@ -6,9 +6,12 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Routes
+// API Routes
 const venueRoutes = require('./routes/venues.routes');
 app.use('/venues', venueRoutes);
+
+const eventsRoutes = require('./routes/events.routes');
+app.use('/events', eventsRoutes);
 
 module.exports = app;
 

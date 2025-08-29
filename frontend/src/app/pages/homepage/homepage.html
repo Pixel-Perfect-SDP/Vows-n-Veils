@@ -5,6 +5,8 @@
   <section class="Loading-2"></section>
 </section>
 
+<!-- I user does have an event-->
+ <!-- show the couples hompage -->
 <section class="has-event" *ngIf="hasEvent && eventData">
     <nav class="sidebar">
       <section class="sidebar-header">
@@ -12,17 +14,62 @@
         <h1>Vows & Veils</h1>
       </section>
       <ul>
-        <li><a routerLink="/guest-list" routerLinkActive="active">Guest List</a></li>
+        <li><a href="#" [class.active]="activeTab==='guests'"(click)="switchToGuests($event)">Guest List</a></li>
         <li><a routerLink="/invitations" routerLinkActive="active">Invitations</a></li>
         <li><a routerLink="/venues-couples" routerLinkActive="active">Venues</a></li>
         <li><a routerLink="/vendors-couples" routerLinkActive="active">Vendors</a></li>
       </ul>      
   </nav>
+
+      <!-- Default landing content for event can stay here -->
+    <section *ngIf="activeTab==='overview'">
+      <!-- your overview content -->
+    </section>
+
+      <!-- NEW: Guest list panel -->
+    <section *ngIf="activeTab==='guests'">
+      <h2>Guest List</h2>
+
+      <div *ngIf="guestsLoading">Loading guests…</div>
+      <div *ngIf="guestsError && !guestsLoading" class="error">{{ guestsError }}</div>
+
+      <table *ngIf="!guestsLoading && !guestsError && guests?.length" class="guest-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Dietary</th>
+            <th>Allergies</th>
+            <th>RSVP</th>
+            <th>Song</th>
+          </tr>
+        </thead>
+        
+        <tbody>
+          <tr *ngFor="let g of guests">
+            <td>{{ g.Name }}</td>
+            <td>{{ g.Email }}</td>
+            <td>{{ g.Dietary }}</td>
+            <td>{{ g.Allergies }}</td>
+            <td>{{ g.RSVPstatus }}</td>
+            <td>{{ g.Song }}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p *ngIf="!guestsLoading && !guestsError && !guests?.length">No guests yet.</p>
+      </section>
+    </section>
+
   <section class="event-details">
   <p class="names">Welcome, {{ eventData.Name1 }} and {{ eventData.Name2 }}</p>
   </section>
 </section>
 
+
+
+<!-- if user doesnt have an event: -->
+ <!-- show create event page -->
 <section class="create-event" *ngIf="hasEvent === false">
   <section class="event-card">
   <img src="assets/logo.jpg" alt="Vows & Veils logo" class="logo" />

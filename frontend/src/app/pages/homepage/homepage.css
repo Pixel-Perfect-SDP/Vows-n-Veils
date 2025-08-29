@@ -331,3 +331,10 @@
   text-shadow: 0 2px 6px rgba(197,126,109,0.6); 
 }
 
+
+
+/* table CSS */
+.guest-table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; }
+.guest-table th, .guest-table td { padding: 0.5rem; border-bottom: 1px solid #eee; text-align: left; }
+.error { color: #b00020; }
+.sidebar a.active { font-weight: 600; text-decoration: underline; }
