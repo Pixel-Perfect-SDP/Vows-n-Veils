@@ -98,12 +98,23 @@ router.put('/:id', async (req, res) => {
 
 router.delete('/:id', async (req, res) => {
   try {
-    await db.collection('Venues').doc(req.params.id).delete();
+    const venueRef = db.collection('Venues').doc(req.params.id);
+    const doc = await venueRef.get();
+    if (!doc.exists) return res.status(404).json({ error: 'Venue not found' });
+
+    const [files] = await bucket.getFiles({ prefix: `venues/${req.params.id}/` });
+    if (files.length > 0) {
+      await Promise.all(files.map(file => file.delete()));
+    }
+
+    await venueRef.delete();
+
     res.json({ ok: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
+
 
 
 router.get('/company/:companyID', async (req, res) => {
