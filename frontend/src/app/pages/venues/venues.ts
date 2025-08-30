@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
-import { Router,RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { collection, query, where, getDocs, updateDoc, doc } from 'firebase/firestore';
 import { auth, db } from '../firebase/firebase-config';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -23,7 +23,7 @@ interface Venue {
 @Component({
   selector: 'app-venues',
   standalone: true,
-  imports: [CommonModule,RouterModule, HttpClientModule],
+  imports: [CommonModule, RouterModule, HttpClientModule],
   templateUrl: './venues.html',
   styleUrls: ['./venues.css']
 })
@@ -34,7 +34,7 @@ export class Venues implements OnInit {
   error: string | null = null;
   chosenVenueName: string | null = null;
 
-  constructor(private http: HttpClient,private router: Router) { }
+  constructor(private http: HttpClient, private router: Router) { }
 
   ngOnInit(): void {
     onAuthStateChanged(auth, (user) => {
@@ -96,7 +96,7 @@ export class Venues implements OnInit {
     const uid = user.uid;
     console.log(uid);
     const eventsRef = collection(db, 'Events');
-    const q = query(eventsRef, where('UserID', '==', uid));
+    const q = query(eventsRef, where('EventID', '==', uid));
     getDocs(q)
       .then((querySnapshot) => {
         if (querySnapshot.empty) {
@@ -111,9 +111,9 @@ export class Venues implements OnInit {
           .then(() => console.log(`VenueID updated for event ${eventDoc.id}`))
           .catch((error) => console.error('Error updating VenueID:', error))
           .finally(() => {
-            alert('Venue has been updated');   
+            alert('Venue has been updated');
             this.chosenVenueName = this.selectedVenue ? this.selectedVenue.venuename : null;
-;           
+            ;
           })
       })
       .catch((error) => console.error('Error fetching events:', error));
@@ -129,7 +129,7 @@ export class Venues implements OnInit {
 
     const uid = user.uid;
     const eventsRef = collection(db, 'Events');
-    const q = query(eventsRef, where('UserID', '==', uid));
+    const q = query(eventsRef, where('EventID', '==', uid));
 
     getDocs(q)
       .then(async (querySnapshot) => {
@@ -166,7 +166,7 @@ export class Venues implements OnInit {
   }
 
 
- backTohome(): void {
-  this.router.navigate(['/homepage']);
+  backTohome(): void {
+    this.router.navigate(['/homepage']);
   }
 }

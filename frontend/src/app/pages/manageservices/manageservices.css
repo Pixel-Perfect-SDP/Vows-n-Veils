@@ -292,3 +292,125 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
+.button-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  margin-top: 50px;
+}
+
+.toggle-switch {
+  display: flex;
+  border: 2px solid rgb(255, 255, 255);
+  border-radius: 0;
+  overflow: hidden;
+}
+
+.toggle-switch button {
+  padding: 8px 15px;
+  font-size: 2rem;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.yes-style, .no-style { 
+  background-color: #A76858; 
+  color: black; 
+}
+
+.default-style { 
+  background-color: white; 
+  color: black; 
+}
+
+.add-venue-btn {
+  padding: 10px 20px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  background-color:#A76858;
+  color:black;
+  border: none;
+  border-radius: 5px;
+  transition: background 0.3s;
+}
+
+.add-venue-btn:hover { 
+  background-color:#C57E6D ; 
+}
+
+.venue-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+  margin-top: 30px;
+}
+
+.card {
+  border: 2px solid black;
+  padding: 15px;
+  width: 250px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.card img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+}
+
+.update-form {
+  border: 2px solid black;
+  padding: 20px;
+  margin-top: 20px;
+  width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.update-form input {
+  padding: 8px;
+  font-size: 1rem;
+}
+
+.form-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+.form-buttons button {
+  padding: 10px 15px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.addbtn {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.add-venue-btn {
+  padding: 10px 20px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  background-color:  #A76858 ;
+  color:white;
+  border: none;
+  border-radius: 5px;
+  transition: background 0.3s;
+}
+
+.add-venue-btn:hover {
+  background-color:#C57E6D;
+}
