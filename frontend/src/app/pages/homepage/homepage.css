@@ -2,8 +2,8 @@
 .homepage-section {
   background-color: #F5EFE6;
   width: 100%;
-  min-height: 100vh; 
-  margin: 0;         
+  min-height: 100vh;
+  margin: 0;
   padding: 40px 20px;
 }
 
@@ -13,8 +13,8 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    min-height: 0vh; 
-    padding-top: 20vh; 
+    min-height: 0vh;
+    padding-top: 20vh;
     gap: 20px;
     background: var(--beige-300);
 }
@@ -22,10 +22,10 @@
   width: 120px;
   aspect-ratio: 1;
   background: linear-gradient(#dc1818 0 0) bottom/100% 0% no-repeat #ccc;
-  -webkit-mask: 
-    radial-gradient(circle at 60% 65%, #000 62%, #0000 65%) top left, 
-    radial-gradient(circle at 40% 65%, #000 62%, #0000 65%) top right, 
-    linear-gradient(to bottom left, #000 42%,#0000 43%) bottom left , 
+  -webkit-mask:
+    radial-gradient(circle at 60% 65%, #000 62%, #0000 65%) top left,
+    radial-gradient(circle at 40% 65%, #000 62%, #0000 65%) top right,
+    linear-gradient(to bottom left, #000 42%,#0000 43%) bottom left ,
     linear-gradient(to bottom right,#000 42%,#0000 43%) bottom right;
   -webkit-mask-size: 50% 50%;
   -webkit-mask-repeat: no-repeat;
@@ -50,27 +50,27 @@
 
 /*create an event*/
 .logo {
-  width: 60px;          
-  height: auto;          
-  display: block;        
-  margin: 0 auto;        
-  border-radius: 8px;    
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
+  width: 60px;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 .create-event{
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    min-height: 60vh; 
-    padding-top: 5vh 20px; 
+    min-height: 60vh;
+    padding-top: 5vh 20px;
     gap: 20px;
     background: var(--beige-300);
     border-radius: 16px;
 }
 
 .event-card {
-    background: #f9e8e874; /* soft pink */
+    background: #f9e8e874;
     padding: 40px 30px;
     border-radius: 16px;
     box-shadow: 0 6px 20px rgba(0,0,0,0.08);
@@ -88,6 +88,7 @@
     margin: 0;
     line-height: 1.2;
     text-transform: uppercase;
+    transition: transform 0.3s ease, text-shadow 0.3s ease;
     animation: slideIn 1s ease-out forwards;
 }
 
@@ -135,7 +136,7 @@
 .event-form form {
   display: flex;
   flex-direction: column;
-  gap: 15px; 
+  gap: 15px;
   width: 100%;
   max-width: 400px;
 }
@@ -200,17 +201,17 @@
   display: flex;
   flex-direction: column;
   border-right: 1px solid var(--line);
-  position: fixed;        
+  position: fixed;
   top: 0;
   left: 0;
-  height: 100vh;          
+  height: 100vh;
   box-shadow: 2px 0 12px rgba(0,0,0,0.05);
   z-index: 1;
 }
 .sidebar-header {
   display: flex;
   align-items: center;
-  margin-bottom: 15px; 
+  margin-bottom: 15px;
   padding-bottom: 0px;
   border-bottom: 2px #000 solid;
 }
@@ -218,7 +219,7 @@
 .sidebar-logo {
   width: 40px;
   height: 40px;
-  border-radius: 5px; 
+  border-radius: 5px;
   margin-right: 5px;
 }
 
@@ -271,34 +272,9 @@
 
 .sidebar a:hover,
 .sidebar a.active {
-  color: #000000; 
-  text-shadow: 0 0 8px rgba(197, 126, 109, 0.8); 
-  transform: translateX(5px); 
-}
-
-.event-details {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: 40px 20px;
-  text-align: center;
-  height: 4.5rem;
-  width: 65rem;
-  margin-left: 255px;
-  background-image: url('https://images.unsplash.com/photo-1511184150666-9bb7d41a88f4?q=80&w=869&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'); 
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-   border-radius: 20px;
-       transition: all 0.3s ease; 
-    cursor: pointer; 
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
-}
-
-.event-details:hover {
-    transform: scale(1.002); /* slightly bigger */
-    box-shadow: 0 8px 12px rgba(0,0,0,0.2); /* stronger shadow */
+  color: #000000;
+  text-shadow: 0 0 8px rgba(197, 126, 109, 0.8);
+  transform: translateX(5px);
 }
 
 @keyframes fadeInSlide {
@@ -312,22 +288,416 @@
   }
 }
 
-.event-details .names {
-  font-size: 4.3rem;                     
-  font-weight: 700;                      
-  color: #000000;                        
-  margin-bottom: 12px;
-  margin-top: 2px;
-  font-family: 'Brush Script MT', cursive;  
-  letter-spacing: 0.5px;                 
-  text-shadow: 0 1px 3px rgba(0,0,0,0.1); 
-  transition: transform 0.3s ease, text-shadow 0.3s ease;
+/* table CSS */
+.guest-table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; }
+.guest-table th, .guest-table td { padding: 0.5rem; border-bottom: 1px solid #eee; text-align: left; }
+.error { color: #b00020; }
+.sidebar a.active { font-weight: 600; text-decoration: underline; }
+
+
+/* Layout: fixed sidebar + flowing main (no overlap) */
+.has-event {
+  display: block;                 /* stack children */
+  min-height: 100vh;
+  background: var(--beige-100);
+  position: relative;
+}
+
+.sb-toggle {                      /* hidden checkbox toggle */
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Sidebar (fixed) */
+.sidebar {
+  width: 240px;
+  position: fixed;
+  inset: 0 auto 0 0;              /* top:0 right:auto bottom:0 left:0 */
+  height: 100vh;
+  z-index: 10;
+  transform: translateX(0);
+  transition: transform 0.25s ease;
+}
+
+/* Main column accounts for sidebar width (so nothing overlaps) */
+.main {
+  margin-left: 240px;             /* same as .sidebar width */
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header/banner inside main (no absolute positioning) */
+.event-header {
+  position: sticky;               /* stays visible on scroll */
+  top: 0;
+  z-index: 5;
+  background: var(--beige-100);
+  border-bottom: 1px solid var(--line);
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Hamburger button */
+.hamburger {
+  font-size: 1.6rem;
+  line-height: 1;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  user-select: none;
+  border: 1px solid var(--line);
+  background: #fff;
+}
+
+/* Hero banner styling (reusing your old background but inside the flow) */
+.event-hero {
+  flex: 1;
+  border-radius: 16px;
+  padding: 12px 16px;
+  background-image: url('https://images.unsplash.com/photo-1496661415325-ef852f9e8e7c?q=80&w=927&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
+  background-size: cover;
+  background-position: center;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.08);
+}
+
+/* Keep your nice names typography */
+.event-hero .names {
+  margin: 8px 0;
+  font-size: 2.6rem;
+  font-weight: 700;
+  color: #000;
+  font-family: 'Brush Script MT', cursive;
   animation: fadeInSlide 0.8s ease-out forwards;
 }
 
-
-.event-details .names:hover {
-  transform: scale(1.05);               
-  text-shadow: 0 2px 6px rgba(197,126,109,0.6); 
+/* Content area spacing */
+.content {
+  padding: 16px;
 }
 
+/* Collapse behavior (CSS-only): when checkbox is checked, hide sidebar and expand main */
+.sb-toggle:checked ~ .sidebar {
+  transform: translateX(-100%);
+}
+
+.sb-toggle:checked ~ .main {
+  margin-left: 0;
+}
+
+/* Small screens: start with sidebar hidden, user opens with hamburger */
+@media (max-width: 900px) {
+  .sidebar {
+    transform: translateX(-100%);
+  }
+  .main {
+    margin-left: 0;
+  }
+  /* When user toggles ON (checked), show the sidebar OVER the main */
+  .sb-toggle:checked ~ .sidebar {
+    transform: translateX(0);
+    box-shadow: 2px 0 18px rgba(0,0,0,0.15);
+  }
+}
+
+.filters-row {
+  display: flex;
+  justify-content: space-between; /* push button to the right */
+  align-items: flex-end; /* optional: align button with selects */
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.filter-group {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.filter {
+  display: flex;
+  flex-direction: column;
+  margin-right: 8px;
+}
+
+.filter label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.filter select {
+  min-width: 180px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+}
+
+/* ======= Guest List Table: Container + Card ======= */
+.table-card {
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+  overflow: hidden;
+}
+
+.table-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line);
+  background: linear-gradient(180deg, #fff, #faf7f4);
+}
+
+.table-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--stone-800);
+}
+
+/* Wrap the table for scrolling on small screens */
+.table-container {
+  width: 100%;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ======= Table Base ======= */
+.guest-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.95rem;
+}
+
+.guest-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: #fff;
+  /* subtle frosted effect on supported browsers */
+  backdrop-filter: saturate(120%) blur(6px);
+  -webkit-backdrop-filter: saturate(120%) blur(6px);
+  text-align: left;
+  padding: 14px 16px;
+  font-weight: 700;
+  color: #222;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+
+.guest-table tbody td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #f0ece7;
+  color: #2b2b2b;
+  vertical-align: middle;
+}
+
+.guest-table tbody tr:nth-child(odd) td {
+  background: #fcfaf8;
+}
+
+.guest-table tbody tr:hover td {
+  background: #f7efe9;
+}
+
+/* First/last column rounding look (visual nicety when scrolling) */
+.guest-table thead th:first-child,
+.guest-table tbody td:first-child { padding-left: 20px; }
+.guest-table thead th:last-child,
+.guest-table tbody td:last-child  { padding-right: 20px; }
+
+/* ======= “Chip” badges for RSVP/Dietary/Allergy ======= */
+.chip {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  border: 1px solid rgba(0,0,0,0.08);
+  background: #fff;
+}
+
+.chip--ok   { background: #e9f9ef; color: #137a3a; border-color: #bfead0; } /* Attending */
+.chip--no   { background: #fdeeee; color: #a11a1a; border-color: #f5c7c7; } /* Not attending */
+.chip--muted{ background: #f3f1ef; color: #5f5a57; }
+
+/* dietary & allergies as subtle tags */
+.tag {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 10px;
+  font-size: 0.78rem;
+  background: #f1e7e2;
+  color: #6f4b40;
+  border: 1px solid #e6d7cf;
+}
+
+/* ======= Util: truncate long text (emails) ======= */
+.td-clip {
+  max-width: 260px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ======= Empty & loading ======= */
+.empty-state {
+  padding: 24px;
+  text-align: center;
+  color: #6b6b6b;
+}
+
+.loading-row {
+  position: relative;
+  background: linear-gradient(90deg, #f7f1ec 25%, #f0e8e2 37%, #f7f1ec 63%);
+  background-size: 400% 100%;
+  animation: shimmer 1.2s infinite;
+  height: 52px;
+}
+
+@keyframes shimmer {
+  0% { background-position: 100% 0; }
+  100% { background-position: 0 0; }
+}
+
+/* ======= Compact on small screens ======= */
+@media (max-width: 720px) {
+  .table-header { padding: 12px; }
+  .guest-table thead th, .guest-table tbody td { padding: 10px 12px; }
+  .td-clip { max-width: 160px; }
+}
+
+.addGuest {
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
+  margin: 8px 0 12px;
+}
+
+.btn {
+  border: 1px solid var(--line);
+  background: #fff;
+  padding: 8px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.btn:hover { background: #f7f3ef; }
+.btn-primary { background: var(--accent); }
+.btn-secondary { background: #f3f1ef; }
+
+.add-card {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: #fff;
+  padding: 16px;
+  margin: 8px 0 16px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 12px;
+}
+
+.form-grid label { display: flex; flex-direction: column; gap: 6px; }
+.form-grid input, .form-grid select {
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+}
+.grid-span-2 { grid-column: span 2; }
+
+.add-card-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+@media (max-width: 720px) {
+  .form-grid { grid-template-columns: 1fr; }
+  .grid-span-2 { grid-column: span 1; }
+}
+
+/* Logout button */
+.LogOut a {
+  display: flex;
+  margin-top: 13rem;
+  text-decoration: none;
+  font-weight: 600;
+  color: var(--stone-800);
+  padding: 10px 16px;
+  border-radius: 8px;
+  position: relative;
+  font-size: 1.6rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.LogOut a::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0%;
+  height: 100%;
+  background: var(--accent-700);
+  border-radius: 8px;
+  z-index: -1;
+  transition: width 0.3s ease;
+}
+
+.LogOut a:hover::before {
+  width: 100%;
+}
+
+.LogOut a:hover {
+  color: #000000;
+  text-shadow: 0 0 8px rgba(197, 126, 109, 0.8);
+  transform: translateX(5px);
+}
+
+.event-hero
+{
+  margin-bottom: 20px; /* pushes countdown down */
+}
+
+/*countdown things */
+.countdown
+{
+  justify-content: center;
+  gap: 30px;
+  margin-top: 20px 0; /* small space below the welcome text */
+}
+
+.countdown span
+{
+  text-align: center;
+}
+
+.countdown h2
+{
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #C57E6D;
+  margin: 0;
+}
+
+.countdown p
+{
+  font-size: 1.2rem;
+  margin: 0;
+}
+
+.countHead
+{
+  text-align: center;
+}
