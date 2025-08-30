@@ -6,6 +6,9 @@
       <p>Browse all available services from our vendor community.</p>
     </section>
     <section class="button-group">
+    <button class="home-btn" (click)="backTohome()">
+      Back to Home
+    </button>
       <button (click)="loadAllVendors()" [disabled]="loading">
           {{ loading ? 'Loading…' : (loaded ? 'Refresh list' : 'Show all vendors') }}
         </button>
