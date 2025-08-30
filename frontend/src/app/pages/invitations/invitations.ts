@@ -52,6 +52,22 @@ export class Invitations {
     message: ['You are warmly invited.']
   });
 
+  private async getVenueName(db: ReturnType<typeof getFirestore>, VenueID: any): Promise<string> {
+    if (!VenueID) return '';
+
+    // If VenueID is a DocumentReference
+    if (VenueID && typeof VenueID !== 'string' && 'path' in VenueID) {
+      const snap = await getDoc(VenueID);
+      return snap.exists() ? (snap.data() as any)?.venuename ?? '' : '';
+    }
+
+    // If VenueID is the string document ID
+    const vRef = doc(db, 'Venues', String(VenueID));
+    const vSnap = await getDoc(vRef);
+    return vSnap.exists() ? (vSnap.data() as any)?.venuename ?? '' : '';
+  }
+
+
   private async loadDefaultsFromEvent() {
     const user = await this.waitForUser();
     if (!user) return;
@@ -77,6 +93,12 @@ export class Invitations {
     const dateStr = dt ? formatDate(dt, 'yyyy-MM-dd', 'en-ZA') : '';
     const timeStr = dt ? formatDate(dt, 'HH:mm', 'en-ZA') : '';
 
+    let venueStr = '';
+    try {
+      venueStr = await this.getVenueName(db, data?.VenueID);
+    } catch (e) {
+      console.error('Failed to resolve venue name', e);
+    }
     // Only patch if fields are empty (don’t overwrite user-edited values)
     const curr = this.form.getRawValue();
     this.form.patchValue({
@@ -84,7 +106,7 @@ export class Invitations {
       groom:   curr.groom   || data?.Name2 || '',
       date:    curr.date    || dateStr,
       time:    curr.time    || timeStr,
-      venue:   curr.venue   || (data?.VenueID ?? '')
+      venue: curr.venue || venueStr
     });
 }
 
@@ -320,7 +342,6 @@ export class Invitations {
 
       // Still try to prefill from Events so the user gets defaults
       await this.loadDefaultsFromEvent();
-      this.selected = this.selected || this.templates[0];
     }
   }
 
@@ -360,5 +381,9 @@ export class Invitations {
       console.error('Error saving invitation:', err);
       alert('Failed to save invitation. Please try again.');
     }
+  }
+
+  backTohome(): void {
+    this.router.navigate(['/homepage']);
   }
 }
