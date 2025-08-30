@@ -18,7 +18,8 @@ import { signOut } from 'firebase/auth';
   templateUrl: './homepage.html',
   styleUrls: ['./homepage.css']
 })
-export class Homepage {
+export class Homepage
+{
   router = inject(Router);
   //db = inject(Firestore);
   auth = inject(AuthService);
@@ -34,7 +35,7 @@ export class Homepage {
   guests: Guest[] = [];
   guestsLoading = false;
   guestsError: string | null = null;
-  
+
   form = this.formBuild.group({
     name1: ['', [Validators.required]],
     name2: ['', [Validators.required]],
@@ -206,20 +207,8 @@ export class Homepage {
     if (!this.showAddGuest) this.addGuestForm.reset({ RSVPstatus: 'true' });
   }
 
-  async submitAddGuest() {
-    if (this.addGuestForm.invalid) return;
-
-    const user = await this.waitForUser();
-    if (!user) return;
-
-
-  // open/close form
-  toggleAddGuest() {
-    this.showAddGuest = !this.showAddGuest;
-    if (!this.showAddGuest) this.addGuestForm.reset({ RSVPstatus: 'true' });
-  }
-
-  async submitAddGuest() {
+  async submitAddGuest()
+  {
     if (this.addGuestForm.invalid) return;
 
     const user = await this.waitForUser();
@@ -259,7 +248,8 @@ export class Homepage {
 
   /*------------------------------user has NO event--------------------------*/
   //allow user to create one
-  async createEvent() {
+  async createEvent()
+  {
     if (this.form.invalid) {
       return;
     }
@@ -299,7 +289,8 @@ export class Homepage {
 
   }//createEvent
 
-  logout(): void {
+  logout(): void
+  {
     signOut(auth)
       .then(() => {
         console.log('User signed out successfully');
@@ -315,11 +306,10 @@ export class Homepage {
 
 
   // doing the countdown
-
-  months:number=0;
-  days:number=0;
-  hours:number=0;
-  minutes:number=0;
+  months: number = 0;
+  days: number = 0;
+  hours: number = 0;
+  minutes: number = 0;
 
   private countDownInerval: any;
 

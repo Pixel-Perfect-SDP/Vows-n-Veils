@@ -70,7 +70,7 @@
 }
 
 .event-card {
-    background: #f9e8e874; 
+    background: #f9e8e874;
     padding: 40px 30px;
     border-radius: 16px;
     box-shadow: 0 6px 20px rgba(0,0,0,0.08);
@@ -273,9 +273,9 @@
 .sidebar a:hover,
 .sidebar a.active {
 
-  color: #000000; 
-  text-shadow: 0 0 8px rgba(197, 126, 109, 0.8); 
-  transform: translateX(5px); 
+  color: #000000;
+  text-shadow: 0 0 8px rgba(197, 126, 109, 0.8);
+  transform: translateX(5px);
 }
 
 @keyframes fadeInSlide {
@@ -661,11 +661,12 @@
   width: 100%;
 }
 
-.LogOut a:hover {
+.LogOut a:hover
+ {
   color: #000000;
   text-shadow: 0 0 8px rgba(197, 126, 109, 0.8);
   transform: translateX(5px);
-=======
+ }
 
 /* Wrap the table for scrolling on small screens */
 .table-container {
