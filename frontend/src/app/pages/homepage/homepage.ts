@@ -6,14 +6,13 @@ import { Firestore, collection, addDoc, doc, getDoc, setDoc, serverTimestamp } f
 import { AuthService } from '../../core/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getApp } from 'firebase/app';
-
-//New: Data service
+import { FormGroup, FormControl, FormsModule } from '@angular/forms';
 import { DataService, Guest } from '../../core/data.service';
 
 @Component({
   selector: 'app-homepage',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, FormsModule],
   templateUrl: './homepage.html',
   styleUrls: ['./homepage.css']
 })
@@ -94,14 +93,50 @@ export class Homepage {
 
 
   /*------------------------------user HAS event--------------------------*/
-  // NEW: called by sidebar click
-  async switchToGuests(e: Event) {
-    e.preventDefault();
-    this.activeTab = 'guests';
+
+  /*------------fetch guests-------------*/
+  // --- NEW: filter state ---
+  dietaryOptions: string[] = [];
+  allergyOptions: string[] = [];
+  selectedDietary: string | null = null;
+  selectedAllergy: string | null = null;
+  selectedRsvp: 'all' | 'true' | 'false' = 'all';
+
+  // call this when tab switches to 'guests'
+  private async loadGuestFilterOptions() {
+    const user = await this.waitForUser();
+    if (!user) return;
+    const eventId = user.uid;
+
+    this.dataService.getGuestFilterOptions(eventId).subscribe({
+      next: (res) => {
+        this.dietaryOptions = res?.dietary ?? [];
+        this.allergyOptions = res?.allergies ?? [];
+      },
+      error: (err) => console.error('Failed to load filter options', err)
+    });
+  }
+
+  // update: called when filters change
+  async onFiltersChange() {
     await this.loadGuests();
   }
 
-  // NEW: fetch guests from backend via DataService
+  // modify switchToGuests to also fetch options once
+  private filtersLoaded = false;
+
+  async switchToGuests(e: Event) {
+    e.preventDefault();
+    this.activeTab = 'guests';
+
+    if (!this.filtersLoaded) {
+      await this.loadGuestFilterOptions();
+      this.filtersLoaded = true;
+    }
+    await this.loadGuests();
+  }
+
+  // modify loadGuests to pass filters
   private async loadGuests() {
     this.guestsLoading = true;
     this.guestsError = null;
@@ -114,9 +149,14 @@ export class Homepage {
         this.guestsError = 'No authenticated user.';
         return;
       }
+      const eventId = user.uid;
 
-      const eventId = user.uid; // your Events doc id == uid
-      this.dataService.getGuestsByEvent(eventId).subscribe({
+      const opts: any = {};
+      if (this.selectedDietary) opts.dietary = this.selectedDietary;
+      if (this.selectedAllergy) opts.allergy = this.selectedAllergy;
+      if (this.selectedRsvp !== 'all') opts.rsvp = this.selectedRsvp === 'true';
+
+      this.dataService.getGuestsByEvent(eventId, opts).subscribe({
         next: (guests) => {
           this.guests = guests ?? [];
           this.guestsLoading = false;

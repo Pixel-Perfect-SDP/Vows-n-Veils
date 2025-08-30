@@ -1,69 +1,116 @@
 <section class="homepage-section">
 
-<section class="loading-container" *ngIf="hasEvent === null">
-<section class="Loading-1"></section>
-  <section class="Loading-2"></section>
-</section>
+  <section class="loading-container" *ngIf="hasEvent === null">
+    <section class="Loading-1"></section>
+    <section class="Loading-2"></section>
+  </section>
 
-<!-- I user does have an event-->
- <!-- show the couples hompage -->
-<section class="has-event" *ngIf="hasEvent && eventData">
+  <!-- If user DOES have an event -->
+  <section class="has-event" *ngIf="hasEvent && eventData">
+
+    <!-- CSS-ONLY SIDEBAR TOGGLE (no TS needed) -->
+    <input id="sb-toggle" type="checkbox" class="sb-toggle" aria-label="Toggle sidebar" />
+
+    <!-- Sidebar -->
     <nav class="sidebar">
       <section class="sidebar-header">
         <img src="assets/logo.jpg" alt="Vows & Veils logo" class="logo" />
         <h1>Vows & Veils</h1>
       </section>
       <ul>
-        <li><a href="#" [class.active]="activeTab==='guests'"(click)="switchToGuests($event)">Guest List</a></li>
+        <li>
+          <a href="#" [class.active]="activeTab==='guests'" (click)="switchToGuests($event)">Guest List</a>
+        </li>
         <li><a routerLink="/invitations" routerLinkActive="active">Invitations</a></li>
         <li><a routerLink="/venues-couples" routerLinkActive="active">Venues</a></li>
         <li><a routerLink="/vendors-couples" routerLinkActive="active">Vendors</a></li>
-      </ul>      
-  </nav>
+      </ul>
+    </nav>
 
-      <!-- Default landing content for event can stay here -->
-    <section *ngIf="activeTab==='overview'">
-      <!-- your overview content -->
-    </section>
+    <!-- Main content column -->
+    <div class="main">
 
-      <!-- NEW: Guest list panel -->
-    <section *ngIf="activeTab==='guests'">
-      <h2>Guest List</h2>
+      <!-- Header / event banner lives INSIDE the flow (no overlap) -->
+      <header class="event-header">
+        <!-- Hamburger -->
+        <label for="sb-toggle" class="hamburger" title="Toggle sidebar" aria-label="Toggle sidebar">
+          &#9776;
+        </label>
 
-      <div *ngIf="guestsLoading">Loading guests…</div>
-      <div *ngIf="guestsError && !guestsLoading" class="error">{{ guestsError }}</div>
+        <div class="event-hero">
+          <p class="names">Welcome, {{ eventData.Name1 }} and {{ eventData.Name2 }}</p>
+        </div>
+      </header>
 
-      <table *ngIf="!guestsLoading && !guestsError && guests?.length" class="guest-table">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Dietary</th>
-            <th>Allergies</th>
-            <th>RSVP</th>
-            <th>Song</th>
-          </tr>
-        </thead>
-        
-        <tbody>
-          <tr *ngFor="let g of guests">
-            <td>{{ g.Name }}</td>
-            <td>{{ g.Email }}</td>
-            <td>{{ g.Dietary }}</td>
-            <td>{{ g.Allergies }}</td>
-            <td>{{ g.RSVPstatus }}</td>
-            <td>{{ g.Song }}</td>
-          </tr>
-        </tbody>
-      </table>
-
-      <p *ngIf="!guestsLoading && !guestsError && !guests?.length">No guests yet.</p>
+      <!-- Default landing content -->
+      <section class="content" *ngIf="activeTab==='overview'">
+        <!-- your overview content -->
       </section>
-    </section>
 
-  <section class="event-details">
-  <p class="names">Welcome, {{ eventData.Name1 }} and {{ eventData.Name2 }}</p>
-  </section>
+      <!-- Guest list panel -->
+      <section class="content" *ngIf="activeTab==='guests'">
+        <h2>Guest List</h2>
+
+        <!-- Filters row -->
+        <div class="filters-row">
+          <div class="filter">
+            <label>Dietary</label>
+            <select [(ngModel)]="selectedDietary" (change)="onFiltersChange()">
+              <option [ngValue]="null">All</option>
+              <option *ngFor="let d of dietaryOptions" [value]="d">{{ d }}</option>
+            </select>
+          </div>
+
+          <div class="filter">
+            <label>Allergies</label>
+            <select [(ngModel)]="selectedAllergy" (change)="onFiltersChange()">
+              <option [ngValue]="null">All</option>
+              <option *ngFor="let a of allergyOptions" [value]="a">{{ a }}</option>
+            </select>
+          </div>
+
+          <div class="filter">
+            <label>RSVP</label>
+            <select [(ngModel)]="selectedRsvp" (change)="onFiltersChange()">
+              <option value="all">All</option>
+              <option value="true">Attending</option>
+              <option value="false">Not Attending</option>
+            </select>
+          </div>
+        </div>
+
+        <div *ngIf="guestsLoading">Loading guests…</div>
+        <div *ngIf="guestsError && !guestsLoading" class="error">{{ guestsError }}</div>
+
+        <table *ngIf="!guestsLoading && !guestsError && guests?.length" class="guest-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Dietary</th>
+              <th>Allergies</th>
+              <th>RSVP</th>
+              <th>Song</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let g of guests">
+              <td>{{ g.Name }}</td>
+              <td>{{ g.Email }}</td>
+              <td>{{ g.Dietary }}</td>
+              <td>{{ g.Allergies }}</td>
+              <td>{{ g.RSVPstatus ? 'Yes' : 'No' }}</td>
+              <td>{{ g.Song }}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p *ngIf="!guestsLoading && !guestsError && !guests?.length">No guests yet.</p>
+      </section>
+
+
+    </div><!-- /.main -->
+  </section><!-- /.has-event -->
 </section>
 
 

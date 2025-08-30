@@ -1,6 +1,6 @@
 // e.g. frontend/src/app/core/data.service.ts
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
@@ -10,15 +10,19 @@ export interface Guest {
   Email: string;
   Dietary: string;
   Allergies: string;
-  RSVPstatus: string;
+  RSVPstatus: boolean;
   Song: string;
   EventID: string;
 }
 
+export interface GuestFiltersResponse {
+  dietary: string[];
+  allergies: string[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class DataService {
-  private apiUrl = environment.apiUrl; // e.g. http://localhost:3000/api
-  //private apiUrl = `https://site--vowsandveils--5dl8fyl4jyqm.code.run`
+  private apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
 
@@ -30,8 +34,18 @@ export class DataService {
     return this.http.get<string[]>(`${this.apiUrl}/users/emails`);
   }
 
-  // NEW: guests by event
-  getGuestsByEvent(eventId: string): Observable<Guest[]> {
-    return this.http.get<Guest[]>(`${this.apiUrl}/events/${eventId}/guests`);
+  //GET /events/:eventId/guests/{optional params}
+  getGuestsByEvent(eventId: string, opts?: { dietary?: string; allergy?: string; rsvp?: boolean }): Observable<Guest[]> {
+    let params = new HttpParams();
+    if (opts?.dietary) params = params.set('dietary', opts.dietary);
+    if (opts?.allergy) params = params.set('allergy', opts.allergy);
+    if (typeof opts?.rsvp === 'boolean') params = params.set('rsvp', String(opts.rsvp));
+
+    return this.http.get<Guest[]>(`${this.apiUrl}/events/${eventId}/guests`, { params });
+  }
+
+  //GET /events/:eventID/guest-filters
+  getGuestFilterOptions(eventId: string): Observable<GuestFiltersResponse> {
+    return this.http.get<GuestFiltersResponse>(`${this.apiUrl}/events/${eventId}/guest-filters`);
   }
 }
