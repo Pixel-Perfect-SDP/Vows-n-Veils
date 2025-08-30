@@ -49,9 +49,9 @@
 
       <!-- Guest list panel -->
       <section class="content" *ngIf="activeTab==='guests'">
-        <h2>Guest List</h2>
+        <h2 class="sr-only">Guest List</h2>
 
-        <!-- Filters row -->
+        <!-- your filters row stays above -->
         <div class="filters-row">
           <div class="filter">
             <label>Dietary</label>
@@ -79,33 +79,73 @@
           </div>
         </div>
 
-        <div *ngIf="guestsLoading">Loading guests…</div>
-        <div *ngIf="guestsError && !guestsLoading" class="error">{{ guestsError }}</div>
+        <!-- Card -->
+        <div class="table-card">
+          <div class="table-header">
+            <div class="table-title">Guests</div>
+            <!-- space for future actions (export, add guest, etc.) -->
+            <div></div>
+          </div>
 
-        <table *ngIf="!guestsLoading && !guestsError && guests?.length" class="guest-table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Dietary</th>
-              <th>Allergies</th>
-              <th>RSVP</th>
-              <th>Song</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let g of guests">
-              <td>{{ g.Name }}</td>
-              <td>{{ g.Email }}</td>
-              <td>{{ g.Dietary }}</td>
-              <td>{{ g.Allergies }}</td>
-              <td>{{ g.RSVPstatus ? 'Yes' : 'No' }}</td>
-              <td>{{ g.Song }}</td>
-            </tr>
-          </tbody>
-        </table>
+          <!-- Loading -->
+          <div *ngIf="guestsLoading" class="table-container">
+            <table class="guest-table" aria-busy="true" aria-live="polite">
+              <thead>
+                <tr>
+                  <th>Name</th><th>Email</th><th>Dietary</th><th>Allergies</th><th>RSVP</th><th>Song</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="loading-row" *ngFor="let s of [1,2,3,4,5]"><td colspan="6"></td></tr>
+              </tbody>
+            </table>
+          </div>
 
-        <p *ngIf="!guestsLoading && !guestsError && !guests?.length">No guests yet.</p>
+          <!-- Error -->
+          <div *ngIf="guestsError && !guestsLoading" class="empty-state">
+            {{ guestsError }}
+          </div>
+
+          <!-- Table -->
+          <div *ngIf="!guestsLoading && !guestsError" class="table-container">
+            <table *ngIf="guests?.length; else emptyGuests" class="guest-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Dietary</th>
+                  <th>Allergies</th>
+                  <th>RSVP</th>
+                  <th>Song</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let g of guests">
+                  <td>{{ g.Name }}</td>
+                  <td class="td-clip" title="{{ g.Email }}">{{ g.Email }}</td>
+                  <td>
+                    <span class="tag" *ngIf="g.Dietary; else noDiet">{{ g.Dietary }}</span>
+                    <ng-template #noDiet><span class="chip chip--muted">None</span></ng-template>
+                  </td>
+                  <td>
+                    <span class="tag" *ngIf="g.Allergies; else noAllergy">{{ g.Allergies }}</span>
+                    <ng-template #noAllergy><span class="chip chip--muted">None</span></ng-template>
+                  </td>
+                  <td>
+                    <span class="chip" [ngClass]="g.RSVPstatus ? 'chip--ok' : 'chip--no'">
+                      {{ g.RSVPstatus ? 'Attending' : 'Not Attending' }}
+                    </span>
+                  </td>
+                  <td class="td-clip" title="{{ g.Song }}">{{ g.Song }}</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <ng-template #emptyGuests>
+              <div class="empty-state">No guests match the selected filters.</div>
+            </ng-template>
+          </div>
+        </div>
       </section>
 
 
