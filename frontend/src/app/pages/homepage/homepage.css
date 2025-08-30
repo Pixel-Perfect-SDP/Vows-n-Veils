@@ -277,31 +277,6 @@
   transform: translateX(5px); 
 }
 
-.event-details {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: 40px 20px;
-  text-align: center;
-  height: 4.5rem;
-  width: 65rem;
-  margin-left: 255px;
-  background-image: url('https://images.unsplash.com/photo-1496661415325-ef852f9e8e7c?q=80&w=927&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'); 
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-   border-radius: 20px;
-       transition: all 0.3s ease; 
-    cursor: pointer; 
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
-}
-
-.event-details:hover {
-    transform: scale(1.002); /* slightly bigger */
-    box-shadow: 0 8px 12px rgba(0,0,0,0.2); /* stronger shadow */
-}
-
 @keyframes fadeInSlide {
   0% {
     opacity: 0;
@@ -311,25 +286,6 @@
     opacity: 1;
     transform: translateY(0);
   }
-}
-
-.event-details .names {
-  font-size: 4.3rem;                     
-  font-weight: 700;                      
-  color: #000000;                        
-  margin-bottom: 12px;
-  margin-top: 2px;
-  font-family: 'Brush Script MT', cursive;  
-  letter-spacing: 0.5px;                 
-  text-shadow: 0 1px 3px rgba(0,0,0,0.1); 
-  transition: transform 0.3s ease, text-shadow 0.3s ease;
-  animation: fadeInSlide 0.8s ease-out forwards;
-}
-
-
-.event-details .names:hover {
-  transform: scale(1.05);               
-  text-shadow: 0 2px 6px rgba(197,126,109,0.6); 
 }
 
 /* table CSS */
@@ -402,7 +358,7 @@
   flex: 1;
   border-radius: 16px;
   padding: 12px 16px;
-  background-image: url('https://images.unsplash.com/photo-1511184150666-9bb7d41a88f4?q=80&w=869&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
+  background-image: url('https://images.unsplash.com/photo-1496661415325-ef852f9e8e7c?q=80&w=927&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
   background-size: cover;
   background-position: center;
   box-shadow: 0 4px 6px rgba(0,0,0,0.08);
@@ -415,6 +371,7 @@
   font-weight: 700;
   color: #000;
   font-family: 'Brush Script MT', cursive;
+  animation: fadeInSlide 0.8s ease-out forwards;
 }
 
 /* Content area spacing */
