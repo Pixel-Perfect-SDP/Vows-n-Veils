@@ -266,14 +266,11 @@
   100% { opacity: 1; transform: translateY(0); }
 }
 
-/* ---------- SERVICES SECTION (fixed) ---------- */
-
-/* Section container (don’t make all text transparent) */
 .services {
   font-size: 1.75rem;
   color: #3F3A34;
   margin-left: 260px;
-  margin-top: -380px;         
+  margin-top: -450px;         
   margin-bottom: 20px;
   letter-spacing: 1px;
   text-shadow: 0 1px 2px rgba(0,0,0,0.1);
@@ -288,7 +285,6 @@
   -webkit-text-fill-color: transparent;
 }
 
-/* Table readability */
 .services table {
   width: 100%;
   border-collapse: collapse;
@@ -296,8 +292,8 @@
 .services thead th {
   padding: 12px;
   font-weight: 700;
-  color: #3F3A34;              /* solid text color */
-  background: #ffffff;         /* ensure not translucent */
+  color: #3F3A34;             
+  background: #ffffff;        
   border-bottom: 1px solid #e5e7eb;
 }
 .services tbody td {
