@@ -1,6 +1,3 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-
 name: Build and deploy Node.js app to Azure Web App - vows-n-veils
 
 on:
@@ -13,7 +10,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: read #This is required for actions/checkout
+      contents: read
 
     steps:
       - uses: actions/checkout@v4
@@ -25,6 +22,7 @@ jobs:
 
       - name: npm install, build, and test
         run: |
+          cd backend
           npm install
           npm run build --if-present
           npm run test --if-present
@@ -33,7 +31,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: .
+          path: backend  # Upload the built backend folder
 
   deploy:
     runs-on: ubuntu-latest
@@ -44,12 +42,11 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: node-app
-      
-      - name: 'Deploy to Azure Web App'
-        id: deploy-to-webapp
+
+      - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'vows-n-veils'
           slot-name: 'Production'
-          package: .
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_6A566639885F4EC0BE516E1D82B9F385 }}
+          package: backend
+          publish-profile: ${{ secrets.AzureAppService_PublishProfile_1234 }}
