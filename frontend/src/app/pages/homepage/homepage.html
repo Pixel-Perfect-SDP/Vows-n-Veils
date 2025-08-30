@@ -25,9 +25,9 @@
         <li><a routerLink="/venues" routerLinkActive="active">Venues</a></li>
         <li><a routerLink="/vendors-couples" routerLinkActive="active">Vendors</a></li>
         <li class="LogOut"><a (click)="logout()">Log out</a></li>
-      </ul>      
+      </ul>
     </nav>
-    
+
     <!-- Main content column -->
     <div class="main">
 
@@ -42,6 +42,33 @@
           <p class="names">Welcome, {{ eventData.Name1 }} and {{ eventData.Name2 }}</p>
         </div>
       </header>
+
+      <body>
+        <h2 class=countHead>Time until we tie the knot.....</h2>
+      <!-- Countdown -->
+      <section class="countdown">
+        <span>
+          <h2 class=" count-item"> {{months | number: '2.0'}}</h2>
+          <p>Months</p>
+        </span>
+
+        <span>
+          <h2 class="count-item"> {{days | number: '2.0'}}</h2>
+          <p>Days</p>
+        </span>
+
+        <span>
+          <h2 class=" count-item"> {{hours | number: '2.0'}}</h2>
+          <p>Hours</p>
+        </span>
+
+        <span>
+          <h2 class=" count-item"> {{minutes | number: '2.0'}}</h2>
+          <p>Minutes</p>
+        </span>
+
+      </section>
+    </body>
 
       <!-- Default landing content -->
       <section class="content" *ngIf="activeTab==='overview'">
@@ -79,6 +106,7 @@
                 <option value="false">Not Attending</option>
               </select>
             </div>
+
           </div> 
 
           <div class="addGuest">
@@ -89,7 +117,6 @@
         </div>
 
         <!-- Actions row -->
-        
 
         <!-- Add Guest Card -->
         <div class="add-card" *ngIf="showAddGuest">
