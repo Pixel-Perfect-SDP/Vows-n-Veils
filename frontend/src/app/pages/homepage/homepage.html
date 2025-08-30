@@ -1,29 +1,229 @@
 <section class="homepage-section">
 
-<section class="loading-container" *ngIf="hasEvent === null">
-<section class="Loading-1"></section>
-  <section class="Loading-2"></section>
-</section>
+  <section class="loading-container" *ngIf="hasEvent === null">
+    <section class="Loading-1"></section>
+    <section class="Loading-2"></section>
+  </section>
 
-<section class="has-event" *ngIf="hasEvent && eventData">
+  <!-- If user DOES have an event -->
+  <section class="has-event" *ngIf="hasEvent && eventData">
+
+    <!-- CSS-ONLY SIDEBAR TOGGLE (no TS needed) -->
+    <input id="sb-toggle" type="checkbox" class="sb-toggle" aria-label="Toggle sidebar" />
+
+    <!-- Sidebar -->
     <nav class="sidebar">
       <section class="sidebar-header">
         <img src="assets/logo.jpg" alt="Vows & Veils logo" class="logo" />
         <h1>Vows & Veils</h1>
       </section>
       <ul>
-        <li><a routerLink="/guest-list" routerLinkActive="active">Guest List</a></li>
+        <li>
+          <a href="#" [class.active]="activeTab==='guests'" (click)="switchToGuests($event)">Guest List</a>
+        </li>
         <li><a routerLink="/invitations" routerLinkActive="active">Invitations</a></li>
         <li><a routerLink="/venues" routerLinkActive="active">Venues</a></li>
         <li><a routerLink="/vendors-couples" routerLinkActive="active">Vendors</a></li>
         <li class="LogOut"><a (click)="logout()">Log out</a></li>
       </ul>      
-  </nav>
+    </nav>
+    
+  <!-- might need to change or remove -->
   <section class="event-details">
-  <p class="names">Welcome, {{ eventData.Name1 }} and {{ eventData.Name2 }}</p>
+    <p class="names">Welcome, {{ eventData.Name1 }} and {{ eventData.Name2 }}</p>
   </section>
+    
+    
+    
+    <!-- Main content column -->
+    <div class="main">
+
+      <!-- Header / event banner lives INSIDE the flow (no overlap) -->
+      <header class="event-header">
+        <!-- Hamburger -->
+        <label for="sb-toggle" class="hamburger" title="Toggle sidebar" aria-label="Toggle sidebar">
+          &#9776;
+        </label>
+
+        <div class="event-hero">
+          <p class="names">Welcome, {{ eventData.Name1 }} and {{ eventData.Name2 }}</p>
+        </div>
+      </header>
+
+      <!-- Default landing content -->
+      <section class="content" *ngIf="activeTab==='overview'">
+        <!-- your overview content -->
+      </section>
+
+      <!---------Guest list panel----------->
+      <section class="content" *ngIf="activeTab==='guests'">
+        <h2 class="sr-only">Guest List</h2>
+
+        <!-- your filters row stays above -->
+        <div class="filters-row">
+          <div class = "filter-group">
+            <div class="filter">
+              <label>Dietary</label>
+              <select [(ngModel)]="selectedDietary" (change)="onFiltersChange()">
+                <option [ngValue]="null">All</option>
+                <option *ngFor="let d of dietaryOptions" [value]="d">{{ d }}</option>
+              </select>
+            </div>
+
+            <div class="filter">
+              <label>Allergies</label>
+              <select [(ngModel)]="selectedAllergy" (change)="onFiltersChange()">
+                <option [ngValue]="null">All</option>
+                <option *ngFor="let a of allergyOptions" [value]="a">{{ a }}</option>
+              </select>
+            </div>
+
+            <div class="filter">
+              <label>RSVP</label>
+              <select [(ngModel)]="selectedRsvp" (change)="onFiltersChange()">
+                <option value="all">All</option>
+                <option value="true">Attending</option>
+                <option value="false">Not Attending</option>
+              </select>
+            </div>
+          </div> 
+
+          <div class="addGuest">
+            <button type="button" class="btn" (click)="toggleAddGuest()">
+              {{ showAddGuest ? 'Close' : 'Add Guest' }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Actions row -->
+        
+
+        <!-- Add Guest Card -->
+        <div class="add-card" *ngIf="showAddGuest">
+          <form [formGroup]="addGuestForm" (ngSubmit)="submitAddGuest()">
+            <div class="form-grid">
+              <label>
+                <span>Name *</span>
+                <input formControlName="Name" placeholder="Full name" />
+              </label>
+
+              <label>
+                <span>Email *</span>
+                <input formControlName="Email" type="email" placeholder="email@example.com" />
+              </label>
+
+              <label>
+                <span>Dietary</span>
+                <input formControlName="Dietary" placeholder="e.g. Vegan" />
+              </label>
+
+              <label>
+                <span>Allergies</span>
+                <input formControlName="Allergies" placeholder="e.g. Peanuts" />
+              </label>
+
+              <label>
+                <span>RSVP</span>
+                <select formControlName="RSVPstatus">
+                  <option value="true">Attending</option>
+                  <option value="false">Not Attending</option>
+                </select>
+              </label>
+
+              <label class="grid-span-2">
+                <span>Song request</span>
+                <input formControlName="Song" placeholder="Favorite song" />
+              </label>
+            </div>
+
+            <div class="add-card-actions">
+              <button type="button" class="btn btn-secondary" (click)="toggleAddGuest()">Cancel</button>
+              <button type="submit" class="btn btn-primary" [disabled]="addGuestForm.invalid || guestsLoading">
+                Save Guest
+              </button>
+            </div>
+          </form>
+        </div>
+
+
+        <!-- Card -->
+        <div class="table-card">
+          <div class="table-header">
+            <div class="table-title">Guests</div>
+            <!-- space for future actions (export, add guest, etc.) -->
+            <div></div>
+          </div>
+
+          <!-- Loading -->
+          <div *ngIf="guestsLoading" class="table-container">
+            <table class="guest-table" aria-busy="true" aria-live="polite">
+              <thead>
+                <tr>
+                  <th>Name</th><th>Email</th><th>Dietary</th><th>Allergies</th><th>RSVP</th><th>Song</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="loading-row" *ngFor="let s of [1,2,3,4,5]"><td colspan="6"></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Error -->
+          <div *ngIf="guestsError && !guestsLoading" class="empty-state">
+            {{ guestsError }}
+          </div>
+
+          <!-- Table -->
+          <div *ngIf="!guestsLoading && !guestsError" class="table-container">
+            <table *ngIf="guests?.length; else emptyGuests" class="guest-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Dietary</th>
+                  <th>Allergies</th>
+                  <th>RSVP</th>
+                  <th>Song</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let g of guests">
+                  <td>{{ g.Name }}</td>
+                  <td class="td-clip" title="{{ g.Email }}">{{ g.Email }}</td>
+                  <td>
+                    <span class="tag" *ngIf="g.Dietary; else noDiet">{{ g.Dietary }}</span>
+                    <ng-template #noDiet><span class="chip chip--muted">None</span></ng-template>
+                  </td>
+                  <td>
+                    <span class="tag" *ngIf="g.Allergies; else noAllergy">{{ g.Allergies }}</span>
+                    <ng-template #noAllergy><span class="chip chip--muted">None</span></ng-template>
+                  </td>
+                  <td>
+                    <span class="chip" [ngClass]="g.RSVPstatus ? 'chip--ok' : 'chip--no'">
+                      {{ g.RSVPstatus ? 'Attending' : 'Not Attending' }}
+                    </span>
+                  </td>
+                  <td class="td-clip" title="{{ g.Song }}">{{ g.Song }}</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <ng-template #emptyGuests>
+              <div class="empty-state">No guests match the selected filters.</div>
+            </ng-template>
+          </div>
+        </div>
+      </section>
+
+
+    </div><!-- /.main -->
+  </section><!-- /.has-event -->
 </section>
 
+
+
+<!-- if user doesnt have an event: -->
+ <!-- show create event page -->
 <section class="create-event" *ngIf="hasEvent === false">
   <section class="event-card">
   <img src="assets/logo.jpg" alt="Vows & Veils logo" class="logo" />
