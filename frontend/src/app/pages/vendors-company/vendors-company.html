@@ -1,0 +1,194 @@
+<section class="vendorsCompany-section">
+
+  
+  <section class="loading-container" *ngIf="hasVendorCompany === null">
+    <section class="Loading-1"></section>
+    <section class="Loading-2"></section>
+  </section>
+
+ 
+  <section class="has-vendor-company" *ngIf="hasVendorCompany && companyVendorData">
+    <nav class="sidebar">
+      <section class="sidebar-header">
+        <img src="assets/logo.jpg" alt="Vows & Veils logo" class="logo" />
+        <h1>Vows & Veils</h1>
+      </section>
+      <button (click)="toggleServiceForm()">
+        {{ showServiceForm ? 'Close' : 'Add service' }}
+      </button>
+      <button (click)="refreshServices()">Refresh</button>
+    </nav>
+
+    <section class="vendor-company-details">
+      <p class="company-name">Welcome, {{ companyVendorData.companyName }}</p>
+    </section>
+  </section>
+
+
+  <section class="services" *ngIf="hasVendorCompany && companyVendorData">
+    <h3>My services:</h3>
+
+ 
+    <section class="vendor-company-form" *ngIf="showServiceForm">
+      <form [formGroup]="serviceForm" (ngSubmit)="addService()">
+        <label>Service name *</label>
+        <input formControlName="serviceName" placeholder="e.g. Full-day photography" />
+
+        <label>Type *</label>
+        <select formControlName="type">
+          <option value="" disabled>Select…</option>
+          <option *ngFor="let t of serviceTypes" [value]="t">{{ t }}</option>
+        </select>
+
+        <label>Price (R) *</label>
+        <input type="number" formControlName="price" min="0" step="0.01" />
+
+        <label>Capacity</label>
+        <input type="number" formControlName="capacity" min="0" step="1" placeholder="e.g. 200" />
+
+        <label>Description</label>
+        <textarea rows="3" formControlName="description" placeholder="What’s included…"></textarea>
+
+        <label>Booking notes (optional)</label>
+        <textarea rows="2" formControlName="bookingNotes" placeholder="Lead time, special terms…"></textarea>
+
+        <div style="display:flex; gap:10px; margin-top:10px">
+          <button type="submit" [disabled]="serviceForm.invalid || busy">
+            {{ busy ? 'Saving…' : 'Save service' }}
+          </button>
+          <button type="button" (click)="serviceForm.reset(defaultServiceValues)" [disabled]="busy">Clear</button>
+        </div>
+
+        <p *ngIf="errorMsg" style="color:#b45353;margin-top:8px">{{ errorMsg }}</p>
+        <p *ngIf="successMsg" style="color:#166534;margin-top:8px">{{ successMsg }}</p>
+      </form>
+    </section>
+
+  
+    <div *ngIf="loadingServices" style="color:#6b7280">Loading services…</div>
+    <div *ngIf="!loadingServices && services.length === 0" style="color:#6b7280">
+      No services yet — add your first one.
+    </div>
+
+    <div *ngIf="services.length > 0"
+         style="overflow:auto; background:#fff; border-radius:12px; box-shadow:0 6px 20px rgba(0,0,0,0.08);">
+      <table style="width:100%; border-collapse:collapse">
+        <thead>
+          <tr style="text-align:left; border-bottom:1px solid #e5e7eb">
+            <th style="padding:12px">Name</th>
+            <th style="padding:12px">Type</th>
+            <th style="padding:12px">Price</th>
+            <th style="padding:12px">Capacity</th>
+            <th style="padding:12px">Status</th>
+            <th style="padding:12px">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let s of services; trackBy: trackById" style="border-bottom:1px solid #f3f4f6">
+            <td style="padding:12px">{{ s.serviceName }}</td>
+            <td style="padding:12px">{{ s.type }}</td>
+            <td style="padding:12px">R{{ s.price | number:'1.0-2' }}</td>
+            <td style="padding:12px">{{ s.capacity ?? '—' }}</td>
+            <td style="padding:12px">
+              <span style="padding:2px 8px; border-radius:999px; font-size:12px; background:#e5e7eb; color:#374151">
+                {{ s.status || 'active' }}
+              </span>
+            </td>
+            <td style="padding:12px">
+              <button (click)="deleteService(s)" [disabled]="busyId===s.id">
+                {{ busyId===s.id ? 'Deleting…' : 'Delete' }}
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+ 
+    <h3 style="margin-top:28px">Incoming orders</h3>
+
+    <div *ngIf="loadingOrders" style="color:#6b7280">Loading orders…</div>
+    <div *ngIf="!loadingOrders && orders.length === 0" style="color:#6b7280">
+      No orders yet.
+    </div>
+
+    <div *ngIf="orders.length > 0"
+         style="overflow:auto; background:#fff; border-radius:12px; box-shadow:0 6px 20px rgba(0,0,0,0.08);">
+      <table style="width:100%; border-collapse:collapse">
+        <thead>
+          <tr style="text-align:left; border-bottom:1px solid #e5e7eb">
+            <th style="padding:12px">Placed</th>
+            <th style="padding:12px">Service</th>
+            <th style="padding:12px">Guests</th>
+            <th style="padding:12px">Date</th>
+            <th style="padding:12px">Time</th>
+            <th style="padding:12px">Notes</th>
+            <th style="padding:12px">Status</th>
+            <th style="padding:12px">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let o of orders; trackBy: trackById" style="border-bottom:1px solid #f3f4f6">
+            <td style="padding:12px">{{ o.createdAtDate || o.startAtDate | date:'MMM d, y, h:mm a' }}</td>
+            <td style="padding:12px">{{ getServiceName(o.vendorID) }}</td>
+            <td style="padding:12px">{{ o.guestsNum }}</td>
+            <td style="padding:12px">{{ o.startAtDate | date:'MMM d, y' }}</td>
+            <td style="padding:12px">{{ o.startAtDate | date:'shortTime' }} – {{ o.endAtDate | date:'shortTime' }}</td>
+            <td style="padding:12px; max-width:280px;">
+              <span style="white-space:pre-wrap">{{ o.note || '—' }}</span>
+            </td>
+            <td style="padding:12px">
+              <span [ngStyle]="{
+                    background: o.status==='pending' ? '#FEF3C7'
+                              : o.status==='accepted' ? '#DCFCE7'
+                              : o.status==='declined' ? '#FEE2E2'
+                              : '#E5E7EB',
+                    color: '#111827',
+                    padding: '2px 8px',
+                    'border-radius': '999px',
+                    'font-size': '12px'
+                  }">
+                {{ o.status }}
+              </span>
+            </td>
+            <td style="padding:12px; display:flex; gap:8px;">
+              <button (click)="acceptOrder(o)" [disabled]="!canAct(o) || orderBusyId===o.id">
+                {{ orderBusyId===o.id && orderBusyAction==='accept' ? 'Accepting…' : 'Accept' }}
+              </button>
+              <button (click)="declineOrder(o)" [disabled]="!canAct(o) || orderBusyId===o.id">
+                {{ orderBusyId===o.id && orderBusyAction==='decline' ? 'Declining…' : 'Decline' }}
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p *ngIf="errorMsg" style="color:#b45353;margin-top:12px">{{ errorMsg }}</p>
+  </section>
+
+
+  <section class="create-vendor-company" *ngIf="hasVendorCompany === false">
+    <section class="vendor-company-card">
+      <img src="assets/logo.jpg" alt="Vows & Veils logo" class="logo" />
+      <h2>Join as a vendor</h2>
+      <p>Fill in the details below to get started!</p>
+    </section>
+
+    <section class="vendor-company-form">
+      <form [formGroup]="form" (ngSubmit)="createVendorCompany()">
+        <label>Company Name:</label>
+        <input formControlName="companyName" />
+
+        <label>Contact Email:</label>
+        <input type="email" formControlName="companyEmail" />
+
+        <label>Phone Number:</label>
+        <input formControlName="companyNumber" />
+
+        <button type="submit" [disabled]="form.invalid">Create vendor account</button>
+      </form>
+    </section>
+  </section>
+
+</section>

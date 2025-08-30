@@ -23,7 +23,6 @@ export class Homepage {
   //db = inject(Firestore);
   auth = inject(AuthService);
   private formBuild = inject(FormBuilder);
-
   //New: Data service
   private dataService = inject(DataService);
 
@@ -35,7 +34,7 @@ export class Homepage {
   guests: Guest[] = [];
   guestsLoading = false;
   guestsError: string | null = null;
-
+  
   form = this.formBuild.group({
     name1: ['', [Validators.required]],
     name2: ['', [Validators.required]],
@@ -200,6 +199,20 @@ export class Homepage {
     Song: ['']
   });
 
+
+  // open/close form
+  toggleAddGuest() {
+    this.showAddGuest = !this.showAddGuest;
+    if (!this.showAddGuest) this.addGuestForm.reset({ RSVPstatus: 'true' });
+  }
+
+  async submitAddGuest() {
+    if (this.addGuestForm.invalid) return;
+
+    const user = await this.waitForUser();
+    if (!user) return;
+
+
   // open/close form
   toggleAddGuest() {
     this.showAddGuest = !this.showAddGuest;
@@ -286,8 +299,6 @@ export class Homepage {
 
   }//createEvent
 
-
-
   logout(): void {
     signOut(auth)
       .then(() => {
@@ -301,6 +312,7 @@ export class Homepage {
         console.error('Error signing out:', error);
       });
   }
+
 
   // doing the countdown
 
@@ -357,5 +369,4 @@ export class Homepage {
     this.minutes = minDiff;
 
   }
-
  }

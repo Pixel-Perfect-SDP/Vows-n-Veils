@@ -1,0 +1,10 @@
+
+{
+    "comment": "allows for page reload tells azure to not look for page route when reloading and instead let angular take over",
+
+
+    "navigationFallback": {
+        "rewrite": "/index.html",
+        "exclude": ["/assets/*", "/favicon.ico"]
+  }
+}

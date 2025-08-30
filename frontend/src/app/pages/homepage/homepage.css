@@ -70,7 +70,7 @@
 }
 
 .event-card {
-    background: #f9e8e874;
+    background: #f9e8e874; 
     padding: 40px 30px;
     border-radius: 16px;
     box-shadow: 0 6px 20px rgba(0,0,0,0.08);
@@ -272,9 +272,10 @@
 
 .sidebar a:hover,
 .sidebar a.active {
-  color: #000000;
-  text-shadow: 0 0 8px rgba(197, 126, 109, 0.8);
-  transform: translateX(5px);
+
+  color: #000000; 
+  text-shadow: 0 0 8px rgba(197, 126, 109, 0.8); 
+  transform: translateX(5px); 
 }
 
 @keyframes fadeInSlide {
@@ -459,6 +460,212 @@
   font-weight: 700;
   color: var(--stone-800);
 }
+
+
+/* Wrap the table for scrolling on small screens */
+.table-container {
+  width: 100%;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ======= Table Base ======= */
+.guest-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.95rem;
+}
+
+.guest-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: #fff;
+  /* subtle frosted effect on supported browsers */
+  backdrop-filter: saturate(120%) blur(6px);
+  -webkit-backdrop-filter: saturate(120%) blur(6px);
+  text-align: left;
+  padding: 14px 16px;
+  font-weight: 700;
+  color: #222;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+
+.guest-table tbody td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #f0ece7;
+  color: #2b2b2b;
+  vertical-align: middle;
+}
+
+.guest-table tbody tr:nth-child(odd) td {
+  background: #fcfaf8;
+}
+
+.guest-table tbody tr:hover td {
+  background: #f7efe9;
+}
+
+/* First/last column rounding look (visual nicety when scrolling) */
+.guest-table thead th:first-child,
+.guest-table tbody td:first-child { padding-left: 20px; }
+.guest-table thead th:last-child,
+.guest-table tbody td:last-child  { padding-right: 20px; }
+
+/* ======= “Chip” badges for RSVP/Dietary/Allergy ======= */
+.chip {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  border: 1px solid rgba(0,0,0,0.08);
+  background: #fff;
+}
+
+.chip--ok   { background: #e9f9ef; color: #137a3a; border-color: #bfead0; } /* Attending */
+.chip--no   { background: #fdeeee; color: #a11a1a; border-color: #f5c7c7; } /* Not attending */
+.chip--muted{ background: #f3f1ef; color: #5f5a57; }
+
+/* dietary & allergies as subtle tags */
+.tag {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 10px;
+  font-size: 0.78rem;
+  background: #f1e7e2;
+  color: #6f4b40;
+  border: 1px solid #e6d7cf;
+}
+
+/* ======= Util: truncate long text (emails) ======= */
+.td-clip {
+  max-width: 260px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ======= Empty & loading ======= */
+.empty-state {
+  padding: 24px;
+  text-align: center;
+  color: #6b6b6b;
+}
+
+.loading-row {
+  position: relative;
+  background: linear-gradient(90deg, #f7f1ec 25%, #f0e8e2 37%, #f7f1ec 63%);
+  background-size: 400% 100%;
+  animation: shimmer 1.2s infinite;
+  height: 52px;
+}
+
+@keyframes shimmer {
+  0% { background-position: 100% 0; }
+  100% { background-position: 0 0; }
+}
+
+/* ======= Compact on small screens ======= */
+@media (max-width: 720px) {
+  .table-header { padding: 12px; }
+  .guest-table thead th, .guest-table tbody td { padding: 10px 12px; }
+  .td-clip { max-width: 160px; }
+}
+
+.addGuest {
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
+  margin: 8px 0 12px;
+}
+
+.btn {
+  border: 1px solid var(--line);
+  background: #fff;
+  padding: 8px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.btn:hover { background: #f7f3ef; }
+.btn-primary { background: var(--accent); }
+.btn-secondary { background: #f3f1ef; }
+
+.add-card {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: #fff;
+  padding: 16px;
+  margin: 8px 0 16px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 12px;
+}
+
+.form-grid label { display: flex; flex-direction: column; gap: 6px; }
+.form-grid input, .form-grid select {
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+}
+.grid-span-2 { grid-column: span 2; }
+
+.add-card-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+@media (max-width: 720px) {
+  .form-grid { grid-template-columns: 1fr; }
+  .grid-span-2 { grid-column: span 1; }
+}
+
+/* Logout button */
+.LogOut a {
+  display: flex;
+  margin-top: 13rem;
+  text-decoration: none;
+  font-weight: 600;
+  color: var(--stone-800);
+  padding: 10px 16px;
+  border-radius: 8px;
+  position: relative;
+  font-size: 1.6rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.LogOut a::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0%;
+  height: 100%;
+  background: var(--accent-700);
+  border-radius: 8px;
+  z-index: -1;
+  transition: width 0.3s ease;
+}
+
+.LogOut a:hover::before {
+  width: 100%;
+}
+
+.LogOut a:hover {
+  color: #000000;
+  text-shadow: 0 0 8px rgba(197, 126, 109, 0.8);
+  transform: translateX(5px);
+=======
 
 /* Wrap the table for scrolling on small screens */
 .table-container {

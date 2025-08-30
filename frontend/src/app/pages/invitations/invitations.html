@@ -1,1 +1,58 @@
-<p>invitations works!</p>
+<div class="page">
+  <h1>Wedding Invitations</h1>
+
+  <!-- Template picker -->
+  <div class="picker" *ngIf="!selected">
+    <div class="card" *ngFor="let t of templates">
+      <img [src]="t.thumb" [alt]="t.name" />
+      <div class="card-footer">
+        <span>{{ t.name }}</span>
+        <button (click)="choose(t)">Choose</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Editor + Preview -->
+  <div class="editor" *ngIf="selected">
+    <aside class="controls">
+      <h2>Selected: {{ selected.name }}</h2>
+      <form [formGroup]="form" class="form">
+        <label> Bride
+          <input type="text" formControlName="bride" />
+        </label>
+        <label> Groom
+          <input type="text" formControlName="groom" />
+        </label>
+        <label> Date & Time
+          <input type="text" formControlName="date" />
+        </label>
+        <label> Venue
+          <input type="text" formControlName="venue" />
+        </label>
+        <label> Message
+          <textarea rows="4" formControlName="message"></textarea>
+        </label>
+        <label> Add Photo
+          <input type="file" accept="image/*" (change)="onPhotoChange($event)" />
+        </label>
+        <button type="button" (click)="selected = undefined">Change Template</button>
+        <label>
+        <button type="button" (click)="downloadCanvasPNG()">Download Invitation</button>
+        </label>
+      </form>
+    </aside>
+
+    <section class="preview">
+      <div class="canvas">
+        <img class="bg" [src]="selected.bg" alt="" />
+        <img class="photo" *ngIf="photoUrl" [src]="photoUrl" alt="Photo" />
+        <div class="text bride">{{ form.value.bride }}</div>
+        <div class="text amp">&amp;</div>
+        <div class="text groom">{{ form.value.groom }}</div>
+        <div class="text date">{{ form.value.date }}</div>
+        <div class="text venue">{{ form.value.venue }}</div>
+        <div class="text message">{{ form.value.message }}</div>
+      </div>
+    </section>
+  </div>
+</div>
