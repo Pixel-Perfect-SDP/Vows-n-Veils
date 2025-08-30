@@ -7,6 +7,8 @@ import {
 } from 'firebase/firestore';
 import { getApp } from 'firebase/app';
 import { AuthService } from '../../core/auth';
+import { RouterModule } from '@angular/router';
+import { Router } from '@angular/router';
 
 type ServiceDoc = {
   id: string;
@@ -38,7 +40,7 @@ type OrderRow = {
 @Component({
   selector: 'app-vendor-couples',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule],
   templateUrl: './vendor-couples.html',
   styleUrls: ['./vendor-couples.css'],
 })
@@ -83,7 +85,7 @@ export class VendorCouples {
     note: ['']
   });
 
-  constructor() {
+  constructor(private router: Router) {
     this.serviceTypes.forEach(t => this.expanded[t] = true);
   }
 
@@ -332,5 +334,10 @@ export class VendorCouples {
     } finally {
       this.ordering = false;
     }
+  }
+
+
+   backTohome(): void {
+  this.router.navigate(['/homepage']);
   }
 }

@@ -1,50 +1,48 @@
 <section class="vendorCouples-section">
 
-
-  <section class="vc-hero">
-    <div class="brand">
-      <img src="assets/logo.jpg" alt="Vows & Veils logo" class="logo" />
+  <section class="initial">
+    <section class="heading">
       <h1>Find your perfect vendors</h1>
       <p>Browse all available services from our vendor community.</p>
-
-      <div class="cta-row">
-        <button (click)="loadAllVendors()" [disabled]="loading">
+    </section>
+    <section class="button-group">
+    <button class="home-btn" (click)="backTohome()">
+      Back to Home
+    </button>
+      <button (click)="loadAllVendors()" [disabled]="loading">
           {{ loading ? 'Loading…' : (loaded ? 'Refresh list' : 'Show all vendors') }}
         </button>
-
-      
-        <button (click)="toggleOrders()" [disabled]="loadingOrders">
+      <button (click)="toggleOrders()" [disabled]="loadingOrders">
           {{ loadingOrders ? 'Loading…' : (showOrders ? 'Hide my orders' : 'Check my orders') }}
         </button>
-
-        <span class="count" *ngIf="loaded && totalCount">Found {{ totalCount }} services</span>
-      </div>
-
-      <p *ngIf="errorMsg" class="error">{{ errorMsg }}</p>
-    </div>
+    </section>
+    <section class="loading-container" *ngIf="loading">
+  <section class="Loading-1"></section>
+</section>
+    <section class="serviceCount" *ngIf="loaded && totalCount">{{ totalCount }} services available</section>
+  <p *ngIf="errorMsg" class="error">{{ errorMsg }}</p>
   </section>
 
 
-  <section class="vc-orders" *ngIf="showOrders">
-    <div class="order-summary" *ngIf="orders?.length">
-      <span>Showing {{ orders.length }} order(s)</span>
-    </div>
 
-    <div class="orders-list" *ngIf="orders?.length; else noOrders">
-      <div class="order-row" *ngFor="let o of orders">
-        <div class="left">
-          <div class="row1">
-            <span>{{ o.serviceName || 'Service' }}</span>
-            <span *ngIf="o.price != null">· R{{ o.price | number:'1.0-2' }}</span>
-          </div>
-          <div class="row2">
-            <span *ngIf="o.companyName">{{ o.companyName }}</span>
-            <span>· {{ o.startAt | date:'mediumDate' }} {{ o.startAt | date:'shortTime' }}–{{ o.endAt | date:'shortTime' }}</span>
-            <span>· Guests: {{ o.guestsNum }}</span>
-          </div>
-        </div>
+  <section class="my-orders" *ngIf="showOrders">
+    <section class="order-summary" *ngIf="orders?.length">
+      <h3>Showing {{ orders.length }} order(s)</h3>
+    </section>
+    <section class="orders-list" *ngIf="orders?.length; else noOrders">
+      <section class="order-card" *ngFor="let o of orders">
+        <section class="row2">
+            <p *ngIf="o.companyName">Company: {{ o.companyName }}</p>
+            <p>Date: {{ o.startAt | date:'mediumDate' }}</p>
+            <p>Time: {{ o.startAt | date:'shortTime' }}–{{ o.endAt | date:'shortTime' }}</p>
+            <p>Number of guests: {{ o.guestsNum }}</p>
+        </section>
+        <section class="card1">
+            <p>Service name: {{ o.serviceName || 'Service' }}</p>
+            <p *ngIf="o.price != null">Price: R{{ o.price | number:'1.0-2' }}</p>
+        </section>
 
-        <span
+        <p
           class="status-chip"
           [ngClass]="{
             ok: o.status === 'accepted',
@@ -52,9 +50,9 @@
             pending: o.status === 'pending',
             muted: o.status === 'cancelled'
           }"
-        >{{ o.status }}</span>
-      </div>
-    </div>
+        >{{ o.status }}</p>
+      </section>
+    </section>
 
     <ng-template #noOrders>
       <p class="orders-empty">You don’t have any orders yet. Browse vendors and send a request!</p>
@@ -64,23 +62,25 @@
   </section>
 
 
-  <section class="vc-results" *ngIf="loaded">
-    <ng-container *ngFor="let t of serviceTypes">
-      <section *ngIf="groups[t]?.length" class="vc-group">
-        <header class="vc-group-header" (click)="toggle(t)">
+ <section class="vendor-results" *ngIf="loaded">
+  <ng-container *ngFor="let t of serviceTypes">
+  
+    <section class="result-group" *ngIf="groups[t]?.length">
+      <section class="result-group-header" (click)="toggle(t)">
           <h2>{{ typeLabel(t) }}</h2>
-          <span class="pill">{{ groups[t].length }}</span>
-          <span class="chev" [class.up]="expanded[t]">▾</span>
-        </header>
+          <p class="pill">{{ groups[t].length }} options</p>
+          <p class="chev" [class.up]="expanded[t]">▾</p>
+      </section>
 
-        <div class="vc-grid" *ngIf="expanded[t]">
-          <article class="vc-card" *ngFor="let s of groups[t]; trackBy: trackById">
-            <header>
+
+        <section class="vresults-grid" *ngIf="expanded[t]">
+          <section class="vc-card" *ngFor="let s of groups[t]; trackBy: trackById">
+            <section>
               <h3>{{ s.serviceName }}</h3>
-              <div class="price" *ngIf="s.price != null">R{{ s.price | number:'1.0-2' }}</div>
-            </header>
+              <section class="price" *ngIf="s.price != null">Price: R{{ s.price | number:'1.0-2' }}</section>
+            </section>
 
-            <p class="company" *ngIf="s.companyName">{{ s.companyName }}</p>
+            <p class="company" *ngIf="s.companyName">Company: {{ s.companyName }}</p>
 
             <ul class="meta">
               <li *ngIf="s.capacity != null">Capacity: {{ s.capacity }}</li>
@@ -90,68 +90,83 @@
             <p class="desc" *ngIf="s.description">{{ s.description }}</p>
             <p class="notes" *ngIf="s.bookingNotes">{{ s.bookingNotes }}</p>
 
-            <div class="actions">
+
+            <section class="actions">
               <button class="primary" (click)="openOrder(s)">Order</button>
               <button class="secondary" disabled>View details</button>
-            </div>
-          </article>
-        </div>
+            </section>
+          </section>
+
+        </section>
+
+
+
+    </section>
+
+  </ng-container>
+
+  <p class="empty" *ngIf="!totalCount">No services yet.</p>
+ </section>
+    
+
+
+<section class="order-form" *ngIf="showOrder">
+  <section class="orders">
+    <h3>Request booking</h3>
+
+    <section class="vendor-summary" *ngIf="selectedService">
+       <section class="left">
+          <section class="name">Service name: {{ selectedService.serviceName }}</section>
+          <section class="company" *ngIf="selectedService.companyName">Company: {{ selectedService.companyName }}</section>
+          </section>
+        <section class="price" *ngIf="selectedService.price != null">Price: R{{ selectedService.price | number:'1.0-2' }}</section>
+    </section>
+
+    <form [formGroup]="orderForm" (ngSubmit)="submitOrder()">
+      <section class="event-row" *ngIf="myEventId">
+          <label>Wedding of </label>
+          <section class="event-chip"><strong>{{ myEventTitle }}</strong></section>
       </section>
-    </ng-container>
-
-    <p class="empty" *ngIf="!totalCount">No services yet.</p>
-  </section>
-
-
-  <div class="modal-backdrop" *ngIf="showOrder">
-    <div class="modal">
-      <h3>Request booking</h3>
-
-      <div class="vendor-summary" *ngIf="selectedService">
-        <div class="left">
-          <div class="name">{{ selectedService.serviceName }}</div>
-          <div class="company" *ngIf="selectedService.companyName">{{ selectedService.companyName }}</div>
-        </div>
-        <div class="price" *ngIf="selectedService.price != null">R{{ selectedService.price | number:'1.0-2' }}</div>
-      </div>
-
-      <form [formGroup]="orderForm" (ngSubmit)="submitOrder()">
-        <div class="event-row" *ngIf="myEventId">
-          <label>Event</label>
-          <div class="event-chip"><strong>{{ myEventTitle }}</strong></div>
-        </div>
-
-        <label>Date *</label>
+      <section class="eventDate">
+        <label>Date: </label>
         <input type="date" formControlName="date" />
+      </section>
 
-        <div class="row">
-          <div class="col">
-            <label>Start time *</label>
+      <section class="row">
+          <section class="col">
+            <label>Start time: </label>
             <input type="time" formControlName="startTime" />
-          </div>
-          <div class="col">
-            <label>End time *</label>
+          </section>
+          <section class="col">
+            <label>End time: </label>
             <input type="time" formControlName="endTime" />
-          </div>
-        </div>
+          </section>
+      </section>
 
-        <label>Guests *</label>
+      <section class="guests">
+        <label>Number of guests: </label>
         <input type="number" min="1" formControlName="guestsNum" placeholder="e.g. 120" />
+      </section>
 
-        <label>Notes</label>
+      <section class="vendorNotes">
+        <label>Notes for the vendor: </label>
         <textarea rows="3" formControlName="note" placeholder="Anything the vendor should know?"></textarea>
+      </section>
 
-        <div class="actions">
+      <section class="actions">
           <button type="button" class="secondary" (click)="closeOrder()" [disabled]="ordering">Cancel</button>
           <button type="submit" [disabled]="orderForm.invalid || ordering">
             {{ ordering ? 'Sending…' : 'Send request' }}
           </button>
-        </div>
+      </section>
 
         <p class="error" *ngIf="orderError">{{ orderError }}</p>
         <p class="success" *ngIf="orderSuccess">{{ orderSuccess }}</p>
-      </form>
-    </div>
-  </div>
+
+    </form>
+
+  </section>
+</section>
+  
 
 </section>
