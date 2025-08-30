@@ -23,7 +23,6 @@ export class Homepage {
   //db = inject(Firestore);
   auth = inject(AuthService);
   private formBuild = inject(FormBuilder);
-  
   //New: Data service
   private dataService = inject(DataService);
 
@@ -80,7 +79,13 @@ export class Homepage {
       if (docSnap.exists()) {
         this.hasEvent = true;
         this.eventData = docSnap.data();
-      } else {
+
+        //countdown
+        this.updateCountdown();
+        this.countDownInerval=setInterval(()=>this.updateCountdown(),60000)
+
+      } else
+      {
         this.hasEvent = false;
         this.eventData = null;
       }
@@ -90,6 +95,11 @@ export class Homepage {
       this.hasEvent = false;
       this.eventData = null;
     }
+  }
+
+  ngOnDestroy()
+  {
+    if (this.countDownInerval) clearInterval(this.countDownInerval);
   }
 
 
@@ -189,6 +199,20 @@ export class Homepage {
     Song: ['']
   });
 
+
+  // open/close form
+  toggleAddGuest() {
+    this.showAddGuest = !this.showAddGuest;
+    if (!this.showAddGuest) this.addGuestForm.reset({ RSVPstatus: 'true' });
+  }
+
+  async submitAddGuest() {
+    if (this.addGuestForm.invalid) return;
+
+    const user = await this.waitForUser();
+    if (!user) return;
+
+
   // open/close form
   toggleAddGuest() {
     this.showAddGuest = !this.showAddGuest;
@@ -275,8 +299,6 @@ export class Homepage {
 
   }//createEvent
 
-
-  
   logout(): void {
     signOut(auth)
       .then(() => {
@@ -289,5 +311,62 @@ export class Homepage {
       .catch((error) => {
         console.error('Error signing out:', error);
       });
+  }
+
+
+  // doing the countdown
+
+  months:number=0;
+  days:number=0;
+  hours:number=0;
+  minutes:number=0;
+
+  private countDownInerval: any;
+
+  private updateCountdown()
+  {
+    if (!this.eventData?.Date_Time) return;
+
+    const eventTime= this.eventData.Date_Time.toDate() ? this.eventData.Date_Time.toDate() : this.eventData.Date_Time;
+    const now = new Date();
+
+    if (eventTime <= now)
+    {
+      this.months= this.days=this.hours=this.minutes=0;
+      return;
+    }
+
+    let yearDiff= eventTime.getFullYear()- now.getFullYear();
+    let monthsDiff = eventTime.getMonth() - now.getMonth() + yearDiff*12;
+    let daysDiff = eventTime.getDate()-now.getDate();
+    let hoursDiff = eventTime.getHours() - now.getHours();
+    let minDiff = eventTime.getMinutes() - now.getMinutes();
+
+    // if the any values are negative
+
+    if (minDiff <0)
+    {
+      minDiff+=60;
+      hoursDiff-=1;
+    }
+
+    if (hoursDiff <0)
+    {
+      hoursDiff+=24;
+      daysDiff-=1;
+    }
+
+    if(daysDiff <0)
+    {
+      const lastMonth = new Date(now.getFullYear(), now.getMonth()+1,0).getDate();
+      daysDiff+=lastMonth;
+      monthsDiff-=1;
+    }
+
+    this.months = monthsDiff;
+    this.days = daysDiff;
+    this.hours = hoursDiff;
+    this.minutes = minDiff;
+
   }
  }
