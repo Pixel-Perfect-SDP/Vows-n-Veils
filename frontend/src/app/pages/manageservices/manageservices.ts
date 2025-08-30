@@ -10,6 +10,8 @@ import { getApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
 import { AuthService } from '../../core/auth';
+import { auth } from '../firebase/firebase-config';
+import { signOut } from 'firebase/auth';
 
 @Component({
   selector: 'app-manageservices',
@@ -116,5 +118,18 @@ export class Manageservices {
       console.error('Error adding document: ', e);
       alert('Error creating your Venue Company.');
     }
+  }
+
+
+  logout(): void {
+    signOut(auth)
+      .then(() => {
+        console.log('User signed out successfully');
+        // Clear any stored user info in your component if needed
+        this.router.navigate(['/landing']);
+      })
+      .catch((error) => {
+        console.error('Error signing out:', error);
+      });
   }
 }
