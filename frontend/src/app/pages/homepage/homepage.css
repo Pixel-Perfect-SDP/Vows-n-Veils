@@ -881,8 +881,9 @@
 /*countdown things */
 .countdown
 {
+  display: flex;
   justify-content: center;
-  gap: 30px;
+  gap: 5px;
   margin-top: 20px 0; /* small space below the welcome text */
 }
 
@@ -903,9 +904,32 @@
 {
   font-size: 1.2rem;
   margin: 0;
+  text-align: center;
+  color:rgba(0,0,0,0.6);;
 }
 
 .countHead
 {
   text-align: center;
+}
+
+.countBox
+{
+  border: 1px solid rgba(197, 126, 109, 0.6);
+  height: 15vw;
+  width: 15vw;
+  border-radius: 25px;
+  display :flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.divider
+{
+  width: 50%;
+  border:0;
+  border-top: 1px solid rgba(0,0,0,0.3);
+  margin: 5px 0;
 }
