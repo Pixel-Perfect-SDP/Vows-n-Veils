@@ -1,26 +1,22 @@
 <section class="vendorsCompany-section">
 
-  <!-- Loading -->
+  
   <section class="loading-container" *ngIf="hasVendorCompany === null">
     <section class="Loading-1"></section>
     <section class="Loading-2"></section>
   </section>
 
-  <!-- If vendor company exists -->
+ 
   <section class="has-vendor-company" *ngIf="hasVendorCompany && companyVendorData">
     <nav class="sidebar">
       <section class="sidebar-header">
         <img src="assets/logo.jpg" alt="Vows & Veils logo" class="logo" />
         <h1>Vows & Veils</h1>
       </section>
-
-      <!-- actions -->
       <button (click)="toggleServiceForm()">
         {{ showServiceForm ? 'Close' : 'Add service' }}
       </button>
       <button (click)="refreshServices()">Refresh</button>
-      <button disabled>Delete service</button>
-      <button disabled>Track orders</button>
     </nav>
 
     <section class="vendor-company-details">
@@ -28,11 +24,11 @@
     </section>
   </section>
 
-  <!-- Services area -->
+
   <section class="services" *ngIf="hasVendorCompany && companyVendorData">
     <h3>My services:</h3>
 
-    <!-- Add Service form (uses existing .vendor-company-form styles) -->
+ 
     <section class="vendor-company-form" *ngIf="showServiceForm">
       <form [formGroup]="serviceForm" (ngSubmit)="addService()">
         <label>Service name *</label>
@@ -68,13 +64,14 @@
       </form>
     </section>
 
-    <!-- Services list -->
+  
     <div *ngIf="loadingServices" style="color:#6b7280">Loading services…</div>
     <div *ngIf="!loadingServices && services.length === 0" style="color:#6b7280">
       No services yet — add your first one.
     </div>
 
-    <div *ngIf="services.length > 0" style="overflow:auto; background:#fff; border-radius:12px; box-shadow:0 6px 20px rgba(0,0,0,0.08);">
+    <div *ngIf="services.length > 0"
+         style="overflow:auto; background:#fff; border-radius:12px; box-shadow:0 6px 20px rgba(0,0,0,0.08);">
       <table style="width:100%; border-collapse:collapse">
         <thead>
           <tr style="text-align:left; border-bottom:1px solid #e5e7eb">
@@ -106,9 +103,71 @@
         </tbody>
       </table>
     </div>
+
+ 
+    <h3 style="margin-top:28px">Incoming orders</h3>
+
+    <div *ngIf="loadingOrders" style="color:#6b7280">Loading orders…</div>
+    <div *ngIf="!loadingOrders && orders.length === 0" style="color:#6b7280">
+      No orders yet.
+    </div>
+
+    <div *ngIf="orders.length > 0"
+         style="overflow:auto; background:#fff; border-radius:12px; box-shadow:0 6px 20px rgba(0,0,0,0.08);">
+      <table style="width:100%; border-collapse:collapse">
+        <thead>
+          <tr style="text-align:left; border-bottom:1px solid #e5e7eb">
+            <th style="padding:12px">Placed</th>
+            <th style="padding:12px">Service</th>
+            <th style="padding:12px">Guests</th>
+            <th style="padding:12px">Date</th>
+            <th style="padding:12px">Time</th>
+            <th style="padding:12px">Notes</th>
+            <th style="padding:12px">Status</th>
+            <th style="padding:12px">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let o of orders; trackBy: trackById" style="border-bottom:1px solid #f3f4f6">
+            <td style="padding:12px">{{ o.createdAtDate || o.startAtDate | date:'MMM d, y, h:mm a' }}</td>
+            <td style="padding:12px">{{ getServiceName(o.vendorID) }}</td>
+            <td style="padding:12px">{{ o.guestsNum }}</td>
+            <td style="padding:12px">{{ o.startAtDate | date:'MMM d, y' }}</td>
+            <td style="padding:12px">{{ o.startAtDate | date:'shortTime' }} – {{ o.endAtDate | date:'shortTime' }}</td>
+            <td style="padding:12px; max-width:280px;">
+              <span style="white-space:pre-wrap">{{ o.note || '—' }}</span>
+            </td>
+            <td style="padding:12px">
+              <span [ngStyle]="{
+                    background: o.status==='pending' ? '#FEF3C7'
+                              : o.status==='accepted' ? '#DCFCE7'
+                              : o.status==='declined' ? '#FEE2E2'
+                              : '#E5E7EB',
+                    color: '#111827',
+                    padding: '2px 8px',
+                    'border-radius': '999px',
+                    'font-size': '12px'
+                  }">
+                {{ o.status }}
+              </span>
+            </td>
+            <td style="padding:12px; display:flex; gap:8px;">
+              <button (click)="acceptOrder(o)" [disabled]="!canAct(o) || orderBusyId===o.id">
+                {{ orderBusyId===o.id && orderBusyAction==='accept' ? 'Accepting…' : 'Accept' }}
+              </button>
+              <button (click)="declineOrder(o)" [disabled]="!canAct(o) || orderBusyId===o.id">
+                {{ orderBusyId===o.id && orderBusyAction==='decline' ? 'Declining…' : 'Decline' }}
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p *ngIf="errorMsg" style="color:#b45353;margin-top:12px">{{ errorMsg }}</p>
   </section>
 
-  <!-- If no vendor company -->
+
   <section class="create-vendor-company" *ngIf="hasVendorCompany === false">
     <section class="vendor-company-card">
       <img src="assets/logo.jpg" alt="Vows & Veils logo" class="logo" />
