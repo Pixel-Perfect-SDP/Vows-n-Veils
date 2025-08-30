@@ -8,6 +8,8 @@ import { getFirestore } from 'firebase/firestore';
 import { getApp } from 'firebase/app';
 import { FormGroup, FormControl, FormsModule } from '@angular/forms';
 import { DataService, Guest } from '../../core/data.service';
+import { auth } from '../firebase/firebase-config';
+import { signOut } from 'firebase/auth';
 
 @Component({
   selector: 'app-homepage',
@@ -272,4 +274,20 @@ export class Homepage {
 
 
   }//createEvent
+
+
+  
+  logout(): void {
+    signOut(auth)
+      .then(() => {
+        console.log('User signed out successfully');
+        // Clear any stored user info in your component if needed
+        this.hasEvent = null;
+        this.eventData = null;
+        this.router.navigate(['/landing']);
+      })
+      .catch((error) => {
+        console.error('Error signing out:', error);
+      });
+  }
  }

@@ -22,11 +22,19 @@
           <a href="#" [class.active]="activeTab==='guests'" (click)="switchToGuests($event)">Guest List</a>
         </li>
         <li><a routerLink="/invitations" routerLinkActive="active">Invitations</a></li>
-        <li><a routerLink="/venues-couples" routerLinkActive="active">Venues</a></li>
+        <li><a routerLink="/venues" routerLinkActive="active">Venues</a></li>
         <li><a routerLink="/vendors-couples" routerLinkActive="active">Vendors</a></li>
-      </ul>
+        <li class="LogOut"><a (click)="logout()">Log out</a></li>
+      </ul>      
     </nav>
-
+    
+  <!-- might need to change or remove -->
+  <section class="event-details">
+    <p class="names">Welcome, {{ eventData.Name1 }} and {{ eventData.Name2 }}</p>
+  </section>
+    
+    
+    
     <!-- Main content column -->
     <div class="main">
 

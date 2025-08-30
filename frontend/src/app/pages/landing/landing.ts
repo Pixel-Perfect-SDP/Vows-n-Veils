@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../core/auth';
 import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
 
@@ -18,7 +18,7 @@ export class Landing {
 
   companiesPopup=false;
 
-  constructor(public auth: AuthService) {}
+  constructor(public auth: AuthService, private router:Router) {}
 
   async loadRecent() {
     this.loading = true;
@@ -35,4 +35,27 @@ export class Landing {
     toggleCompaniesPopup() {
     this.companiesPopup = !this.companiesPopup;
   }
+
+  //sign in with google for different user roles
+    async signInAndRedirect(path: string) {
+      try {
+        await this.auth.signInWithGoogle();
+        console.log('Google login successful');
+        this.router.navigateByUrl(path);
+      } catch (error) {
+        console.error('Google login failed', error);
+      }
+    }
+
+    onGoogleVendor() {
+      this.signInAndRedirect('/vendors-company');
+    }
+
+    onGoogleVenue() {
+      this.signInAndRedirect('/manageservices');
+    }
+
+    onGoogleAdmin() {
+      this.signInAndRedirect('/landing');
+    }
 }

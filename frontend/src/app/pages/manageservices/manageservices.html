@@ -1,0 +1,55 @@
+<section class="manageservices-section">
+
+  <!-- Loading -->
+<section class="loading-container" *ngIf="hasVenueCompany === null">
+<section class="Loading-1"></section>
+<section class="Loading-2"></section>
+  </section>
+
+  <!-- If venue company exists -->
+  <section class="has-venue-company" *ngIf="hasVenueCompany && companyVenueData">
+    <nav class="sidebar">
+      <section class="sidebar-header">
+        <img src="assets/logo.jpg" alt="Vows & Veils logo" class="logo" />
+        <h1>Vows & Veils</h1>
+      </section>
+
+      <!-- actions -->
+      <button disabled>Track orders</button>
+    </nav>
+
+    <section class="venue-company-details">
+      <p class="company-name">Welcome, {{ companyVenueData.companyName }}</p>
+    </section>
+  </section>
+
+  <!-- Services area -->
+  <section class="services" *ngIf="hasVenueCompany && companyVenueData">
+    <h3>My services:</h3>
+  </section>
+
+  <!-- If no vendor company -->
+  <section class="create-venue-company" *ngIf="hasVenueCompany === false">
+    <section class="venue-company-card">
+      <img src="assets/logo.jpg" alt="Vows & Veils logo" class="logo" />
+      <h2>Join as a venue company</h2>
+      <p>Fill in the details below to get started!</p>
+    </section>
+
+    <section class="venue-company-form">
+      <form [formGroup]="form" (ngSubmit)="createVenueCompany()">
+        <label>Company Name:</label>
+        <input formControlName="companyName" />
+
+        <label>Contact Email:</label>
+        <input type="email" formControlName="companyEmail" />
+
+        <label>Phone Number:</label>
+        <input formControlName="companyNumber" />
+
+        <button type="submit" [disabled]="form.invalid">Create venue account</button>
+      </form>
+    </section>
+  </section>
+
+</section>

@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router,RouterModule } from '@angular/router';
 import { collection, query, where, getDocs, updateDoc, doc } from 'firebase/firestore';
 import { auth, db } from '../firebase/firebase-config';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -23,7 +23,7 @@ interface Venue {
 @Component({
   selector: 'app-venues',
   standalone: true,
-  imports: [CommonModule, HttpClientModule],
+  imports: [CommonModule,RouterModule, HttpClientModule],
   templateUrl: './venues.html',
   styleUrls: ['./venues.css']
 })
