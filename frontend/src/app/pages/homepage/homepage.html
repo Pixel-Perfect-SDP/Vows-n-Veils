@@ -47,37 +47,96 @@
         <!-- your overview content -->
       </section>
 
-      <!-- Guest list panel -->
+      <!---------Guest list panel----------->
       <section class="content" *ngIf="activeTab==='guests'">
         <h2 class="sr-only">Guest List</h2>
 
         <!-- your filters row stays above -->
         <div class="filters-row">
-          <div class="filter">
-            <label>Dietary</label>
-            <select [(ngModel)]="selectedDietary" (change)="onFiltersChange()">
-              <option [ngValue]="null">All</option>
-              <option *ngFor="let d of dietaryOptions" [value]="d">{{ d }}</option>
-            </select>
-          </div>
+          <div class = "filter-group">
+            <div class="filter">
+              <label>Dietary</label>
+              <select [(ngModel)]="selectedDietary" (change)="onFiltersChange()">
+                <option [ngValue]="null">All</option>
+                <option *ngFor="let d of dietaryOptions" [value]="d">{{ d }}</option>
+              </select>
+            </div>
 
-          <div class="filter">
-            <label>Allergies</label>
-            <select [(ngModel)]="selectedAllergy" (change)="onFiltersChange()">
-              <option [ngValue]="null">All</option>
-              <option *ngFor="let a of allergyOptions" [value]="a">{{ a }}</option>
-            </select>
-          </div>
+            <div class="filter">
+              <label>Allergies</label>
+              <select [(ngModel)]="selectedAllergy" (change)="onFiltersChange()">
+                <option [ngValue]="null">All</option>
+                <option *ngFor="let a of allergyOptions" [value]="a">{{ a }}</option>
+              </select>
+            </div>
 
-          <div class="filter">
-            <label>RSVP</label>
-            <select [(ngModel)]="selectedRsvp" (change)="onFiltersChange()">
-              <option value="all">All</option>
-              <option value="true">Attending</option>
-              <option value="false">Not Attending</option>
-            </select>
+            <div class="filter">
+              <label>RSVP</label>
+              <select [(ngModel)]="selectedRsvp" (change)="onFiltersChange()">
+                <option value="all">All</option>
+                <option value="true">Attending</option>
+                <option value="false">Not Attending</option>
+              </select>
+            </div>
+          </div> 
+
+          <div class="addGuest">
+            <button type="button" class="btn" (click)="toggleAddGuest()">
+              {{ showAddGuest ? 'Close' : 'Add Guest' }}
+            </button>
           </div>
         </div>
+
+        <!-- Actions row -->
+        
+
+        <!-- Add Guest Card -->
+        <div class="add-card" *ngIf="showAddGuest">
+          <form [formGroup]="addGuestForm" (ngSubmit)="submitAddGuest()">
+            <div class="form-grid">
+              <label>
+                <span>Name *</span>
+                <input formControlName="Name" placeholder="Full name" />
+              </label>
+
+              <label>
+                <span>Email *</span>
+                <input formControlName="Email" type="email" placeholder="email@example.com" />
+              </label>
+
+              <label>
+                <span>Dietary</span>
+                <input formControlName="Dietary" placeholder="e.g. Vegan" />
+              </label>
+
+              <label>
+                <span>Allergies</span>
+                <input formControlName="Allergies" placeholder="e.g. Peanuts" />
+              </label>
+
+              <label>
+                <span>RSVP</span>
+                <select formControlName="RSVPstatus">
+                  <option value="true">Attending</option>
+                  <option value="false">Not Attending</option>
+                </select>
+              </label>
+
+              <label class="grid-span-2">
+                <span>Song request</span>
+                <input formControlName="Song" placeholder="Favorite song" />
+              </label>
+            </div>
+
+            <div class="add-card-actions">
+              <button type="button" class="btn btn-secondary" (click)="toggleAddGuest()">Cancel</button>
+              <button type="submit" class="btn btn-primary" [disabled]="addGuestForm.invalid || guestsLoading">
+                Save Guest
+              </button>
+            </div>
+          </form>
+        </div>
+
 
         <!-- Card -->
         <div class="table-card">

@@ -449,11 +449,24 @@
 
 .filters-row {
   display: flex;
+  justify-content: space-between; /* push button to the right */
+  align-items: flex-end; /* optional: align button with selects */
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.filter-group {
+  display: flex;
   gap: 12px;
-  align-items: flex-end;
-  margin: 8px 0 16px;
   flex-wrap: wrap;
 }
+
+.filter {
+  display: flex;
+  flex-direction: column;
+  margin-right: 8px;
+}
+
 .filter label {
   display: block;
   font-weight: 600;
@@ -601,6 +614,61 @@
   .table-header { padding: 12px; }
   .guest-table thead th, .guest-table tbody td { padding: 10px 12px; }
   .td-clip { max-width: 160px; }
+}
+
+.addGuest {
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
+  margin: 8px 0 12px;
+}
+
+.btn {
+  border: 1px solid var(--line);
+  background: #fff;
+  padding: 8px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.btn:hover { background: #f7f3ef; }
+.btn-primary { background: var(--accent); }
+.btn-secondary { background: #f3f1ef; }
+
+.add-card {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: #fff;
+  padding: 16px;
+  margin: 8px 0 16px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 12px;
+}
+
+.form-grid label { display: flex; flex-direction: column; gap: 6px; }
+.form-grid input, .form-grid select {
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+}
+.grid-span-2 { grid-column: span 2; }
+
+.add-card-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+@media (max-width: 720px) {
+  .form-grid { grid-template-columns: 1fr; }
+  .grid-span-2 { grid-column: span 1; }
 }
 
 

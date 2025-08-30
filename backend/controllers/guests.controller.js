@@ -52,3 +52,39 @@ exports.getGuestFilterOptions = async (req, res) => {
     return res.status(500).json({ message: 'Failed to fetch filter options' });
   }
 };
+
+//adds guest to db
+exports.createGuestForEvent = async (req, res) => {
+  try {
+    const { eventId } = req.params;
+    const { Name, Email, Dietary, Allergies, RSVPstatus, Song } = req.body || {};
+
+    if (!Name || !Email) {
+      return res.status(400).json({ message: 'Name and Email are required.' });
+    }
+
+    // normalize types
+    const rsvpBool =
+      typeof RSVPstatus === 'boolean'
+        ? RSVPstatus
+        : String(RSVPstatus).toLowerCase() === 'true';
+
+    const payload = {
+      Name: String(Name).trim(),
+      Email: String(Email).trim(),
+      Dietary: Dietary ? String(Dietary).trim() : '',
+      Allergies: Allergies ? String(Allergies).trim() : '',
+      RSVPstatus: rsvpBool,
+      Song: Song ? String(Song).trim() : '',
+      EventID: eventId
+    };
+
+    const ref = await db.collection('Guests').add(payload);
+
+    const saved = await ref.get();
+    return res.status(201).json({ id: ref.id, ...saved.data() });
+  } catch (err) {
+    console.error('Error creating guest:', err);
+    return res.status(500).json({ message: 'Failed to create guest' });
+  }
+};

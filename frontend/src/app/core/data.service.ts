@@ -20,6 +20,15 @@ export interface GuestFiltersResponse {
   allergies: string[];
 }
 
+export interface CreateGuestDto {
+  Name: string;
+  Email: string;
+  Dietary?: string;
+  Allergies?: string;
+  RSVPstatus?: boolean;
+  Song?: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class DataService {
   private apiUrl = environment.apiUrl;
@@ -47,5 +56,10 @@ export class DataService {
   //GET /events/:eventID/guest-filters
   getGuestFilterOptions(eventId: string): Observable<GuestFiltersResponse> {
     return this.http.get<GuestFiltersResponse>(`${this.apiUrl}/events/${eventId}/guest-filters`);
+  }
+
+  //POST //events/:eventID/guests
+  postGuest(eventId: string, guest: CreateGuestDto): Observable<Guest> {
+    return this.http.post<Guest>(`${this.apiUrl}/events/${eventId}/guests`, guest);
   }
 }

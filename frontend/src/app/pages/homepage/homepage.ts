@@ -88,7 +88,6 @@ export class Homepage {
       this.hasEvent = false;
       this.eventData = null;
     }
-    
   }
 
 
@@ -172,6 +171,62 @@ export class Homepage {
       this.guestsError = e?.message ?? 'Unexpected error loading guests';
       this.guestsLoading = false;
     }
+  }
+
+  /*------------ADD guests-------------*/
+  // UI toggle
+  showAddGuest = false;
+
+  // form for new guest
+  addGuestForm = this.formBuild.group({
+    Name: ['', [Validators.required]],
+    Email: ['', [Validators.required, Validators.email]],
+    Dietary: ['None'],
+    Allergies: ['None'],
+    RSVPstatus: ['true'],            // default to attending (string here, convert later)
+    Song: ['']
+  });
+
+  // open/close form
+  toggleAddGuest() {
+    this.showAddGuest = !this.showAddGuest;
+    if (!this.showAddGuest) this.addGuestForm.reset({ RSVPstatus: 'true' });
+  }
+
+  async submitAddGuest() {
+    if (this.addGuestForm.invalid) return;
+
+    const user = await this.waitForUser();
+    if (!user) return;
+
+    const eventId = user.uid;
+    const raw = this.addGuestForm.getRawValue();
+
+    const dto = {
+      Name: raw.Name?.trim() ?? '',
+      Email: raw.Email?.trim() ?? '',
+      Dietary: raw.Dietary?.trim() ?? 'None',
+      Allergies: raw.Allergies?.trim() ?? 'None',
+      RSVPstatus: String(raw.RSVPstatus).toLowerCase() === 'true',
+      Song: raw.Song?.trim() ?? ''
+    };
+
+    // optimistic UX: disable form with a quick flag
+    this.guestsLoading = true;
+    this.dataService.postGuest(eventId, dto).subscribe({
+      next: async () => {
+        // refresh table + dynamic filter options
+        await this.loadGuests();
+        await this.loadGuestFilterOptions();
+        this.toggleAddGuest(); // close + reset
+        this.guestsLoading = false;
+      },
+      error: (err) => {
+        console.error('Failed to create guest', err);
+        this.guestsLoading = false;
+        this.guestsError = 'Failed to create guest';
+      }
+    });
   }
 
 
