@@ -1,1 +1,157 @@
-<p>vendor-couples works!</p>
+<section class="vendorCouples-section">
+
+
+  <section class="vc-hero">
+    <div class="brand">
+      <img src="assets/logo.jpg" alt="Vows & Veils logo" class="logo" />
+      <h1>Find your perfect vendors</h1>
+      <p>Browse all available services from our vendor community.</p>
+
+      <div class="cta-row">
+        <button (click)="loadAllVendors()" [disabled]="loading">
+          {{ loading ? 'Loading…' : (loaded ? 'Refresh list' : 'Show all vendors') }}
+        </button>
+
+      
+        <button (click)="toggleOrders()" [disabled]="loadingOrders">
+          {{ loadingOrders ? 'Loading…' : (showOrders ? 'Hide my orders' : 'Check my orders') }}
+        </button>
+
+        <span class="count" *ngIf="loaded && totalCount">Found {{ totalCount }} services</span>
+      </div>
+
+      <p *ngIf="errorMsg" class="error">{{ errorMsg }}</p>
+    </div>
+  </section>
+
+
+  <section class="vc-orders" *ngIf="showOrders">
+    <div class="order-summary" *ngIf="orders?.length">
+      <span>Showing {{ orders.length }} order(s)</span>
+    </div>
+
+    <div class="orders-list" *ngIf="orders?.length; else noOrders">
+      <div class="order-row" *ngFor="let o of orders">
+        <div class="left">
+          <div class="row1">
+            <span>{{ o.serviceName || 'Service' }}</span>
+            <span *ngIf="o.price != null">· R{{ o.price | number:'1.0-2' }}</span>
+          </div>
+          <div class="row2">
+            <span *ngIf="o.companyName">{{ o.companyName }}</span>
+            <span>· {{ o.startAt | date:'mediumDate' }} {{ o.startAt | date:'shortTime' }}–{{ o.endAt | date:'shortTime' }}</span>
+            <span>· Guests: {{ o.guestsNum }}</span>
+          </div>
+        </div>
+
+        <span
+          class="status-chip"
+          [ngClass]="{
+            ok: o.status === 'accepted',
+            bad: o.status === 'declined',
+            pending: o.status === 'pending',
+            muted: o.status === 'cancelled'
+          }"
+        >{{ o.status }}</span>
+      </div>
+    </div>
+
+    <ng-template #noOrders>
+      <p class="orders-empty">You don’t have any orders yet. Browse vendors and send a request!</p>
+    </ng-template>
+
+    <p class="error" *ngIf="ordersError">{{ ordersError }}</p>
+  </section>
+
+
+  <section class="vc-results" *ngIf="loaded">
+    <ng-container *ngFor="let t of serviceTypes">
+      <section *ngIf="groups[t]?.length" class="vc-group">
+        <header class="vc-group-header" (click)="toggle(t)">
+          <h2>{{ typeLabel(t) }}</h2>
+          <span class="pill">{{ groups[t].length }}</span>
+          <span class="chev" [class.up]="expanded[t]">▾</span>
+        </header>
+
+        <div class="vc-grid" *ngIf="expanded[t]">
+          <article class="vc-card" *ngFor="let s of groups[t]; trackBy: trackById">
+            <header>
+              <h3>{{ s.serviceName }}</h3>
+              <div class="price" *ngIf="s.price != null">R{{ s.price | number:'1.0-2' }}</div>
+            </header>
+
+            <p class="company" *ngIf="s.companyName">{{ s.companyName }}</p>
+
+            <ul class="meta">
+              <li *ngIf="s.capacity != null">Capacity: {{ s.capacity }}</li>
+              <li *ngIf="s.status">Status: <span class="status">{{ s.status }}</span></li>
+            </ul>
+
+            <p class="desc" *ngIf="s.description">{{ s.description }}</p>
+            <p class="notes" *ngIf="s.bookingNotes">{{ s.bookingNotes }}</p>
+
+            <div class="actions">
+              <button class="primary" (click)="openOrder(s)">Order</button>
+              <button class="secondary" disabled>View details</button>
+            </div>
+          </article>
+        </div>
+      </section>
+    </ng-container>
+
+    <p class="empty" *ngIf="!totalCount">No services yet.</p>
+  </section>
+
+
+  <div class="modal-backdrop" *ngIf="showOrder">
+    <div class="modal">
+      <h3>Request booking</h3>
+
+      <div class="vendor-summary" *ngIf="selectedService">
+        <div class="left">
+          <div class="name">{{ selectedService.serviceName }}</div>
+          <div class="company" *ngIf="selectedService.companyName">{{ selectedService.companyName }}</div>
+        </div>
+        <div class="price" *ngIf="selectedService.price != null">R{{ selectedService.price | number:'1.0-2' }}</div>
+      </div>
+
+      <form [formGroup]="orderForm" (ngSubmit)="submitOrder()">
+        <div class="event-row" *ngIf="myEventId">
+          <label>Event</label>
+          <div class="event-chip"><strong>{{ myEventTitle }}</strong></div>
+        </div>
+
+        <label>Date *</label>
+        <input type="date" formControlName="date" />
+
+        <div class="row">
+          <div class="col">
+            <label>Start time *</label>
+            <input type="time" formControlName="startTime" />
+          </div>
+          <div class="col">
+            <label>End time *</label>
+            <input type="time" formControlName="endTime" />
+          </div>
+        </div>
+
+        <label>Guests *</label>
+        <input type="number" min="1" formControlName="guestsNum" placeholder="e.g. 120" />
+
+        <label>Notes</label>
+        <textarea rows="3" formControlName="note" placeholder="Anything the vendor should know?"></textarea>
+
+        <div class="actions">
+          <button type="button" class="secondary" (click)="closeOrder()" [disabled]="ordering">Cancel</button>
+          <button type="submit" [disabled]="orderForm.invalid || ordering">
+            {{ ordering ? 'Sending…' : 'Send request' }}
+          </button>
+        </div>
+
+        <p class="error" *ngIf="orderError">{{ orderError }}</p>
+        <p class="success" *ngIf="orderSuccess">{{ orderSuccess }}</p>
+      </form>
+    </div>
+  </div>
+
+</section>
