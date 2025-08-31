@@ -9,7 +9,7 @@ const options = {
       description: 'API docs for venues/events/guests',
     },
     servers: [
-      { url: process.env.PUBLIC_API_URL || 'http://localhost:3000', description: 'default' },
+      { url: process.env.PUBLIC_API_URL || 'https://site--vowsandveils--5dl8fyl4jyqm.code.run/api-docs/', description: 'default' },
     ],
   },
 apis: [__dirname + '/routes/*.js']
