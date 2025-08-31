@@ -47,7 +47,7 @@ jobs:
         with:
           app-name: 'vows-n-veils'
           slot-name: 'Production'
-          package: .
+          package: backend
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_6A566639885F4EC0BE516E1D82B9F385 }}
 
 
