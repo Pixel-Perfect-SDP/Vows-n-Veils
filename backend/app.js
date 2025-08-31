@@ -1,5 +1,7 @@
 const express = require('express');
 const cors = require('cors');
+const swaggerUi = require('swagger-ui-express');
+const { specs } = require('./swagger-config'); 
 const app = express();
 
 const allowedOrigins = [
@@ -20,6 +22,7 @@ app.use(cors({
 }));
 app.use(express.json());
 
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, { explorer: true }));
 
 // API Routes
 const venueRoutes = require('./routes/venues.routes');
