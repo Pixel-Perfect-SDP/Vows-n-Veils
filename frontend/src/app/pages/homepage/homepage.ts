@@ -193,18 +193,18 @@ export class Homepage
   // form for new guest
   addGuestForm = this.formBuild.group({
     Name: ['', [Validators.required]],
-    Email: ['', [Validators.required, Validators.email]],
-    Dietary: ['None'],
-    Allergies: ['None'],
-    RSVPstatus: ['true'],            // default to attending (string here, convert later)
-    Song: ['']
+    //Email: ['', [Validators.required, Validators.email]],
+    //Dietary: ['None'],
+    //Allergies: ['None'],
+    //RSVPstatus: ['true'],            // default to attending (string here, convert later)
+    //Song: ['']
   });
 
 
   // open/close form
   toggleAddGuest() {
     this.showAddGuest = !this.showAddGuest;
-    if (!this.showAddGuest) this.addGuestForm.reset({ RSVPstatus: 'true' });
+    if (!this.showAddGuest) this.addGuestForm.reset({ Name: '' }); //was RSVPstatus,'true'
   }
 
   async submitAddGuest()
@@ -218,12 +218,12 @@ export class Homepage
     const raw = this.addGuestForm.getRawValue();
 
     const dto = {
-      Name: raw.Name?.trim() ?? '',
-      Email: raw.Email?.trim() ?? '',
-      Dietary: raw.Dietary?.trim() ?? 'None',
-      Allergies: raw.Allergies?.trim() ?? 'None',
-      RSVPstatus: String(raw.RSVPstatus).toLowerCase() === 'true',
-      Song: raw.Song?.trim() ?? ''
+      Name: raw.Name?.trim() ?? ''
+     // Email: raw.Email?.trim() ?? '',
+      //Dietary: raw.Dietary?.trim() ?? 'None',
+      //Allergies: raw.Allergies?.trim() ?? 'None',
+      //RSVPstatus: String(raw.RSVPstatus).toLowerCase() === 'true',
+      //Song: raw.Song?.trim() ?? ''
     };
 
     // optimistic UX: disable form with a quick flag
