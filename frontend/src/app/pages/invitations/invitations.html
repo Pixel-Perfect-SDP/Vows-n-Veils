@@ -1,39 +1,42 @@
-<div class="page">
+<section class="invitations-section">
   <button class="btn-homepage" (click)="backTohome()">Back to Homepage</button>
-  <h1>Wedding Invitations</h1>
+  <section class="header">
+     <h1>Wedding Invitations</h1>
+  </section>
+  
 
   <!-- Template picker -->
-  <div class="picker" *ngIf="!selected">
-    <div class="card" *ngFor="let t of templates">
+  <section class="picker" *ngIf="!selected">
+    <section class="card" *ngFor="let t of templates">
       <img [src]="t.thumb" [alt]="t.name" />
-      <div class="card-footer">
-        <span>{{ t.name }}</span>
+      <section class="card-footer">
+        <p>{{ t.name }}</p>
         <button (click)="choose(t)">Choose</button>
-      </div>
-    </div>
-  </div>
+      </section>
+    </section>
+  </section>
 
   <!-- Editor + Preview -->
-  <div class="editor" *ngIf="selected">
+  <section class="editor" *ngIf="selected">
     <aside class="controls">
       <h2>Selected: {{ selected.name }}</h2>
       <form [formGroup]="form" class="form">
-        <label> Bride
+        <label> Bride:
           <input type="text" formControlName="bride" />
         </label>
-        <label> Groom
+        <label> Groom:
           <input type="text" formControlName="groom" />
         </label>
-        <label> Date & Time
+        <label> Date & Time:
           <input type="text" formControlName="date" />
         </label>
-        <label> Venue
+        <label> Venue:
           <input type="text" formControlName="venue" />
         </label>
-        <label> Message
+        <label> Message:
           <textarea rows="4" formControlName="message"></textarea>
         </label>
-        <label> Add Photo
+        <label> Add Photo:
           <input type="file" accept="image/*" (change)="onPhotoChange($event)" />
         </label>
         <button type="button" (click)="selected = undefined">Change Template</button>
@@ -44,17 +47,18 @@
     </aside>
 
     <section class="preview">
-      <div class="canvas">
+      <section class="canvas">
         <img class="bg" [src]="selected.bg" alt="" />
         <img class="photo" *ngIf="photoUrl" [src]="photoUrl" alt="Photo" />
-        <div class="text bride">{{ form.value.bride }}</div>
-        <div class="text amp">&amp;</div>
-        <div class="text groom">{{ form.value.groom }}</div>
-        <div class="text date">{{ form.value.date }}</div>
-        <div class="text venue">{{ form.value.venue }}</div>
-        <div class="text message">{{ form.value.message }}</div>
-      </div>
+        <section class="text bride">{{ form.value.bride }}</section>
+        <section class="text amp">&amp;</section>
+        <section class="text groom">{{ form.value.groom }}</section>
+        <section class="text date">{{ form.value.date }}</section>
+        <section class="text venue">{{ form.value.venue }}</section>
+        <section class="text message">{{ form.value.message }}</section>
+      </section>
     </section>
-  </div>
-</div>
+  </section>
+  
+</section>
 
