@@ -43,17 +43,15 @@ jobs:
           name: node-app
           path: ./artifact
 
-      - name: Extract artifact
-        run: |
-          ls ./artifact
-          mv ./artifact/backend ./backend
+      - name: List contents (for debugging)
+        run: ls -la ./artifact
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'vows-n-veils'
           slot-name: 'Production'
-          package: backend
+          package: ./artifact  
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_6A566639885F4EC0BE516E1D82B9F385 }}
 
 
