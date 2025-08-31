@@ -1,4 +1,4 @@
-name: Build and deploy Node.js app to Azure Web App - vows-n-veils
+name: Backend/ Build and deploy Node.js app to Azure Web App - vows-n-veils
 
 on:
   push:
@@ -47,7 +47,8 @@ jobs:
         with:
           app-name: 'vows-n-veils'
           slot-name: 'Production'
-          package: backend
+          package: .
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_6A566639885F4EC0BE516E1D82B9F385 }}
+
 
 
