@@ -1,0 +1,74 @@
+<html>
+    <head class="hero">
+        <link rel="stylesheet" href="rsvp.css">
+        <title> RSVP</title>
+
+    </head>
+    <body>
+
+        <span *ngIf ="!eventIdEntered" class= "eventId">
+            <p>Enter your Event ID:</p>
+            <input type="text" [(ngModel)]="eventId" placeholder="Wedding Code">
+            <button  class="idSumbit" (click)="submitEventId()">Continue</button>
+        </span>
+
+    <span *ngIf= "eventIdEntered">
+
+        <span class="hero">
+            <img src=logo.jpg class="logo" /> <!-- "assets/logo.jpg" when in git  -->
+            <h1>Will you be joining us?</h1>
+        </span>
+
+        <span class="div-line">
+
+        </span>
+
+        <span class="question-box">
+            <p>First Name</p>
+            <input type="text" [(ngModel)]="formData.Name" name="name" placeholder="First Name">
+        </span>
+
+        <span class="question-box">
+            <p>Surname</p>
+            <input type="text" [(ngModel)]="formData.Surname" name="surname" placeholder="Surname">
+        </span>
+
+        <span class="question-box">
+            <p>Email Address</p>
+            <input type="text" [(ngModel)]="formData.Email" name="email" placeholder="Email">
+        </span>
+
+        <span class="question-box">
+            <p>Dietary Requirements</p>
+            <select [(ngModel)]="formData.Diet" name="diet">
+                <option value="Kosher">Kosher</option>
+                <option value="Halal">Halal</option>
+                <option value="Vegetarian">Vegetarian</option>
+                <option value="Vegan">Vegan</option>
+                </select>
+            <p>Other</p>
+            <input type="text" [(ngModel)]="formData.otherDiet" name="otherDiet" placeholder="Other">
+        </span>
+
+        <span class="question-box">
+            <p>Allergies</p>
+            <input type="text" [(ngModel)]="formData.Allergy" name="allergy" placeholder="Allergies">
+        </span>
+
+        <span class="question-box">
+            <p>Song Request</p>
+            <input type="text" [(ngModel)]="formData.Song" name="song" placeholder="Song Requests">
+        </span>
+
+        <span class="sub-container">
+            <button (click)="onSubmit()">Submit Details</button>
+
+        </span>
+
+    </span>
+
+
+    </body>
+
+
+</html>

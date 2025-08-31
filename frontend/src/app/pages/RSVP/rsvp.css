@@ -1,0 +1,158 @@
+html
+{
+  background-color: #FAF7F2;
+  font-family: ui-serif, Georgia, 'Times New Roman', serif;
+  color: #3F3A34;
+  min-height: 100vh;
+}
+
+.hero
+{
+  margin: 8px 0 24px;
+  display: flex;  /* how to get thing next to each other */
+  gap: 1rem;
+  align-items: center;
+  border-bottom: 1px solid rgba(197,126,109,0.3);
+  justify-content: center;
+}
+
+.hero h1
+{
+  font-size: clamp(1rem,6vw,2rem);
+
+  /* min 1rem, max 2rem, responsive in between */
+}
+
+.logo {
+  height: 96px;
+  width: auto;
+  margin-bottom: 12px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: #fff;
+  box-shadow: 0 2px 12px rgba(0,0,0,.06);
+
+}
+
+.question-box
+{
+  display: flex;
+  flex-direction: column; /* content stacked vertically inside the box */
+  align-items: center;
+  justify-content: center;
+  background-color: white;
+  padding: 2rem;
+  border-color: 1px solid rgba(197,126,109,0.3);
+  border-radius: 15px;           /* rounded corners */
+  box-shadow: 0 4px 12px rgba(197,126,109,0.3);
+  max-width: 500px;              /* limits width */
+  width: 60vw  ;                     /* responsive width */
+  height: 15vw;
+  margin: 2rem auto;              /* centers horizontally and adds top/bottom spacing */
+  box-sizing: border-box;
+
+
+
+}
+.question-box input
+{
+  font-family: ui-serif, Georgia, 'Times New Roman', serif;
+  color: #3F3A34;
+  background: none;
+  width: 25vw;
+  border-color:rgba(197,126,109,0.3);
+  border-radius: 15px;
+  border-style: solid;
+  padding: 1rem;
+  font-size: 1rem;
+
+}
+
+.question-box select
+{
+  font-family: ui-serif, Georgia, 'Times New Roman', serif;
+  color: #3F3A34;
+  background: none;
+  width: 25vw;
+  border-color:rgba(197,126,109,0.3);
+  border-radius: 15px;
+  border-style: solid;
+  padding: 1rem;
+  font-size: 1rem;
+}
+
+.sub-container
+{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+
+}
+.sub-container button
+{
+  background: rgba(197,126,109,0.8) ;
+  font-family: ui-serif, Georgia, 'Times New Roman', serif;
+  color: #2a2927;
+  border-radius: 15px;
+  border: rgba(197,126,109,0.8) ;
+  width: 25vw;
+  height: 5vw;
+  font-size: 2vw;
+  cursor: pointer;
+}
+.sub-container button:hover
+{
+  background: rgba(197,126,109,1) ;
+}
+
+/* id finder */
+
+/* Event ID input box styling */
+.eventId {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background-color: white;
+  padding: 2rem;
+  border: 1px solid rgba(197,126,109,0.3);
+  border-radius: 15px;
+  box-shadow: 0 4px 12px rgba(197,126,109,0.3);
+  max-width: 500px;
+  width: 60vw;
+  height: 40vw;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.eventId input {
+  font-family: ui-serif, Georgia, 'Times New Roman', serif;
+  color: #3F3A34;
+  background: none;
+  width: 25vw;
+  border-color: rgba(197,126,109,0.3);
+  border-radius: 15px;
+  border-style: solid;
+  padding: 1rem;
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Event ID submit button */
+.eventId button {
+  background: rgba(197,126,109,0.8);
+  font-family: ui-serif, Georgia, 'Times New Roman', serif;
+  color: #2a2927;
+  border-radius: 15px;
+  border: rgba(197,126,109,0.8);
+  width: 25vw;
+  height: 5vw;
+  font-size: 2vw;
+  cursor: pointer;
+}
+
+.eventId button:hover {
+  background: rgba(197,126,109,1);
+}
