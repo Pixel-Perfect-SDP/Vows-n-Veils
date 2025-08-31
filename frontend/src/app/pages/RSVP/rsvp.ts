@@ -32,9 +32,9 @@ export class Rsvp
     Name: '',
     Surname: '',
     Email: '',
-    Diet: '',
+    Diet: 'None',
     otherDiet: '',
-    Allergy: '',
+    Allergy: 'None',
     Song: ''
   };
 
@@ -71,6 +71,13 @@ export class Rsvp
 
 
       //query for matching name and surname
+
+      if (fullname.trim()=='')
+      {
+        this.message = 'Please enter your full name ❌';
+        alert('Name field cannot be empty ❌');
+        return;
+      }
       const q=query
       (
         rsvpCollection,
@@ -89,13 +96,17 @@ export class Rsvp
 
         setTimeout(() => {
           this.router.navigate(['/landing']);
-        }, 3000);
+        }, 2000);
 
 
       }
       else
       {
         this.message=('Guest not apart of wedding party ❌');
+        alert('The name you entered is not apart of the wedding party❌');
+        setTimeout(() => {
+          this.router.navigate(['/landing']);
+        }, 2000)
       }
 
 
