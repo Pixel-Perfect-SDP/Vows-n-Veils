@@ -1,4 +1,4 @@
-name: Build and deploy Node.js app to Azure Web App - vows-n-veils
+name: Backend/ Build and deploy Node.js app to Azure Web App - vows-n-veils
 
 on:
   push:
@@ -41,12 +41,18 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: node-app
+          path: ./artifact
+
+      - name: List contents (for debugging)
+        run: ls -la ./artifact
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'vows-n-veils'
           slot-name: 'Production'
-          package: backend
-          publish-profile: ${{ secrets.AzureAppService_PublishProfile_1234 }}
+          package: ./artifact  
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_6A566639885F4EC0BE516E1D82B9F385 }}
+
+
 

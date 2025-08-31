@@ -12,6 +12,7 @@ import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
 import { AuthService } from '../../core/auth';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { auth } from '../firebase/firebase-config';
+import { signOut } from 'firebase/auth';
 
 @Component({
   selector: 'app-manageservices',
@@ -241,5 +242,17 @@ export class Manageservices implements OnInit {
         }
       });
   }
+
+    logout(): void
+    {
+      signOut(auth)
+        .then(() => {
+          console.log('User signed out successfully');
+          this.router.navigate(['/landing']);
+        })
+        .catch((error) => {
+          console.error('Error signing out:', error);
+        });
+    }
 
 }

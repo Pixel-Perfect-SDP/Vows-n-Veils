@@ -18,6 +18,16 @@ if (!admin.apps.length) {
 const db = admin.firestore();
 const bucket = admin.storage().bucket();
 
+/**
+ * @swagger
+ * /venues:
+ *   get:
+ *     summary: Get all venues
+ *     responses:
+ *       200:
+ *         description: List of venues with image URLs
+ */
+
 router.get('/', async (req, res) => {
   try {
     const snap = await db.collection('Venues').get();
@@ -49,6 +59,24 @@ router.get('/', async (req, res) => {
   }
 });
 
+
+/**
+ * @swagger
+ * /venues/{id}:
+ *   get:
+ *     summary: Get a single venue by ID
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Venue ID
+ *     responses:
+ *       200:
+ *         description: Venue data with images
+ *       404:
+ *  */
 router.get('/:id', async (req, res) => {
   try {
     const doc = await db.collection('Venues').doc(req.params.id).get();
@@ -71,7 +99,49 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-
+/**
+ * @swagger
+ * /venues:
+ *   post:
+ *     summary: Create a new venue
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - venuename
+ *               - address
+ *               - capacity
+ *               - companyID
+ *               - description
+ *               - email
+ *               - phonenumber
+ *               - price
+ *             properties:
+ *               venuename:
+ *                 type: string
+ *               address:
+ *                 type: string
+ *               capacity:
+ *                 type: integer
+ *               companyID:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               phonenumber:
+ *                 type: string
+ *               price:
+ *                 type: number
+ *     responses:
+ *       201:
+ *         description: Venue created successfully
+ *       400:
+ *         description: Missing required fields
+ */
 router.post('/', async (req, res) => {
   try {
     const venue = req.body;
@@ -87,6 +157,29 @@ router.post('/', async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /venues/{id}:
+ *   put:
+ *     summary: Update an existing venue
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Venue ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       200:
+ *         description: Venue updated successfully
+ */
+
 router.put('/:id', async (req, res) => {
   try {
     await db.collection('Venues').doc(req.params.id).update(req.body);
@@ -95,6 +188,23 @@ router.put('/:id', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+/**
+ * @swagger
+ * /venues/{id}:
+ *   delete:
+ *     summary: Delete a venue
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Venue ID
+ *     responses:
+ *       200:
+ *         description: Venue deleted successfully
+ */
 
 router.delete('/:id', async (req, res) => {
   try {

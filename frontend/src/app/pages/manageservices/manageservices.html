@@ -15,7 +15,8 @@
       </section>
 
       <!-- actions -->
-      <button disabled>Track orders</button>
+      <!--<button disabled>Track orders</button>-->
+      <button (click)="logout()">Log out</button>
     </nav>
 
     <section class="venue-company-details">
@@ -23,70 +24,65 @@
     </section>
   </section>
 
-  <!-- Services area -->
+  <!-- Venues area -->
   <section class="services" *ngIf="hasVenueCompany && companyVenueData">
-    <h3>My services:</h3>
-    <div class="button-container">
-        <div class="toggle-switch">
-            <button (click)="select('Venues')"
-                [ngClass]="selected === 'Venues' ? 'yes-style' : 'default-style'">Venues</button>
-            <button (click)="select('Vendors')"
-                [ngClass]="selected === 'Vendors' ? 'no-style' : 'default-style'">Vendors</button>
-        </div>
+    <h3 class="my-venues">My venues:</h3>
+    <section class="button-container">
+      <button (click)="select('Venues')"[ngClass]="selected === 'Venues' ? 'yes-style' : 'default-style'">View my venues</button>
+        <button class="add-venue-btn" *ngIf="selected === 'Venues' && !addingVenue && !editingVenue" (click)="AddVenue()">Add Venue</button>
 
-    </div>
-    <div class="addbtn" *ngIf="selected === 'Venues' && !addingVenue && !editingVenue">
-        <button class="add-venue-btn" (click)="AddVenue()">Add Venue</button>
-    </div>
-    <div class="content" *ngIf="selected === 'Venues'; else noVenues">
+    </section> <!--button-container-->
+
+
+    <section class="content" *ngIf="selected === 'Venues'; else noVenues">
 
         <!-- Add Venue Form -->
-        <div *ngIf="addingVenue" class="update-form">
-            <h2>Add New Venue</h2>
+        <section *ngIf="addingVenue" class="update-form">
+            <h2>Add a new venue</h2>
 
-            <label>Venue Name</label>
+            <label>Venue Name:</label>
             <input type="text" [(ngModel)]="newVenueData.venuename" placeholder="Add new venue name" />
 
-            <label>Description</label>
-            <input type="text" [(ngModel)]="newVenueData.description" placeholder="Add new description" />
+            <label>Description:</label>
+            <input type="text" [(ngModel)]="newVenueData.description" placeholder="Add venue description" />
 
-            <label>Address</label>
-            <input type="text" [(ngModel)]="newVenueData.address" placeholder="Add new address" />
+            <label>Address:</label>
+            <input type="text" [(ngModel)]="newVenueData.address" placeholder="Add venue address" />
 
-            <label>Email</label>
-            <input type="email" [(ngModel)]="newVenueData.email" placeholder="Add new email" />
+            <label>Email:</label>
+            <input type="email" [(ngModel)]="newVenueData.email" placeholder="Add contact email" />
 
-            <label>Phone Number</label>
-            <input type="text" [(ngModel)]="newVenueData.phonenumber" placeholder="Add new phone number" />
+            <label>Phone Number:</label>
+            <input type="text" [(ngModel)]="newVenueData.phonenumber" placeholder="Add contact number" />
 
-            <label>Capacity</label>
-            <input type="number" [(ngModel)]="newVenueData.capacity" placeholder="Add new capacity" />
+            <label>Capacity:</label>
+            <input type="number" [(ngModel)]="newVenueData.capacity" placeholder="Add venue capacity" />
 
-            <label>Price</label>
-            <input type="number" [(ngModel)]="newVenueData.price" placeholder="Add new price" />
+            <label>Price:</label>
+            <input type="number" [(ngModel)]="newVenueData.price" placeholder="Add venue price" />
 
-            <label>Image Placeholder</label>
-            <input type="text" disabled value="placeholder-image.jpg" />
+            <!--<label>Image Placeholder:</label>
+            <input type="text" disabled value="placeholder-image.jpg" />-->
 
-            <div class="form-buttons">
+            <section class="form-buttons">
                 <button (click)="SubmitNewVenue()">Add Venue</button>
                 <button (click)="CancelAdd()">Cancel</button>
-            </div>
-        </div>
+            </section>
+          </section><!--adding venue form-->
 
         <!-- Venue Cards -->
-        <div *ngIf="!addingVenue && !editingVenue" class="venue-list">
-            <div class="card" *ngFor="let venue of venues">
+        <section *ngIf="!addingVenue && !editingVenue" class="venue-list">
+            <section class="card" *ngFor="let venue of venues">
                 <h3>{{ venue.venuename }}</h3>
                 <img *ngIf="venue.images && venue.images[1]" [src]="venue.images[1]" alt="{{venue.venuename}}" />
                 <button class="btn" (click)="UpdateVenue(venue)">Update Venue Details</button>
                   <button class="btn delete-btn" (click)="DeleteVenue(venue)">Delete Venue</button>
 
-            </div>
-        </div>
+            </section>
+          </section>
 
         <!-- Update Form -->
-        <div *ngIf="editingVenue" class="update-form">
+        <section *ngIf="editingVenue" class="update-form">
             <h2>Update Venue: {{ editingVenue.venuename }}</h2>
 
             <label>Venue Name</label>
@@ -110,19 +106,21 @@
             <label>Price</label>
             <input type="number" [(ngModel)]="updateData.price" placeholder="Add new price" />
 
-            <div class="form-buttons">
+            <section class="form-buttons">
                 <button (click)="SubmitUpdate()">Update</button>
                 <button (click)="CancelUpdate()">Cancel</button>
-            </div>
-        </div>
+            </section>
+          </section>
 
-    </div>
+      </section>
 
     <ng-template #noVenues>
         <p>NEED TO PUT VENDOR INFOMATIONS</p>
     </ng-template>
 
   </section>
+
+
 
   <!-- If no vendor company -->
   <section class="create-venue-company" *ngIf="hasVenueCompany === false">

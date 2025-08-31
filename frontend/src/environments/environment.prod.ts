@@ -2,7 +2,7 @@
     used by github actions---*/
 export const environment = {
   production: true,
-  apiUrl: 'https://<your-staticwebapp-name>.azurestaticapps.net/api', //change this link
+  apiUrl: 'https://vows-n-veils-b3etdddfbxe0a9e3.uksouth-01.azurewebsites.net', 
   firebase: {
     apiKey: "AIzaSyCMTT56PkAHQr23nsk1ZOspwBye5At-wMs",
     authDomain: "ppep-2651c.firebaseapp.com",
