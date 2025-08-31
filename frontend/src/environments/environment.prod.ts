@@ -2,7 +2,7 @@
     used by github actions---*/
 export const environment = {
   production: true,
-  apiUrl: 'https://vows-n-veils-b3etdddfbxe0a9e3.uksouth-01.azurewebsites.net', 
+  apiUrl: 'https://site--vowsandveils--5dl8fyl4jyqm.code.run', 
   firebase: {
     apiKey: "AIzaSyCMTT56PkAHQr23nsk1ZOspwBye5At-wMs",
     authDomain: "ppep-2651c.firebaseapp.com",
