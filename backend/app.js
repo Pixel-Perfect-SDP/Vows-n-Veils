@@ -10,6 +10,7 @@ app.use(express.json());
 const venueRoutes = require('./routes/venues.routes');
 app.use('/venues', venueRoutes);
 
+console.log("Loading eventRoutes");
 const eventsRoutes = require('./routes/events.routes');
 app.use('/events', eventsRoutes);
 
