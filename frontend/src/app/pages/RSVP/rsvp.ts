@@ -137,6 +137,8 @@ export class Rsvp
       } else {
         this.eventIdEntered = false;
         this.message = 'Event ID not found ❌';
+        alert('Event ID not found. Please try again');
+        this.eventId = '';
       }
     } catch (err) {
       console.error(err);
