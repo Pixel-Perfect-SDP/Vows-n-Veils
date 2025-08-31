@@ -32,6 +32,7 @@ export class Rsvp
     Name: '',
     Surname: '',
     Email: '',
+    Attending:'',
     Diet: 'None',
     otherDiet: '',
     Allergy: 'None',
@@ -56,7 +57,19 @@ export class Rsvp
         ? this.formData.otherDiet
         : this.formData.Diet;
 
-      const fullname =this.formData.Name.trim()+ ' ' + this.formData.Surname.trim();
+        const fullname = this.formData.Surname.trim()
+        ? this.formData.Name.trim() + ' ' + this.formData.Surname.trim()
+        : this.formData.Name.trim();
+
+      let attendance;
+      if (this.formData.Attending =="Yes")
+      {
+        attendance=true;
+      }
+      else
+      {
+        attendance=false;
+      }
 
         const submitData =
         {
@@ -64,7 +77,7 @@ export class Rsvp
         Dietary: finalDiet,
         Allergies: this.formData.Allergy,
         Song: this.formData.Song,
-        RSVPstatus:true
+        RSVPstatus: attendance
       };
 
       const rsvpCollection = collection(this.db, 'Guests');
@@ -104,9 +117,6 @@ export class Rsvp
       {
         this.message=('Guest not apart of wedding party ❌');
         alert('The name you entered is not apart of the wedding party❌');
-        setTimeout(() => {
-          this.router.navigate(['/landing']);
-        }, 2000)
       }
 
 

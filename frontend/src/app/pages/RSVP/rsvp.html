@@ -37,7 +37,16 @@
             <p>Email Address</p>
             <input type="text" [(ngModel)]="formData.Email" name="email" placeholder="Email">
         </span>
+        <span class="question-box">
+            <p>Will you be attending?</p>
+            <select [(ngModel)]="formData.Attending" name="attending">
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+                </select>
+        </span>
 
+        <!-- Only show these if Attending is "Yes" -->
+        <span *ngIf="formData.Attending === 'Yes'">
         <span class="question-box">
             <p>Dietary Requirements</p>
             <select [(ngModel)]="formData.Diet" name="diet">
@@ -58,6 +67,7 @@
         <span class="question-box">
             <p>Song Request</p>
             <input type="text" [(ngModel)]="formData.Song" name="song" placeholder="Song Requests">
+        </span>
         </span>
 
         <span class="sub-container">
