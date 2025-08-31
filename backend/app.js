@@ -26,8 +26,13 @@ const venueRoutes = require('./routes/venues.routes');
 app.use('/venues', venueRoutes);
 
 console.log("Loading eventRoutes");
+console.log("FIREBASE_PROJECT_ID:", process.env.FIREBASE_PROJECT_ID);
 const eventsRoutes = require('./routes/events.routes');
 app.use('/events', eventsRoutes);
+
+app.get('/', (req, res) => {
+  res.send('Backend is up 🚀');
+});
 
 module.exports = app;
 
