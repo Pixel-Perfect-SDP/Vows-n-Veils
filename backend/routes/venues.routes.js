@@ -50,6 +50,7 @@ router.get('/', async (req, res) => {
 
         data.images = imageUrls;
         return data;
+
       })
     );
 
@@ -208,8 +209,70 @@ router.put('/:id', async (req, res) => {
 
 router.delete('/:id', async (req, res) => {
   try {
-    await db.collection('Venues').doc(req.params.id).delete();
+    const venueRef = db.collection('Venues').doc(req.params.id);
+    const doc = await venueRef.get();
+    if (!doc.exists) return res.status(404).json({ error: 'Venue not found' });
+
+    const [files] = await bucket.getFiles({ prefix: `venues/${req.params.id}/` });
+    if (files.length > 0) {
+      await Promise.all(files.map(file => file.delete()));
+    }
+
+    await venueRef.delete();
+
     res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * @swagger
+ * /venues/company/{companyid}:
+ *   delete:
+ *     summary: Fetches all the venues of a Company
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: company ID
+ *     responses:
+ *       200:
+ *         description: Venue data with images
+ */
+
+
+router.get('/company/:companyID', async (req, res) => {
+  try {
+    const companyID = req.params.companyID;
+
+    const snap = await db.collection('Venues').where('companyID', '==', companyID).get();
+    if (snap.empty) {
+      return res.status(404).json({ error: 'No venues found for this companyID' });
+    }
+    const venues = await Promise.all(
+      snap.docs.map(async (doc) => {
+        const data = { id: doc.id, ...doc.data() };
+
+        const [files] = await bucket.getFiles({ prefix: `venues/${doc.id}/` });
+        const imageUrls = await Promise.all(
+          files.map(async (file) => {
+            const [url] = await file.getSignedUrl({
+              action: 'read',
+              expires: Date.now() + 60 * 60 * 1000, 
+            });
+            return url;
+          })
+        );
+
+        data.images = imageUrls;
+        return data;
+      })
+    );
+
+    res.json(venues);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

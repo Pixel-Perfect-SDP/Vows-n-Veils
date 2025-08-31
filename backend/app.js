@@ -34,7 +34,7 @@ const eventsRoutes = require('./routes/events.routes');
 app.use('/events', eventsRoutes);
 
 app.get('/', (req, res) => {
-  res.send('Backend is up 🚀');
+  res.send('Backend is up ');
 });
 
 module.exports = app;
