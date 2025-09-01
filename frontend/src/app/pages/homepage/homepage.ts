@@ -193,7 +193,7 @@ export class Homepage
   // form for new guest
   addGuestForm = this.formBuild.group({
     Name: ['', [Validators.required]],
-    Email: ['', [Validators.required, Validators.email]],
+    Email: ['', [ Validators.email]],
     Dietary: ['None'],
     Allergies: ['None'],
     RSVPstatus: ['false'],            // default to attending (string here, convert later)
