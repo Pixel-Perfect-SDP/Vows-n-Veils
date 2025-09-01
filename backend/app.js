@@ -22,6 +22,7 @@ app.use(cors({
 }));
 app.use(express.json());
 
+
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, { explorer: true }));
 
 // API Routes
@@ -32,6 +33,10 @@ console.log("Loading eventRoutes");
 console.log("FIREBASE_PROJECT_ID:", process.env.FIREBASE_PROJECT_ID);
 const eventsRoutes = require('./routes/events.routes');
 app.use('/events', eventsRoutes);
+
+// Weather Crossing API
+const weatherCrossingRoutes = require('./routes/weather-crossing.routes');
+app.use('/weather-crossing', weatherCrossingRoutes);
 
 app.get('/', (req, res) => {
   res.send('Backend is up ');
