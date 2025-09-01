@@ -262,12 +262,12 @@ export class Homepage
 
     const dto :any= {
       Name: raw.Name?.trim() ?? '',
+      Email: raw.Email?.trim() ? raw.Email?.trim() : '',
       Dietary: raw.Dietary?.trim() ?? 'None',
       Allergies: raw.Allergies?.trim() ?? 'None',
       RSVPstatus: String(raw.RSVPstatus).toLowerCase() === 'true',
       Song: raw.Song?.trim() ?? ''
     };
-    if(raw.Email?.trim() === '') dto.Email = '';
 
     // optimistic UX: disable form with a quick flag
     this.guestsLoading = true;
