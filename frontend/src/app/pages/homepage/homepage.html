@@ -30,6 +30,43 @@
 
     <!-- Main content column -->
     <div class="main">
+      <!-- Weather Info Top Right -->
+      <div class="weather-info" style="position:absolute; top:20px; right:40px; background:#f5f5f5; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08); padding:16px; min-width:220px; z-index:10;">
+          <ng-container *ngIf="!eventData?.VenueID">
+            <span style="color:#888">Add a venue to see wedding weather.</span>
+          </ng-container>
+          <ng-container *ngIf="eventData?.VenueID">
+            <ng-container *ngIf="weatherLoading">
+              <span>Loading weather...</span>
+            </ng-container>
+            <ng-container *ngIf="weatherError">
+              <span style="color:red">{{ weatherError }}</span>
+            </ng-container>
+            <ng-container *ngIf="weather && !weatherLoading && !weatherError">
+              <h3 style="margin-top:0;">Wedding Weather</h3>
+              <div *ngIf="weather.days && weather.days.length">
+                <div>
+                  <strong>Date:</strong> {{ weather.days[0].datetime }}
+                </div>
+                <div>
+                  <strong>Location:</strong> {{ weather.resolvedAddress || weather.address }}
+                </div>
+                <div>
+                  <strong>Temperature:</strong> {{ (((weather.days[0].temp - 32) * 5) / 9) | number:'1.2-2' }} °C
+                </div>
+                <div>
+                  <strong>Rainfall:</strong> {{ weather.days[0].precipprob || weather.days[0].precip }} %
+                </div>
+                <div>
+                  <strong>Humidity:</strong> {{ weather.days[0].humidity }} %
+                </div>
+                <div *ngIf="weather.days[0].description">
+                  <strong>Summary:</strong> {{ weather.days[0].description }}
+                </div>
+              </div>
+            </ng-container>
+          </ng-container>
+      </div>
 
       <!-- Header / event banner lives INSIDE the flow (no overlap) -->
       <header class="event-header">
