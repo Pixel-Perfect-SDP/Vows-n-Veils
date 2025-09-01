@@ -21,16 +21,18 @@ import { signOut } from 'firebase/auth';
 export class Homepage
 {
   router = inject(Router);
-  //db = inject(Firestore);
   auth = inject(AuthService);
   private formBuild = inject(FormBuilder);
-  //New: Data service
   private dataService = inject(DataService);
 
   public hasEvent: boolean | null = null;
   public eventData: any = null;
 
-  // NEW: UI state
+  // Weather data
+  public weather: any = null;
+  public weatherLoading: boolean = false;
+  public weatherError: string | null = null;
+
   activeTab: 'overview' | 'guests' = 'overview';
   guests: Guest[] = [];
   guestsLoading = false;
@@ -65,37 +67,78 @@ export class Homepage
 
   //check if user has an existing event
   async ngOnInit() {
-    try{
+    try {
       const user = await this.waitForUser();
-
       if (!user) {
         return;
       }
-
       const db = getFirestore(getApp());
-
       const docRef = doc(db, 'Events', user.uid);
       const docSnap = await getDoc(docRef);
-
       if (docSnap.exists()) {
         this.hasEvent = true;
         this.eventData = docSnap.data();
-
         //countdown
         this.updateCountdown();
-        this.countDownInerval=setInterval(()=>this.updateCountdown(),60000)
+        this.countDownInerval = setInterval(() => this.updateCountdown(), 60000);
 
-      } else
-      {
+        // Fetch venue address
+        if (this.eventData?.VenueID) {
+          // Get venue details from backend
+          this.fetchVenueAndWeather(this.eventData.VenueID, this.eventData.Date_Time);
+        }
+      } else {
         this.hasEvent = false;
         this.eventData = null;
       }
-    }
-    catch(error){
+    } catch (error) {
       console.error("Error fetching event data: ", error);
       this.hasEvent = false;
       this.eventData = null;
     }
+  }
+
+  private fetchVenueAndWeather(venueId: string, eventDate: any) {
+    this.weatherLoading = true;
+    this.weatherError = null;
+    // Fetch venue details
+    this.dataService.getVenueById(venueId).subscribe({
+      next: (venue: any) => {
+        // Get address and format date
+        const address = venue?.address || '';
+        let dateStr = '';
+        if (eventDate) {
+          if (eventDate.toDate) {
+            dateStr = this.formatDate(eventDate.toDate());
+          } else {
+            dateStr = this.formatDate(new Date(eventDate));
+          }
+        }
+        // Fetch weather
+        this.dataService.getWeatherCrossing(address, dateStr).subscribe({
+          next: (weather: any) => {
+            this.weather = weather;
+            this.weatherLoading = false;
+          },
+          error: (err) => {
+            this.weatherError = 'Failed to fetch weather';
+            this.weatherLoading = false;
+          }
+        });
+      },
+      error: (err) => {
+        this.weatherError = 'Failed to fetch venue';
+        this.weatherLoading = false;
+      }
+    });
+  }
+
+  private formatDate(date: Date): string {
+    // Format as YYYY-MM-DD
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
   }
 
   ngOnDestroy()
@@ -217,14 +260,14 @@ export class Homepage
     const eventId = user.uid;
     const raw = this.addGuestForm.getRawValue();
 
-    const dto = {
+    const dto :any= {
       Name: raw.Name?.trim() ?? '',
-     Email: raw.Email?.trim() ? raw.Email?.trim() : '',
       Dietary: raw.Dietary?.trim() ?? 'None',
       Allergies: raw.Allergies?.trim() ?? 'None',
       RSVPstatus: String(raw.RSVPstatus).toLowerCase() === 'true',
       Song: raw.Song?.trim() ?? ''
     };
+    if(raw.Email?.trim() === '') dto.Email = '';
 
     // optimistic UX: disable form with a quick flag
     this.guestsLoading = true;
