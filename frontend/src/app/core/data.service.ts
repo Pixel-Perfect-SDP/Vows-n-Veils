@@ -1,4 +1,3 @@
-// e.g. frontend/src/app/core/data.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -35,6 +34,16 @@ export class DataService {
 
   constructor(private http: HttpClient) {}
 
+
+  // Get weather data for a location and date
+  getVenueById(venueId: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/venues/${venueId}`);
+  }
+
+  getWeatherCrossing(location: string, date: string): Observable<any> {
+    const params = new HttpParams().set('location', location).set('date', date);
+    return this.http.get<any>(`${this.apiUrl}/weather-crossing`, { params });
+  }
   postUserLogin(user: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/users/login`, user);
   }
