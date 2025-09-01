@@ -219,7 +219,7 @@ export class Homepage
 
     const dto = {
       Name: raw.Name?.trim() ?? '',
-     Email: raw.Email?.trim() ?? '',
+     Email: raw.Email?.trim() ? raw.Email?.trim() : '',
       Dietary: raw.Dietary?.trim() ?? 'None',
       Allergies: raw.Allergies?.trim() ?? 'None',
       RSVPstatus: String(raw.RSVPstatus).toLowerCase() === 'true',
