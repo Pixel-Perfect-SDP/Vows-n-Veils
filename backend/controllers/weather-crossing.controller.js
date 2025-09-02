@@ -1,4 +1,3 @@
-
 const axios = require('axios');
 const VISUAL_CROSSING_API_KEY = '2VPYZFP3UHJYDW7RSW4NGT3Q9'; // Replace with your actual API key
 

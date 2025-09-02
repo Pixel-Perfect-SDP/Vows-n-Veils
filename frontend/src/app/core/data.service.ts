@@ -35,11 +35,11 @@ export class DataService {
   constructor(private http: HttpClient) {}
 
 
-  // Get weather data for a location and date
   getVenueById(venueId: string): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/venues/${venueId}`);
   }
 
+  // Get weather data for a location and date
   getWeatherCrossing(location: string, date: string): Observable<any> {
     const params = new HttpParams().set('location', location).set('date', date);
     return this.http.get<any>(`${this.apiUrl}/weather-crossing`, { params });
