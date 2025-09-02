@@ -30,44 +30,6 @@
 
     <!-- Main content column -->
     <div class="main">
-      <!-- Weather Info Top Right -->
-      <div class="weather-info" style="position:absolute; top:20px; right:40px; background:#f5f5f5; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08); padding:16px; min-width:220px; z-index:10;">
-          <ng-container *ngIf="!eventData?.VenueID">
-            <span style="color:#888">Add a venue to see wedding weather.</span>
-          </ng-container>
-          <ng-container *ngIf="eventData?.VenueID">
-            <ng-container *ngIf="weatherLoading">
-              <span>Loading weather...</span>
-            </ng-container>
-            <ng-container *ngIf="weatherError">
-              <span style="color:red">{{ weatherError }}</span>
-            </ng-container>
-            <ng-container *ngIf="weather && !weatherLoading && !weatherError">
-              <h3 style="margin-top:0;">Wedding Weather</h3>
-              <div *ngIf="weather.days && weather.days.length">
-                <div>
-                  <strong>Date:</strong> {{ weather.days[0].datetime }}
-                </div>
-                <div>
-                  <strong>Location:</strong> {{ weather.resolvedAddress || weather.address }}
-                </div>
-                <div>
-                  <strong>Temperature:</strong> {{ (((weather.days[0].temp - 32) * 5) / 9) | number:'1.2-2' }} °C
-                </div>
-                <div>
-                  <strong>Rainfall:</strong> {{ weather.days[0].precipprob || weather.days[0].precip }} %
-                </div>
-                <div>
-                  <strong>Humidity:</strong> {{ weather.days[0].humidity }} %
-                </div>
-                <div *ngIf="weather.days[0].description">
-                  <strong>Summary:</strong> {{ weather.days[0].description }}
-                </div>
-              </div>
-            </ng-container>
-          </ng-container>
-      </div>
-
       <!-- Header / event banner lives INSIDE the flow (no overlap) -->
       <header class="event-header">
         <!-- Hamburger -->
@@ -79,6 +41,72 @@
           <p class="names">Welcome, {{ eventData.Name1 }} and {{ eventData.Name2 }}</p>
         </div>
       </header>
+
+      <!-- Weather Bar (full-width, under header) -->
+      <section class="weather-bar" *ngIf="eventData?.VenueID">
+        <!-- Loading -->
+        <ng-container *ngIf="weatherLoading">
+          <div class="wb-row">
+            <div class="wb-icon-skel"></div>
+            <div class="wb-text-skel"></div>
+            <div class="wb-text-skel short"></div>
+          </div>
+        </ng-container>
+
+        <!-- Error -->
+        <ng-container *ngIf="weatherError && !weatherLoading">
+          <div class="wb-row wb-error">
+            <span>{{ weatherError }}</span>
+          </div>
+        </ng-container>
+
+        <!-- Data -->
+        <!-- Data -->
+        <ng-container *ngIf="weather && !weatherLoading && !weatherError">
+          <div class="wb-row">
+            <!-- ICON (auto picks class based on conditions/probability) -->
+            <div class="wb-icon" [ngClass]="getWeatherIconClass(weather.days[0])" aria-hidden="true"></div>
+
+            <div class="wb-col">
+              <div class="wb-title">Wedding Weather</div>
+              <div class="wb-sub">
+                <strong>{{ weather.resolvedAddress || weather.address }}</strong>
+                • {{ weather.days[0].datetime }}
+                <ng-container *ngIf="weather.days[0].description">
+                  • {{ weather.days[0].description }}
+                </ng-container>
+                <ng-container *ngIf="!weather.days[0].description">
+                  • {{ getConditionLabel(weather.days[0]) }}
+                </ng-container>
+              </div>
+            </div>
+
+            <div class="wb-metrics">
+              <div class="wb-chip">
+                🌡️ {{ (((weather.days[0].temp - 32) * 5) / 9) | number:'1.0-0' }}°C
+              </div>
+              <div class="wb-chip" *ngIf="weather.days[0].humidity !== undefined">
+                💧 {{ weather.days[0].humidity }}%
+              </div>
+              <div class="wb-chip" *ngIf="getPrecipPercent(weather.days[0]) !== null">
+                ☔ {{ getPrecipPercent(weather.days[0]) }}%
+              </div>
+            </div>
+          </div>
+        </ng-container>
+      </section>
+
+      <!-- If no venue yet -->
+      <section class="weather-bar wb-empty" *ngIf="!eventData?.VenueID">
+        <div class="wb-row">
+          <div class="wb-icon" aria-hidden="true">⛅</div>
+          <div class="wb-col">
+            <div class="wb-title">Add a venue to see your wedding weather</div>
+            <div class="wb-sub">We’ll pull the forecast for your exact location & date.</div>
+          </div>
+        </div>
+      </section>
+
 
       <body>
         <h2 class=countHead>Time until we tie the knot.....</h2>
@@ -110,6 +138,8 @@
 
       </section>
     </body>
+
+    
 
       <!-- Default landing content -->
       <section class="content" *ngIf="activeTab==='overview'">

@@ -933,3 +933,163 @@
   border-top: 1px solid rgba(0,0,0,0.3);
   margin: 5px 0;
 }
+
+/* ===== Weather Bar ===== */
+.weather-bar {
+  margin: 8px 16px 0 16px;        /* inside .main content flow */
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: linear-gradient(180deg, #fff, #faf7f4);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+}
+
+.weather-bar .wb-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+}
+
+.weather-bar .wb-icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  color: #A76858;                 /* close to your accent family */
+}
+
+.weather-bar .wb-col {
+  flex: 1;
+  min-width: 0;                   /* so text can truncate */
+}
+
+.weather-bar .wb-title {
+  font-weight: 800;
+  font-size: 1.05rem;
+  line-height: 1.1;
+  background: linear-gradient(90deg, #C57E6D, #A76858);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.weather-bar .wb-sub {
+  color: #4b4b4b;
+  opacity: 0.9;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.weather-bar .wb-metrics {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.weather-bar .wb-chip {
+  background: #f4ebe6;
+  border: 1px solid #e6d7cf;
+  color: #6f4b40;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+/* Empty state look */
+.weather-bar.wb-empty {
+  background: #f9e8e89d;
+  border-style: dashed;
+}
+
+/* Loading skeleton */
+.wb-icon-skel {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: linear-gradient(90deg, #f7f1ec 25%, #f0e8e2 37%, #f7f1ec 63%);
+  background-size: 400% 100%;
+  animation: shimmer 1.2s infinite;
+}
+.wb-text-skel {
+  width: 240px; height: 12px; border-radius: 6px;
+  background: linear-gradient(90deg, #f7f1ec 25%, #f0e8e2 37%, #f7f1ec 63%);
+  background-size: 400% 100%;
+  animation: shimmer 1.2s infinite;
+}
+.wb-text-skel.short { width: 160px; }
+
+.wb-error { color: #a11a1a; }
+
+/* ===== Icon (SVG masks so they inherit color) ===== */
+.wb-icon {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 auto;
+  color: #A76858;                /* matches your accent family */
+  background: currentColor;
+  border-radius: 10px;
+  opacity: 0.95;
+}
+
+/* Clear (sun) */
+.wb-icon.icon-clear {
+  -webkit-mask: url('data:image/svg+xml;utf8,\
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">\
+    <path d="M6.76 4.84l-1.8-1.79-1.41 1.41 1.79 1.8 1.42-1.42zM1 13h3v-2H1v2zm10-9h2V1h-2v3zm7.04 1.46l1.79-1.8-1.41-1.41-1.8 1.79 1.42 1.42zM17 13h3v-2h-3v2zM11 23h2v-3h-2v3zM4.22 18.36l1.41 1.41 1.8-1.79-1.42-1.42-1.79 1.8zM18.36 19.78l1.41-1.41-1.79-1.8-1.42 1.42 1.8 1.79zM12 8a4 4 0 100 8 4 4 0 000-8z"/>\
+  </svg>') center / 24px 24px no-repeat;
+          mask: url('data:image/svg+xml;utf8,\
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">\
+    <path d="M6.76 4.84l-1.8-1.79-1.41 1.41 1.79 1.8 1.42-1.42zM1 13h3v-2H1v2zm10-9h2V1h-2v3zm7.04 1.46l1.79-1.8-1.41-1.41-1.8 1.79 1.42 1.42zM17 13h3v-2h-3v2zM11 23h2v-3h-2v3zM4.22 18.36l1.41 1.41 1.8-1.79-1.42-1.42-1.79 1.8zM18.36 19.78l1.41-1.41-1.79-1.8-1.42 1.42 1.8 1.79zM12 8a4 4 0 100 8 4 4 0 000-8z"/>\
+  </svg>') center / 24px 24px no-repeat;
+}
+
+/* Overcast (cloud) */
+.wb-icon.icon-overcast {
+  -webkit-mask: url('data:image/svg+xml;utf8,\
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">\
+    <path d="M19 18H6a4 4 0 010-8 5.5 5.5 0 0110.39-1.73A4.5 4.5 0 1119 18z"/>\
+  </svg>') center / 24px 24px no-repeat;
+          mask: url('data:image/svg+xml;utf8,\
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">\
+    <path d="M19 18H6a4 4 0 010-8 5.5 5.5 0 0110.39-1.73A4.5 4.5 0 1119 18z"/>\
+  </svg>') center / 24px 24px no-repeat;
+}
+
+/* Rain */
+.wb-icon.icon-rain {
+  -webkit-mask: url('data:image/svg+xml;utf8,\
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">\
+    <path d="M6 13a4 4 0 010-8 5.5 5.5 0 0110.39-1.73A4.5 4.5 0 1118 13H6zM9 20l1.5-3M13 21l1.5-3M7 22l1.5-3" stroke="black" stroke-width="2" fill="black"/>\
+  </svg>') center / 24px 24px no-repeat;
+          mask: url('data:image/svg+xml;utf8,\
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">\
+    <path d="M6 13a4 4 0 010-8 5.5 5.5 0 0110.39-1.73A4.5 4.5 0 1118 13H6zM9 20l1.5-3M13 21l1.5-3M7 22l1.5-3" stroke="black" stroke-width="2" fill="black"/>\
+  </svg>') center / 24px 24px no-repeat;
+}
+
+/* Snow */
+.wb-icon.icon-snow {
+  -webkit-mask: url('data:image/svg+xml;utf8,\
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">\
+    <path d="M12 2v20M4.93 4.93l14.14 14.14M2 12h20M4.93 19.07L19.07 4.93" stroke="black" stroke-width="2" stroke-linecap="round"/>\
+  </svg>') center / 24px 24px no-repeat;
+          mask: url('data:image/svg+xml;utf8,\
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">\
+    <path d="M12 2v20M4.93 4.93l14.14 14.14M2 12h20M4.93 19.07L19.07 4.93" stroke="black" stroke-width="2" stroke-linecap="round"/>\
+  </svg>') center / 24px 24px no-repeat;
+}
+
+/* Optional: tint the whole bar subtly when rainy (keeps theme) */
+.weather-bar .icon-rain ~ .wb-col .wb-title,
+.weather-bar .icon-rain ~ .wb-col .wb-sub { color: #6a4a44; }
+
+/* Responsive: stack on small screens */
+@media (max-width: 720px) {
+  .weather-bar .wb-row {
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .weather-bar .wb-metrics {
+    width: 100%;
+    margin-top: 6px;
+  }
+}

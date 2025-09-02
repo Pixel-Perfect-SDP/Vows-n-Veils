@@ -98,6 +98,7 @@ export class Homepage
     }
   }
 
+  /*----------fetch weather helpers-------- */
   private fetchVenueAndWeather(venueId: string, eventDate: any) {
     this.weatherLoading = true;
     this.weatherError = null;
@@ -140,6 +141,36 @@ export class Homepage
     const dd = String(date.getDate()).padStart(2, '0');
     return `${yyyy}-${mm}-${dd}`;
   }
+
+  /** Safely return precip probability (0–100) or null if missing */
+  getPrecipPercent(day: any): number | null {
+    // API may give precipprob as %, while precip can be amount (mm/in) — we only use precipprob.
+    const p = day?.precipprob;
+    if (p === undefined || p === null) return null;
+    const n = Number(p);
+    return Number.isFinite(n) ? Math.round(n) : null;
+  }
+
+  /** Human-friendly fallback label if description is empty */
+  getConditionLabel(day: any): string {
+    const cond = (day?.conditions || '').trim();
+    if (!cond) return '—';
+    return cond;
+  }
+
+  /** Decide which icon class to use based on conditions + rain probability */
+  getWeatherIconClass(day: any): 'icon-rain' | 'icon-snow' | 'icon-overcast' | 'icon-clear' {
+    const cond = (day?.conditions || '').toLowerCase();
+    const precipProb = Number(day?.precipprob ?? 0);
+
+    if (Number.isFinite(precipProb) && precipProb > 50) return 'icon-rain';
+    if (cond.includes('snow')) return 'icon-snow';
+    if (cond.includes('overcast') || cond.includes('cloud')) return 'icon-overcast';
+    if (cond.includes('clear')) return 'icon-clear';
+    // default: if we can’t tell, prefer clear (fits the romantic theme)
+    return 'icon-clear';
+  }
+
 
   ngOnDestroy()
   {
