@@ -78,6 +78,12 @@ app.get('/__inspect', (req, res) => {
   }
 });
 
+app.get('/__ping', (req, res) => res.send('pong'));
+
+// direct test on the same base path as your router:
+app.get('/weather-crossing-direct', (req, res) => res.json({ ok: true, note: 'direct handler in app.js' }));
+
+
 
 module.exports = app;
 
