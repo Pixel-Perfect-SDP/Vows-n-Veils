@@ -42,5 +42,42 @@ app.get('/', (req, res) => {
   res.send('Backend is up ');
 });
 
+// --- DEBUG: list mounted routes
+app.get('/__routes', (req, res) => {
+  const out = [];
+  app._router.stack.forEach((m) => {
+    if (m.route?.path) {
+      const method = Object.keys(m.route.methods)[0]?.toUpperCase();
+      out.push({ method, path: m.route.path });
+    } else if (m.name === 'router' && m.handle?.stack) {
+      const base = (m.regexp?.source || '')
+        .replace('^\\', '/')
+        .split('\\/?')[0];
+      m.handle.stack.forEach((h) => {
+        if (h.route?.path) {
+          const method = Object.keys(h.route.methods)[0]?.toUpperCase();
+          out.push({ method, path: `${base}${h.route.path}` });
+        }
+      });
+    }
+  });
+  res.json(out);
+});
+
+// --- DEBUG: inspect the filesystem
+const fs = require('fs');
+app.get('/__inspect', (req, res) => {
+  try {
+    const cwd = process.cwd();
+    const hasRoutesDir = fs.existsSync('./routes');
+    const files = hasRoutesDir ? fs.readdirSync('./routes') : [];
+    const hasWxRoutes = fs.existsSync('./routes/weather-crossing.routes.js');
+    res.json({ cwd, hasRoutesDir, files, hasWxRoutes });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+
 module.exports = app;
 
