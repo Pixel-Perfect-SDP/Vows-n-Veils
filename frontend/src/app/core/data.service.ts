@@ -57,9 +57,6 @@ export class DataService {
 
     return this.http.get<Guest[]>(`${this.apiUrl}/events/${eventId}/guests`, { params });
   }
-  
-  private tempApiUrl = `http://localhost:3000`;   //remove after michelle deploys
-
 
   //GET /events/:eventID/guest-filters
   getGuestFilterOptions(eventId: string): Observable<GuestFiltersResponse> {
@@ -74,6 +71,6 @@ export class DataService {
   // Get weather data for a location and date
   getWeatherCrossing(location: string, date: string): Observable<any> {
     const params = new HttpParams().set('location', location).set('date', date);
-    return this.http.get<any>(`${this.tempApiUrl}/weather-crossing`, { params });   //change "tempApiUrl" to "apiUrl" after michelle deploys 
+    return this.http.get<any>(`${this.apiUrl}/weather-crossing`, { params });  
   }
 }
