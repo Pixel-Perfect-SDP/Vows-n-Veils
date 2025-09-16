@@ -1,5 +1,7 @@
 export const environment = {
   production: false,
+  apiUrl: 'http://localhost:3000',
+
   firebase: {
     apiKey: "AIzaSyCMTT56PkAHQr23nsk1ZOspwBye5At-wMs",
     authDomain: "ppep-2651c.firebaseapp.com",
@@ -8,7 +10,6 @@ export const environment = {
     messagingSenderId: "304346791168",
     appId: "1:304346791168:web:3cce378faacffab53487e5",
     measurementId: "G-4Z1YLNT9HM"
-    // ...other config if needed...
   }
 };
 
@@ -31,6 +32,5 @@ const firebaseConfig = {
   measurementId: "G-4Z1YLNT9HM"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);*/

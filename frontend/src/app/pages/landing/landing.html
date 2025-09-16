@@ -42,7 +42,7 @@
   } @else {
     <section class="account-area">
       <!--<p class="muted">You’re not signed in.</p>-->
-      <a class="btn" routerLink="/login">Find a couple</a>
+      <a class="btn" routerLink="/RSVP">Find a couple</a>
       <a class="btn" routerLink="/login">Plan my wedding</a>
     </section>
   }
@@ -62,10 +62,10 @@
     <button (click)="toggleCompaniesPopup()" class="close-button">X</button>
     <h3>Choose a section</h3>
     <section class="popup-buttons">
-      <button>Venue company</button>
-      <button>Vendor company</button>
-      <button>Admin</button>
+      <button (click)="onGoogleVenue()">Venue company</button>
+      <button (click)="onGoogleVendor()">Vendor company</button>
+      <button (click)="onGoogleAdmin()">Admin</button>
     </section>
-  
+
   </section>
   </section>

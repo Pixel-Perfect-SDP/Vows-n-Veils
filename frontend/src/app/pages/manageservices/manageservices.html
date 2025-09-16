@@ -1,0 +1,149 @@
+<section class="manageservices-section">
+
+  <!-- Loading -->
+<section class="loading-container" *ngIf="hasVenueCompany === null">
+<section class="Loading-1"></section>
+<section class="Loading-2"></section>
+  </section>
+
+  <!-- If venue company exists -->
+  <section class="has-venue-company" *ngIf="hasVenueCompany && companyVenueData">
+    <nav class="sidebar">
+      <section class="sidebar-header">
+        <img src="assets/logo.jpg" alt="Vows & Veils logo" class="logo" />
+        <h1>Vows & Veils</h1>
+      </section>
+
+      <!-- actions -->
+      <!--<button disabled>Track orders</button>-->
+      <button (click)="logout()">Log out</button>
+    </nav>
+
+    <section class="venue-company-details">
+      <p class="company-name">Welcome, {{ companyVenueData.companyName }}</p>
+    </section>
+  </section>
+
+  <!-- Venues area -->
+  <section class="services" *ngIf="hasVenueCompany && companyVenueData">
+    <h3 class="my-venues">My venues:</h3>
+    <section class="button-container">
+      <button (click)="select('Venues')"[ngClass]="selected === 'Venues' ? 'yes-style' : 'default-style'">View my venues</button>
+        <button class="add-venue-btn" *ngIf="selected === 'Venues' && !addingVenue && !editingVenue" (click)="AddVenue()">Add Venue</button>
+
+    </section> <!--button-container-->
+
+
+    <section class="content" *ngIf="selected === 'Venues'; else noVenues">
+
+        <!-- Add Venue Form -->
+        <section *ngIf="addingVenue" class="update-form">
+            <h2>Add a new venue</h2>
+
+            <label>Venue Name:</label>
+            <input type="text" [(ngModel)]="newVenueData.venuename" placeholder="Add new venue name" />
+
+            <label>Description:</label>
+            <input type="text" [(ngModel)]="newVenueData.description" placeholder="Add venue description" />
+
+            <label>Address:</label>
+            <input type="text" [(ngModel)]="newVenueData.address" placeholder="Add venue address" />
+
+            <label>Email:</label>
+            <input type="email" [(ngModel)]="newVenueData.email" placeholder="Add contact email" />
+
+            <label>Phone Number:</label>
+            <input type="text" [(ngModel)]="newVenueData.phonenumber" placeholder="Add contact number" />
+
+            <label>Capacity:</label>
+            <input type="number" [(ngModel)]="newVenueData.capacity" placeholder="Add venue capacity" />
+
+            <label>Price:</label>
+            <input type="number" [(ngModel)]="newVenueData.price" placeholder="Add venue price" />
+
+            <!--<label>Image Placeholder:</label>
+            <input type="text" disabled value="placeholder-image.jpg" />-->
+
+            <section class="form-buttons">
+                <button (click)="SubmitNewVenue()">Add Venue</button>
+                <button (click)="CancelAdd()">Cancel</button>
+            </section>
+          </section><!--adding venue form-->
+
+        <!-- Venue Cards -->
+        <section *ngIf="!addingVenue && !editingVenue" class="venue-list">
+            <section class="card" *ngFor="let venue of venues">
+                <h3>{{ venue.venuename }}</h3>
+                <img *ngIf="venue.images && venue.images[1]" [src]="venue.images[1]" alt="{{venue.venuename}}" />
+                <button class="btn" (click)="UpdateVenue(venue)">Update Venue Details</button>
+                  <button class="btn delete-btn" (click)="DeleteVenue(venue)">Delete Venue</button>
+
+            </section>
+          </section>
+
+        <!-- Update Form -->
+        <section *ngIf="editingVenue" class="update-form">
+            <h2>Update Venue: {{ editingVenue.venuename }}</h2>
+
+            <label>Venue Name</label>
+            <input type="text" [(ngModel)]="updateData.venuename" placeholder="Add new venue name" />
+
+            <label>Description</label>
+            <input type="text" [(ngModel)]="updateData.description" placeholder="Add new description" />
+
+            <label>Address</label>
+            <input type="text" [(ngModel)]="updateData.address" placeholder="Add new address" />
+
+            <label>Email</label>
+            <input type="email" [(ngModel)]="updateData.email" placeholder="Add new email" />
+
+            <label>Phone Number</label>
+            <input type="text" [(ngModel)]="updateData.phonenumber" placeholder="Add new phone number" />
+
+            <label>Capacity</label>
+            <input type="number" [(ngModel)]="updateData.capacity" placeholder="Add new capacity" />
+
+            <label>Price</label>
+            <input type="number" [(ngModel)]="updateData.price" placeholder="Add new price" />
+
+            <section class="form-buttons">
+                <button (click)="SubmitUpdate()">Update</button>
+                <button (click)="CancelUpdate()">Cancel</button>
+            </section>
+          </section>
+
+      </section>
+
+    <ng-template #noVenues>
+        <p>NEED TO PUT VENDOR INFOMATIONS</p>
+    </ng-template>
+
+  </section>
+
+
+
+  <!-- If no vendor company -->
+  <section class="create-venue-company" *ngIf="hasVenueCompany === false">
+    <section class="venue-company-card">
+      <img src="assets/logo.jpg" alt="Vows & Veils logo" class="logo" />
+      <h2>Join as a venue company</h2>
+      <p>Fill in the details below to get started!</p>
+    </section>
+
+    <section class="venue-company-form">
+      <form [formGroup]="form" (ngSubmit)="createVenueCompany()">
+        <label>Company Name:</label>
+        <input formControlName="companyName" />
+
+        <label>Contact Email:</label>
+        <input type="email" formControlName="companyEmail" />
+
+        <label>Phone Number:</label>
+        <input formControlName="companyNumber" />
+
+        <button type="submit" [disabled]="form.invalid">Create venue account</button>
+      </form>
+    </section>
+  </section>
+
+</section>
