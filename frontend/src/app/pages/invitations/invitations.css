@@ -256,7 +256,12 @@
 .text.date  { bottom: 27%; font-size: 1.05rem; }
 .text.venue { bottom: 23%; font-size: 1.05rem; }
 .text.message {bottom: 10%; font-size: .98rem; line-height: 1.3; width: 100%; left: 0; text-align: center; padding: 0;}
-
+.text.website {bottom: 5%; font-size: .98rem; line-height: 1.3; width: 100%; left: 0; text-align: center; padding: 0;}
+.text.website .link {
+  font-family: Arial, sans-serif;
+  overflow-wrap: anywhere; 
+  word-break: break-word;   
+}
 .hint { font-size: .85rem; color: #666; }
 
 
