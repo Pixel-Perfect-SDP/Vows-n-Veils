@@ -91,7 +91,7 @@ router.get('/:id', async (req, res) => {
           action: 'read',
           expires: Date.now() + 60 * 60 * 1000,
         });
-        return {url, name: file.name }; ;
+        return {url, name: file.name };
       })
     );
 
@@ -283,7 +283,7 @@ router.get('/company/:companyID', async (req, res) => {
               action: 'read',
               expires: Date.now() + 60 * 60 * 1000, 
             });
-            return url;
+            return { url, name: file.name };
           })
         );
 
