@@ -334,51 +334,53 @@ const multerUpdate = multer({ storage: multer.memoryStorage(), limits: { fileSiz
 router.put('/:id/images', multerUpdate.array('newImages', 6), async (req, res) => {
   try {
     const venueId = req.params.id;
-    
-    const deleteImages = req.body.deleteImages ? JSON.parse(req.body.deleteImages) : [];
-
-    if (deleteImages.length > 0) {
-      await Promise.all(
-        deleteImages.map(async (imgUrl) => {
-          const filePath = decodeURIComponent(imgUrl.split('/o/')[1].split('?')[0]);
-          const file = bucket.file(filePath);
-          await file.delete();
-        })
-      );
-    }
-
-    const newImageUrls = [];
-    if (req.files && req.files.length > 0) {
-      await Promise.all(
-        req.files.map(async (file, idx) => {
-          const fileName = `venues/${venueId}/${Date.now()}_${idx}_${file.originalname}`;
-          const blob = bucket.file(fileName);
-          await blob.save(file.buffer, { metadata: { contentType: file.mimetype } });
-          const [url] = await blob.getSignedUrl({ action: 'read', expires: Date.now() + 60 * 60 * 1000 });
-          newImageUrls.push(url);
-        })
-      );
-    }
-
-    // Fetch existing venue
     const venueRef = db.collection('Venues').doc(venueId);
     const docSnap = await venueRef.get();
+
     if (!docSnap.exists) return res.status(404).json({ error: 'Venue not found' });
 
-    // Combine existing images with new images, remove deleted ones
-    const existingImages = docSnap.data().images || [];
-    const updatedImages = existingImages.filter(img => !deleteImages.includes(img)).concat(newImageUrls);
+    const venueData = docSnap.data();
+    let existingFiles = venueData.images || []; // store filenames
 
-    // Parse venueData from request and update Firestore
-    const venueData = req.body.venueData ? JSON.parse(req.body.venueData) : {};
-    await venueRef.update({ ...venueData, images: updatedImages });
+    // Delete images
+    const deleteImages = req.body.deleteImages ? JSON.parse(req.body.deleteImages) : [];
+    if (deleteImages.length > 0) {
+      const filesToDelete = existingFiles.filter(f => deleteImages.includes(f));
+      await Promise.all(filesToDelete.map(fileName => bucket.file(fileName).delete()));
+      // Remove deleted filenames from Firestore
+      existingFiles = existingFiles.filter(f => !deleteImages.includes(f));
+    }
 
-    res.json({ ok: true, images: updatedImages });
+    // Add new images
+    if (req.files && req.files.length > 0) {
+      for (let i = 0; i < req.files.length; i++) {
+        const file = req.files[i];
+        const fileName = `venues/${venueId}/${Date.now()}_${i}_${file.originalname}`;
+        const blob = bucket.file(fileName);
+        await blob.save(file.buffer, { metadata: { contentType: file.mimetype } });
+        existingFiles.push(fileName);
+      }
+    }
+
+    // Update Firestore
+    await venueRef.update({ images: existingFiles });
+
+    // Generate signed URLs to return to frontend
+    const signedUrls = await Promise.all(
+      existingFiles.map(async (fileName) => {
+        const [url] = await bucket.file(fileName).getSignedUrl({
+          action: 'read',
+          expires: Date.now() + 60 * 60 * 1000, // 1 hour
+        });
+        return url;
+      })
+    );
+
+    res.json({ ok: true, images: signedUrls });
 
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });
   }
 });
-
 module.exports = router;

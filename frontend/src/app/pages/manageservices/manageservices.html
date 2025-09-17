@@ -118,16 +118,21 @@
         <input type="number" [(ngModel)]="updateData.price" placeholder="Add new price" />
 
         <!-- Existing images -->
-        <div class="image-list">
+        <div class="image-list" *ngIf="editingVenue.images?.length > 0">
           <div class="image-item" *ngFor="let img of editingVenue.images; let i = index">
-            <img [src]="img" alt="Venue Image" />
-            <label>
+            <img *ngIf="img" [src]="img" alt="Venue Image" />
+            <label *ngIf="img">
               <input type="checkbox" [(ngModel)]="updateData.imagesToDelete[i]" />
               Delete
             </label>
-            <p class="disclaimer">Deleted images cannot be retrieved once the update button is pressed.</p>
+
+            <p class="disclaimer" *ngIf="img">
+              Deleted images cannot be retrieved once the update button is pressed.
+            </p>
           </div>
         </div>
+
+
 
         <!-- Add new images -->
         <label>Upload New Images (optional)</label>

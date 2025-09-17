@@ -180,6 +180,8 @@ onNewFilesSelected(event: any) {
   UpdateVenue(venue: any) {
     this.editingVenue = { ...venue };
     this.updateData = { ...venue };
+
+   this.updateData.imagesToDelete = this.editingVenue.images?.map(() => false) || [];
   }
 
 async SubmitUpdate() {
