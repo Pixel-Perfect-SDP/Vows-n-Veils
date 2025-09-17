@@ -1,72 +1,134 @@
-<section class="landing-page">
-<div class="landing-container">
-  <!-- Hero -->
-  <header class="hero">
-    <img src="assets/logo.jpg" alt="Vows & Veils logo" class="logo" />
+<!-- Splash Screen -->
+<section class="splash">
+  
+  <svg class="heart-outline" viewBox="0 0 200 180" xmlns="http://www.w3.org/2000/svg">
+    <path d="M100 160 
+             L30 80 
+             A35 35 0 0 1 100 40 
+             A35 35 0 0 1 170 80 
+             Z"
+          fill="none"
+          stroke="url(#gold)"
+          stroke-width="3"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-dasharray="600"
+          stroke-dashoffset="600" />
+    <defs>
+      <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#d4af37"/>
+        <stop offset="50%" stop-color="#f6e27a"/>
+        <stop offset="100%" stop-color="#d4af37"/>
+      </linearGradient>
+    </defs>
+  </svg>
+
+  <section class="splash-text">
     <h1>Vows & Veils</h1>
-    <p class="subtitle">Crafting timeless memories for your special day</p>
-  </header>
-
-  <!-- Info panels (2 only) -->
-  <section class="image-panels">
-    <div class="panel">
-      <h2>Venues & Invitations</h2>
-      <p>Discover elegant venues and bespoke invitations tailored to you.</p>
-    </div>
-
-    <div class="panel">
-      <h2>Cakes & Catering</h2>
-      <p>Indulge in delightful creations for your guests to enjoy.</p>
-    </div>
+    <p>Your Day, Your Story</p>
   </section>
 
-  <!-- Account / actions -->
-  @if (auth.user(); as u) {
-    <section class="account-area">
-      <p class="greeting">Hi {{ u.email ?? 'there' }} 👋</p>
+  <section class="petal"></section>
+  <section class="petal"></section>
+  <section class="petal"></section>
+  <section class="petal"></section>
+  <section class="petal"></section>
+</section>
 
-      <!-- Removed the 'Load recent test-users' button -->
 
-      @if (docs.length) {
-        <ul class="recent-list">
-          @for (d of docs; track d.id) {
-            <li class="recent-item">
-              <strong>{{ d.name || '(no name)' }}</strong>
-              <span class="sep">—</span>
-              <span class="muted">{{ d.email }}</span>
-            </li>
-          }
-        </ul>
-      }
+<!--PAGE AFTER THE SLIDE UP-->
+<section class="landing-page">
+  <section class="topBar">
+    <img src="assets/logo.jpg" alt="Vows & Veils logo" class="logo" />
+    <h1>Vows & Veils</h1>    
+  </section>
+
+
+  <section class="intro">
+    <h2>Plan your perfect wedding day</h2>
+    <p>
+      From intimate ceremonies to grand celebrations, we connect you with the finest vendors and provide seamless planning tools to make your special day unforgettable.
+    </p>
+
+    <section class="rings-animation">
+    <section class="ring left-ring"></section>
+    <section class="ring right-ring"></section>
+    <section class="heart">❤</section>
     </section>
-  } @else {
-    <section class="account-area">
-      <!--<p class="muted">You’re not signed in.</p>-->
-      <a class="btn" routerLink="/RSVP">Find a couple</a>
-      <a class="btn" routerLink="/login">Plan my wedding</a>
+
+    <button class="hero-btn" routerLink="/login">Start planning your wedding →</button>
+  </section>
+
+    <!-- Cards Section -->
+  <section class="cards">
+    <section class="card">
+      <span class="material-symbols-outlined icon">storefront</span>
+      <h3>For Companies</h3>
+      <p>Join our network of trusted wedding vendors and venue providers and grow your business.</p>
+      <button (click)="toggleCompaniesPopup()" class="cardBtn">Add Your Services</button>
     </section>
-  }
-
-  <!-- Footer -->
-  <footer class="site-footer">
-    <span>© {{ year }} Vows & Veils</span>
-  </footer>
-</div>
-<section>
-
-<!-- Companies button and popup -->
- <button (click)="toggleCompaniesPopup()" class="companies-button">Companies</button>
- <button class="supportBtn" routerLink="/support-page">Support</button>
+    <section class="card">
+      <span class="material-symbols-outlined icon">mail</span>
+      <h3>RSVP Portal</h3>
+      <p>Guests can easily respond to wedding invitations and manage attendance.</p>
+      <button class="cardBtn" routerLink="/RSVP">RSVP to a Wedding</button>
+    </section>
+    <section class="card">
+       <span class="material-symbols-outlined icon">help</span>
+      <h3>Support & FAQ</h3>
+      <p>Get help with planning, technical support, and answers to common questions.</p>
+      <button class="cardBtn" routerLink="/support-page">Get Support</button>
+    </section>
+  </section>
+</section>
 
 <section class="companies-popup" *ngIf="companiesPopup">
   <section class="popup-content">
     <button (click)="toggleCompaniesPopup()" class="close-button">X</button>
     <h3>Choose a section</h3>
     <section class="popup-buttons">
-      <button (click)="onGoogleVenue()">Venue company</button>
-      <button (click)="onGoogleVendor()">Vendor company</button>
-      <button (click)="onGoogleAdmin()">Admin</button>
+      <button (click)="onGoogleVenue()"> <span class="material-symbols-outlined">castle</span>  Venue company</button>
+      <button (click)="onGoogleVendor()"> <span class="material-symbols-outlined">local_florist</span>  Vendor company</button>
+      <button (click)="onGoogleAdmin()"><span class="material-symbols-outlined">manage_accounts</span>  Admin</button>
     </section>
 
   </section>
+</section>
+
+
+<section class="next-section">
+  <h2 class="nextHeading">Everything You Need for Your</h2>
+  <h2 class="nextHeading-pw">Perfect Wedding</h2>
+  <p>From the first "yes" to "I do" and beyond, we're here to help you create the wedding of your dreams with our comprehensive suite of planning tools and services.</p>
+
+ <section class="offer-cards">
+    <section class="offer-card">
+      <h3>Vendor Directory</h3>
+      <p>Discover a curated list of trusted florists, photographers, caterers, and more to bring your vision to life.</p>
+    </section>
+    <section class="offer-card">
+      <h3>Venue Directory</h3>
+      <p>Browse stunning venues tailored to every style, from intimate gardens to grand ballrooms.</p>
+    </section>
+    <section class="offer-card">
+      <h3>Guest Management</h3>
+      <p>Effortlessly track RSVPs, seating plans, dietary needs, and special requests in one place.</p>
+    </section>
+    <section class="offer-card">
+      <h3>Custom Invitations</h3>
+      <p>Create elegant, personalized invitations that set the tone for your celebration.</p>
+    </section>
+    <section class="offer-card">
+      <h3>Countdown timer</h3>
+      <p>Keep the excitement alive with a live countdown to your big day.</p>
+    </section>
+    <section class="offer-card">
+      <h3>Weather forecast</h3>
+      <p>Plan with confidence using accurate forecasts to prepare for every possibility.</p>
+    </section>
   </section>
+
+  <button class="btnNext" routerLink="/login">Get Started →</button>
+</section>
+
+
