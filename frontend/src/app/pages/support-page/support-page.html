@@ -1,4 +1,5 @@
 <section class="support-page">
+  <button class="backLandingBtn" routerLink="/landing">Back</button>
   <h1>Welcome to Vows & Veils Support</h1>
 
   <section class="siteSummary">
@@ -99,7 +100,7 @@
     [(ngModel)]="searchTerm" 
     class="search-bar"
     />
-    
+
      <section class="faq-item" *ngIf="matchesSearch('How do I RSVP to a wedding?')">
       <h4>How do I RSVP to a wedding?</h4>
       <p>Enter the invitation code given to you by the couple when prompted, and fill in the required details.</p>

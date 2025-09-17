@@ -180,3 +180,38 @@
   font-size: 1rem;
 }
 
+
+.backLandingBtn {
+  background-color: #f8e9f0; /* soft pink */
+  color: #444; /* subtle grey text */
+  border: 2px solid #d6d6d6; /* light grey border */
+  padding: 0.6rem 1.2rem;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: "Segoe UI", Arial, sans-serif;
+}
+
+/* Hover effect */
+.backLandingBtn:hover {
+  background-color: #d7e2d0; /* sage green */
+  color: #222;
+  border-color: #b5c4b0;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+}
+
+/* Active / clicked */
+.backLandingBtn:active {
+  background-color: #c9d8c1;
+  transform: scale(0.97);
+}
+
+/* Focus outline for accessibility */
+.backLandingBtn:focus {
+  outline: 3px solid #e2cad9; /* pink focus glow */
+  outline-offset: 2px;
+}
+
+
