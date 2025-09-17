@@ -297,5 +297,88 @@ router.get('/company/:companyID', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+/**
+ * @swagger
+ * /venues/{id}/images:
+ *   put:
+ *     summary: Update venue images (delete old ones, add new ones)
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Venue ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               deleteImages:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               newImages:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Images updated successfully
+ */
+const multerUpdate = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
+
+router.put('/:id/images', multerUpdate.array('newImages', 6), async (req, res) => {
+  try {
+    const venueId = req.params.id;
+    
+    const deleteImages = req.body.deleteImages ? JSON.parse(req.body.deleteImages) : [];
+
+    if (deleteImages.length > 0) {
+      await Promise.all(
+        deleteImages.map(async (imgUrl) => {
+          const filePath = decodeURIComponent(imgUrl.split('/o/')[1].split('?')[0]);
+          const file = bucket.file(filePath);
+          await file.delete();
+        })
+      );
+    }
+
+    const newImageUrls = [];
+    if (req.files && req.files.length > 0) {
+      await Promise.all(
+        req.files.map(async (file, idx) => {
+          const fileName = `venues/${venueId}/${Date.now()}_${idx}_${file.originalname}`;
+          const blob = bucket.file(fileName);
+          await blob.save(file.buffer, { metadata: { contentType: file.mimetype } });
+          const [url] = await blob.getSignedUrl({ action: 'read', expires: Date.now() + 60 * 60 * 1000 });
+          newImageUrls.push(url);
+        })
+      );
+    }
+
+    // Fetch existing venue
+    const venueRef = db.collection('Venues').doc(venueId);
+    const docSnap = await venueRef.get();
+    if (!docSnap.exists) return res.status(404).json({ error: 'Venue not found' });
+
+    // Combine existing images with new images, remove deleted ones
+    const existingImages = docSnap.data().images || [];
+    const updatedImages = existingImages.filter(img => !deleteImages.includes(img)).concat(newImageUrls);
+
+    // Parse venueData from request and update Firestore
+    const venueData = req.body.venueData ? JSON.parse(req.body.venueData) : {};
+    await venueRef.update({ ...venueData, images: updatedImages });
+
+    res.json({ ok: true, images: updatedImages });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
 
 module.exports = router;

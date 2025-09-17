@@ -36,7 +36,7 @@ export class Manageservices implements OnInit {
   selectedFiles: FileList | null = null;
   editingVenue: any = null;
   updateData: any = {};
-  
+  newUpdateFiles: FileList | null = null;
   addingVenue: boolean = false;
   newVenueData: any = {};
 
@@ -174,23 +174,56 @@ export class Manageservices implements OnInit {
   }
 
   // update venue
+onNewFilesSelected(event: any) {
+  this.newUpdateFiles = event.target.files;
+}
   UpdateVenue(venue: any) {
     this.editingVenue = { ...venue };
     this.updateData = { ...venue };
   }
 
-  SubmitUpdate() {
-    if (!this.editingVenue || !this.user) return;
-    this.updateData.companyID = this.user.uid;
-    this.loading = true;
-    delete this.updateData.images;
+async SubmitUpdate() {
+  if (!this.editingVenue || !this.user) return;
+  this.loading = true;
 
-    this.http.put(`https://site--vowsandveils--5dl8fyl4jyqm.code.run/venues/${this.editingVenue.id}`, this.updateData)
-      .subscribe({
-        next: () => { alert('Venue updated successfully!'); this.editingVenue = null; this.fetchVenues();   this.loading = false;},
-        error: err => { console.error('Error updating venue', err); alert('Failed to update venue.'); this.loading=false;}
-      });
+  try {
+    const venueId = this.editingVenue.id;
+
+    // Prepare images to delete
+    const imagesToDelete = this.updateData.imagesToDelete
+      ?.map((v: boolean, idx: number) => (v ? this.editingVenue.images[idx] : null))
+      .filter((v: string | null) => v !== null) || [];
+
+    const formData = new FormData();
+    formData.append('deleteImages', JSON.stringify(imagesToDelete));
+
+    if (this.newUpdateFiles) {
+      for (let i = 0; i < this.newUpdateFiles.length; i++) {
+        formData.append('newImages', this.newUpdateFiles[i]);
+      }
+    }
+
+    const venueData = { ...this.updateData };
+    delete venueData.images;
+    delete venueData.imagesToDelete;
+    formData.append('venueData', JSON.stringify(venueData));
+
+    const apiUrl = `https://site--vowsandveils--5dl8fyl4jyqm.code.run/venues/${venueId}/images`;
+    const result: any = await this.http.put(apiUrl, formData).toPromise();
+
+    this.editingVenue.images = result.images || [];
+    alert('Venue updated successfully!');
+    this.editingVenue = null;
+    this.fetchVenues();
+  } catch (err) {
+    console.error('Error updating venue', err);
+    alert('Failed to update venue.');
+  } finally {
+    this.loading = false;
+    this.newUpdateFiles = null;
   }
+}
+
 
   CancelUpdate() { this.editingVenue = null; }
 

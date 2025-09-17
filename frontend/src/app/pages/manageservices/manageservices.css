@@ -611,3 +611,35 @@
   border-radius: 12px;
   margin-top: 6px;
 }
+.image-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.image-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 150px;
+}
+
+.image-item img {
+  width: 100%;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 5px;
+}
+
+.image-item label {
+  margin-bottom: 3px;
+  font-weight: bold;
+}
+
+.image-item .disclaimer {
+  font-size: 11px;
+  color: #b00;
+  text-align: center;
+}
