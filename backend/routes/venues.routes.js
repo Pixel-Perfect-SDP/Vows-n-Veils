@@ -1,3 +1,4 @@
+const multer = require('multer');
 const express = require('express');
 const admin = require('firebase-admin');
 
@@ -143,17 +144,34 @@ router.get('/:id', async (req, res) => {
  *       400:
  *         description: Missing required fields
  */
-router.post('/', async (req, res) => {
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 } 
+});
+
+router.post('/', upload.array('images', 6), async (req, res) => {
   try {
-    const venue = req.body;
+    const venue = JSON.parse(req.body.venue); 
+
     if (!venue.venuename || !venue.address || !venue.capacity ||
-      !venue.companyID || !venue.description || !venue.email ||
-      !venue.phonenumber || !venue.price) {
+        !venue.companyID || !venue.description || !venue.email ||
+        !venue.phonenumber || !venue.price || !venue.status) {
       return res.status(400).json({ error: 'Some fields are missing' });
     }
     const ref = await db.collection('Venues').add(venue);
-    res.status(201).json({ id: ref.id });
+    if (req.files && req.files.length > 0) {
+      await Promise.all(req.files.map((file, idx) => {
+        const fileName = `venues/${ref.id}/${Date.now()}_${idx}_${file.originalname}`;
+        const blob = bucket.file(fileName);
+        return blob.save(file.buffer, {
+          metadata: { contentType: file.mimetype }
+        });
+      }));
+    }
+    res.status(201).json({ id: ref.id, message: 'Venue created successfully' });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: err.message });
   }
 });

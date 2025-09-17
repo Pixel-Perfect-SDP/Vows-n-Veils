@@ -33,10 +33,10 @@ export class Manageservices implements OnInit {
   selected: string | null = null;
   venues: any[] = [];
   loading: boolean = false;
-
+  selectedFiles: FileList | null = null;
   editingVenue: any = null;
   updateData: any = {};
-
+  
   addingVenue: boolean = false;
   newVenueData: any = {};
 
@@ -164,8 +164,8 @@ export class Manageservices implements OnInit {
       alert("No user logged in!");
       return;
     }
-    const companyID = this.user.uid;
     this.loading = true;
+    const companyID = this.user.uid;
     this.http.get<any[]>(`https://site--vowsandveils--5dl8fyl4jyqm.code.run/venues/company/${companyID}`)
       .subscribe({
         next: data => { this.venues = data; this.loading = false; },
@@ -182,13 +182,13 @@ export class Manageservices implements OnInit {
   SubmitUpdate() {
     if (!this.editingVenue || !this.user) return;
     this.updateData.companyID = this.user.uid;
-
+    this.loading = true;
     delete this.updateData.images;
 
     this.http.put(`https://site--vowsandveils--5dl8fyl4jyqm.code.run/venues/${this.editingVenue.id}`, this.updateData)
       .subscribe({
-        next: () => { alert('Venue updated successfully!'); this.editingVenue = null; this.fetchVenues(); },
-        error: err => { console.error('Error updating venue', err); alert('Failed to update venue.'); }
+        next: () => { alert('Venue updated successfully!'); this.editingVenue = null; this.fetchVenues();   this.loading = false;},
+        error: err => { console.error('Error updating venue', err); alert('Failed to update venue.'); this.loading=false;}
       });
   }
 
@@ -203,9 +203,14 @@ export class Manageservices implements OnInit {
       email: '',
       phonenumber: '',
       capacity: null,
-      price: null
+      price: null,
+      status:"pending"
     };
   }
+
+  onFileSelected(event: any): void {
+  this.selectedFiles = event.target.files; 
+}
 
   SubmitNewVenue() {
     if (!this.user) {
@@ -213,13 +218,20 @@ export class Manageservices implements OnInit {
       return;
     }
     this.newVenueData.companyID = this.user.uid;
-
+    this.loading = true;
     delete this.newVenueData.images;
-
+    
+  const formData = new FormData();
+  formData.append('venue', JSON.stringify(this.newVenueData));
+  if (this.selectedFiles) {
+    for (let i = 0; i < this.selectedFiles.length; i++) {
+      formData.append('images', this.selectedFiles[i]);
+    }
+  }
     this.http.post(`https://site--vowsandveils--5dl8fyl4jyqm.code.run/venues`, this.newVenueData)
       .subscribe({
-        next: () => { alert('New venue added successfully!'); this.addingVenue = false; this.fetchVenues(); },
-        error: err => { console.error('Error adding venue', err); alert('Failed to add venue.'); }
+        next: () => { alert('New venue added successfully!'); this.addingVenue = false; this.fetchVenues(); this.loading=false;},
+        error: err => { console.error('Error adding venue', err); alert('Failed to add venue.'); this.loading=false;}
       });
   }
 
@@ -229,16 +241,20 @@ export class Manageservices implements OnInit {
   DeleteVenue(venue: any) {
     const confirmDelete = confirm(`Are you sure you want to delete "${venue.venuename}"? This cannot be undone!`);
     if (!confirmDelete) return;
-
+  this.loading=true;
     this.http.delete(`https://site--vowsandveils--5dl8fyl4jyqm.code.run/venues/${venue.id}`)
       .subscribe({
         next: () => {
           alert(`Venue "${venue.venuename}" deleted successfully!`);
           this.fetchVenues();
+          this.loading = false;
+
         },
         error: (err) => {
           console.error('Error deleting venue', err);
           alert('Failed to delete venue.');
+          this.loading = false;
+
         }
       });
   }

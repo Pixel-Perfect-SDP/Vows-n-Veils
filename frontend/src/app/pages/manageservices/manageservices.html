@@ -6,6 +6,12 @@
 <section class="Loading-2"></section>
   </section>
 
+  <section class="loading-overlay" *ngIf="loading">
+  <div class="loading-content">
+    <p>Loading...</p>
+  </div>
+</section>
+
   <!-- If venue company exists -->
   <section class="has-venue-company" *ngIf="hasVenueCompany && companyVenueData">
     <nav class="sidebar">
@@ -61,8 +67,8 @@
             <label>Price:</label>
             <input type="number" [(ngModel)]="newVenueData.price" placeholder="Add venue price" />
 
-            <!--<label>Image Placeholder:</label>
-            <input type="text" disabled value="placeholder-image.jpg" />-->
+            <label>Upload Images (max 6):</label>
+            <input type="file" (change)="onFileSelected($event)" multiple accept="image/*" />
 
             <section class="form-buttons">
                 <button (click)="SubmitNewVenue()">Add Venue</button>
@@ -75,8 +81,10 @@
             <section class="card" *ngFor="let venue of venues">
                 <h3>{{ venue.venuename }}</h3>
                 <img *ngIf="venue.images && venue.images[1]" [src]="venue.images[1]" alt="{{venue.venuename}}" />
+                <label class="statuslabel">Status:{{venue.status}}</label>
                 <button class="btn" (click)="UpdateVenue(venue)">Update Venue Details</button>
-                  <button class="btn delete-btn" (click)="DeleteVenue(venue)">Delete Venue</button>
+                <button class="btn delete-btn" (click)="DeleteVenue(venue)">Delete Venue</button>
+                  
 
             </section>
           </section>
