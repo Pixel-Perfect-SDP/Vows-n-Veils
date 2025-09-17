@@ -1,0 +1,175 @@
+<section class="support-page">
+  <button class="backLandingBtn" routerLink="/landing">Back</button>
+  <h1>Welcome to Vows & Veils Support</h1>
+
+  <section class="siteSummary">
+    <p>  At Vows & Veils, we support everyone involved in making weddings special. 
+        Whether you’re a couple planning your big day, a guest attending a celebration, 
+        or a company offering venues and services, you’ll find guidance here.
+  </p>
+  <p> Choose a section below to get answers to common questions and step-by-step help.</p>
+  </section>
+
+  <!-- Show cards only if no section selected -->
+  <section class="support-grid" *ngIf="!selectedSection">
+    <section class="support-card couples" (click)="selectSection('couples')">
+      <span class="material-symbols-outlined">partner_heart</span>
+      <h2>For Couples</h2>
+      <p>Plan and manage your wedding</p>
+    </section>
+
+    <section class="support-card guests" (click)="selectSection('guests')">
+      <span class="material-symbols-outlined">rsvp</span>
+      <h2>For Guests</h2>
+      <p>RSVP and view wedding details</p>
+    </section>
+
+    <section class="support-card companies" (click)="selectSection('companies')">
+      <span class="material-symbols-outlined">store</span>
+      <h2>For Companies</h2>
+      <p>List your venues & vendor services</p>
+    </section>
+  </section>
+
+  <!-- Couples FAQ -->
+  <section class="faq-section" *ngIf="selectedSection === 'couples'">
+    <button class="back-btn" (click)="goBack()">← Back</button>
+    <h2>Couples Support</h2>
+
+    <input 
+    type="text" 
+    placeholder="Search questions..." 
+    [(ngModel)]="searchTerm" 
+    class="search-bar"
+    />
+
+    <section class="faq-item" *ngIf="matchesSearch('How do I start planning my wedding on Vows & Veils?')">
+      <h4>💍 How do I start planning my wedding on Vows & Veils?</h4>
+      <p>Sign in using Google and fill in basic wedding details on the provided form.</p>
+    </section>
+    <section class="faq-item" *ngIf="matchesSearch('What do I do once I have signed in?')">
+      <h4>What do I do once I have signed in?</h4>
+      <p>Begin planning your special day by selecting a wedding venue, adding guests, creating an invitation, and choosing vendor services. It is recommneded that you follow this order.</p>
+    </section>
+    <section class="faq-item" *ngIf="matchesSearch('How do I choose a wedding venue?')">
+      <h4>How do I choose a wedding venue?</h4>
+      <p>Go to your dashboard and select "Venues" on the sidebar. You will be shown various available options where you can then view more details about each venue. Click the "select" button to choose that venue.</p>
+    </section>
+    <section class="faq-item" *ngIf="matchesSearch('How do I add guests?')">
+        <h4>How do I add guests?</h4>
+        <p>Go to your dashboard and select "Guests" on the sidebar. You will be shown a button to add guests, where you can enter details for your guest and add them to your guest list. Next, you will be shown a code which you must give to your guests for them to RSVP.</p>
+    </section>
+     <section class="faq-item" *ngIf="matchesSearch('How does the RSVP code work?')">
+      <h4>How does the RSVP code work?</h4>
+      <p>When you add guests to your guest list, you will be shown a code to give to your guests to RSVP. This ensures that only your allowed quests are able to RSVP to your wedding. Guests will then enter the code into the RSVP section when they are ready.</p>
+    </section>
+     <section class="faq-item" *ngIf="matchesSearch('What if a guest is not able to RSVP online?')">
+      <h4>What if a guest is not able to RSVP online?</h4>
+      <p>No problem! When you add a guest to your guest list, you can set their status to accepted manually, and they will be shown on your accepted guests.</p>
+    </section>
+     <section class="faq-item" *ngIf="matchesSearch('Do I have to fill in all the details when adding a new guest?')">
+      <h4>Do I have to fill in all the details when adding a new guest?</h4>
+      <p>Nope! The only required detail you need to fill in to ensure a guest can RSVP is their full name.</p>
+    </section>
+     <section class="faq-item" *ngIf="matchesSearch('How do I create an invitation?')">
+      <h4>How do I create an invitation?</h4>
+      <p>Go to your dashboard and select "Invitations" on the sidebar. You will be shown various invitation templates, where you can choose one and add a message and picture.</p>
+    </section>
+     <section class="faq-item" *ngIf="matchesSearch('How do I send the invitations to my guests?')">
+      <h4>How do I send the invitations to my guests?</h4>
+      <p>Once you completed your invitation, you will be able to download it and send it to your guests. It includes a link to the website for guests to RSVP, so make sure you send guests your wedding code along with the invitation!</p>
+    </section>
+     <section class="faq-item" *ngIf="matchesSearch('How do I choose vendor services?')">
+      <h4>How do I choose vendor services?</h4>
+      <p>Go to your dashboard and select "Vendors" on the sidear. You will be shown various vendor services which shows the price of the service as well as the maximum amount of guests catered for. If you like a service, click "Order", and you will be shown an order form to send to the vendor company.</p>
+    </section>
+     <section class="faq-item" *ngIf="matchesSearch('How will I know the price of venues and vendor services?')">
+      <h4>How will I know the price of venues and vendor services?</h4>
+      <p>The company owning your selected venue or vendor service will contact your privately to discuss payment options. This is not done on-site.</p>
+    </section>
+  </section>
+
+  <!-- Guests FAQ -->
+  <section class="faq-section" *ngIf="selectedSection === 'guests'">
+    <button class="back-btn" (click)="goBack()">← Back</button>
+    <h2>Guests Support</h2>
+
+    <input 
+    type="text" 
+    placeholder="Search questions..." 
+    [(ngModel)]="searchTerm" 
+    class="search-bar"
+    />
+
+     <section class="faq-item" *ngIf="matchesSearch('How do I RSVP to a wedding?')">
+      <h4>How do I RSVP to a wedding?</h4>
+      <p>Enter the invitation code given to you by the couple when prompted, and fill in the required details.</p>
+    </section>
+     <section class="faq-item" *ngIf="matchesSearch('What if I am unable to RSVP on the website?')">
+      <h4>What if I am unable to RSVP on the website?</h4>
+      <p>Let the couple know and they will manually RSVP for you?</p>
+    </section>
+  </section>
+
+  <!-- Companies FAQ -->
+  <section class="faq-section" *ngIf="selectedSection === 'companies'">
+    <button class="back-btn" (click)="goBack()">← Back</button>
+    <h2>Companies Support</h2>
+
+    <input 
+    type="text" 
+    placeholder="Search questions..." 
+    [(ngModel)]="searchTerm" 
+    class="search-bar"
+    />
+
+     <section class="faq-item" *ngIf="matchesSearch('How do I add my company to the website?')">
+      <h4>How do I add my company to the website?</h4>
+      <p>Sign in using Google for the company type you want (venue/vendor) and fill in basic company details on the provided form to add your company to the website. This will then allow you to add your venues or vendor services for your company.</p>
+    </section>
+     <section class="faq-item" *ngIf="matchesSearch('How do I add a venue to my company profile?')">
+      <h4>How do I add a venue to my company profile?</h4>
+      <p>Make sure that you have created a company profile specifically for venues company. Go to your dashbaord and click the "Add venue" button. You will then be prompted to enter basic venue details, and you can submit this venue to be reviewed by the admin. Once the admin has approved your venue, it will be available on the main page for couples to choose from.</p>
+    </section>
+     <section class="faq-item" *ngIf="matchesSearch('Can I delete a venue that I no longer have available?')">
+      <h4>Can I delete a venue that I no longer have available?</h4>
+      <p>Yes! Go to your venue company dashbaord and click the "Delete venue" button on the venue that you no longer want.</p>
+    </section>
+     <section class="faq-item" *ngIf="matchesSearch('Can I edit the details of a venue that has already been added?')">
+      <h4>Can I edit the details of a venue that has already been added?</h4>
+      <p>Yes! Go to your venue company dashboard and click the "Edit venue" button on the venue that you want to edit.</p>
+    </section>
+     <section class="faq-item" *ngIf="matchesSearch('How do I add a vendor service?')">
+      <h4>How do I add a vendor service?</h4>
+      <p>Make sure that you have created a company profile specifically for vendor companies. Go to your dashboard and click the "Add service" button. You will then be prompted to enter basic vendor service details, and you can submit this vendor service to be reviewed by the admin. Once the admin has approved your vendor service, it will be available on the main page for couples to choose from.</p>
+    </section>
+     <section class="faq-item" *ngIf="matchesSearch('Can I delete a vendor service that I no longer offer?')">
+      <h4>Can I delete a vendor service that I no longer offer?</h4>
+      <p>Yes! Go to your vendor company dashboard and click the "Delete service" button on the vendor service that you no longer offer.</p>
+    </section>
+     <section class="faq-item" *ngIf="matchesSearch('Can I have different types of vendor services in one company?')">
+      <h4>Can I have different types of vendor services in one company?</h4>
+      <p>Yes! When you add a new vendor service, you will choose the category of the new service to be added.</p>
+    </section>
+     <section class="faq-item" *ngIf="matchesSearch('What if I have one company that offers both venues and vendor services?')">
+      <h4>What if I have one company that offers both venues and vendor services?</h4>
+      <p>No problem! However, you will need to create a company profile for venues and vendors seperately.</p>
+    </section>
+     <section class="faq-item" *ngIf="matchesSearch('How do I know if the admin has approved my venue or vendor service?')">
+      <h4>How do I know if the admin has approved my venue or vendor service?</h4>
+      <p>The status of your venue or vendor service will be set to "Active" if the admin has approved it. If the admin has not yet reviewed your venue or vendor service, the status will be set to "Pending".</p>
+    </section>
+     <section class="faq-item" *ngIf="matchesSearch('What if the admin does not approve my venue or vendor service?')">
+      <h4>What if the admin does not approve my venue or vendor service?</h4>
+      <p>Unfortunately, your venue or vendor service will not be available for couples to choose from. However, you can reapply for the admin to review your venue or vendor service again.</p>
+    </section>
+     <section class="faq-item" *ngIf="matchesSearch('How do I accept or decline a couples request for my venue or vendor service?')">
+      <h4>How do I accept or decline a couples request for my venue or vendor service?</h4>
+      <p>Go to your respective company dashboard. You will see a couples pending order, and a status bar available for you to change to "Accept" or "Decline".</p>
+    </section>
+     <section class="faq-item" *ngIf="matchesSearch('How do payments work?')">
+      <h4>How do payments work?</h4>
+      <p>Payments are arranged between the company and the couple privately. This is not done on-site.</p>
+    </section>
+  </section>
+</section>

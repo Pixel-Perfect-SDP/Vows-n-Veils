@@ -9,6 +9,7 @@ import { getApp } from 'firebase/app';
 import { AuthService } from '../../core/auth';
 import { RouterModule } from '@angular/router';
 import { Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 
 type ServiceDoc = {
   id: string;
@@ -40,7 +41,7 @@ type OrderRow = {
 @Component({
   selector: 'app-vendor-couples',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterModule],
   templateUrl: './vendor-couples.html',
   styleUrls: ['./vendor-couples.css'],
 })
@@ -125,6 +126,33 @@ export class VendorCouples {
   trackById(_: number, item: { id: string }) { return item.id; }
   toggle(type: string) { this.expanded[type] = !this.expanded[type]; }
 
+//used for filtering logic of displayed vendor services
+  priceRanges = [
+    { label: 'Any', min: null, max: null },
+    { label: 'Under R1,000', min: null, max: 1000 },
+    { label: 'R1,000 - R5,000', min: 1000, max: 5000 },
+    { label: 'R5,000 - R10,000', min: 5000, max: 10000 },
+    { label: 'Over R10,000', min: 10000, max: null }
+  ];
+
+  capacityRanges = [
+    { label: 'Any', min: null, max: null },
+    { label: 'Under 50 guests', min: null, max: 50 },
+    { label: '50 - 100 guests', min: 50, max: 100 },
+    { label: '100 - 200 guests', min: 100, max: 200 },
+    { label: '200+ guests', min: 200, max: null }
+  ];
+
+  selectedPriceRange = this.priceRanges[0];
+  selectedCapacityRange = this.capacityRanges[0];
+
+  clearFilters() {
+  this.selectedPriceRange = { label: 'Any', min: null, max: null };
+  this.selectedCapacityRange = { label: 'Any', min: null, max: null };
+  this.loadAllVendors();
+}
+
+
   
   async loadAllVendors() {
     this.loading = true;
@@ -146,13 +174,38 @@ export class VendorCouples {
         if (cSnap.exists()) nameById.set(uid, (cSnap.data() as any)?.companyName || 'Unknown company');
       }));
 
+      //apply filter logic by price and capacity
+      const filtered = services.filter(s =>{
+        let ok = true;
+
+        //price filter
+        if (this.selectedPriceRange.min != null) {
+          ok = ok && (s.price ?? 0) >= this.selectedPriceRange.min;
+        }
+        if (this.selectedPriceRange.max != null) {
+          ok = ok && (s.price ?? 0) <= this.selectedPriceRange.max;
+        }
+
+        // capacity filter
+        if (this.selectedCapacityRange.min != null) {
+          ok = ok && (s.capacity ?? 0) >= this.selectedCapacityRange.min;
+        }
+        if (this.selectedCapacityRange.max != null) {
+          ok = ok && (s.capacity ?? 0) <= this.selectedCapacityRange.max;
+        }
+
+        return ok;  
+      });
+
  
       const tmp: Record<string, ServiceWithCompany[]> = {};
-      for (const s of services) {
+      for (const s of filtered) {
         const key = this.normalizeType(s.type);
         const withCompany = { ...s, companyName: s.companyID ? nameById.get(s.companyID) : undefined };
         (tmp[key] ||= []).push(withCompany);
       }
+
+      //alphabetical sort
       for (const k of Object.keys(tmp)) {
         tmp[k].sort((a, b) => (a.serviceName || '').localeCompare(b.serviceName || '', undefined, { sensitivity: 'base' }));
       }
@@ -161,7 +214,8 @@ export class VendorCouples {
       for (const k of Object.keys(tmp)) if (!ordered[k]) ordered[k] = tmp[k];
 
       this.groups = ordered;
-      this.totalCount = services.length;
+      this.totalCount=filtered.length;
+      //this.totalCount = services.length;
       this.loaded = true;
     } catch (e: any) {
       console.error(e);
