@@ -1,0 +1,182 @@
+.support-page {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: #f9f9f9; /* very light grey background */
+}
+
+.support-page h1 {
+  font-size: 2.2rem;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.support-page h3 {
+  font-weight: normal;
+  color: #666;
+  margin-bottom: 2rem;
+}
+
+/* Intro section */
+.siteSummary {
+  max-width: 800px;
+  margin: 0 auto 2.5rem auto;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: #444;
+  background: #f2f2f2; /* soft grey background */
+  border-left: 5px solid #b8c9a9; /* sage accent */
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+}
+
+.siteSummary p {
+  margin: 0.5rem 0;
+}
+
+/* Grid for cards */
+.support-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+/* Card styling */
+.support-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 2rem 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  text-align: center;
+  border: 2px solid transparent;
+}
+
+.support-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+}
+
+/* Different card themes */
+.support-card.couples {
+  border-color: #e8a1b3; /* soft pink */
+}
+
+.support-card.guests {
+  border-color: #b8c9a9; /* sage */
+}
+
+.support-card.companies {
+  border-color: #d3d3d3; /* light grey */
+}
+
+.support-card span.material-symbols-outlined {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+/* Match icons with themes */
+.support-card.couples span {
+  color: #e8a1b3; /* pink */
+}
+
+.support-card.guests span {
+  color: #b8c9a9; /* sage */
+}
+
+.support-card.companies span {
+  color: #7b7b7b; /* grey */
+}
+
+.support-card h2 {
+  margin: 0.5rem 0;
+  font-size: 1.4rem;
+  color: #333;
+}
+
+.support-card p {
+  font-size: 1rem;
+  color: #666;
+}
+
+/* FAQ section */
+.faq-section {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: left;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.faq-section h2 {
+  text-align: center;
+  margin-bottom: 2rem;
+  font-size: 1.8rem;
+  color: #333;
+}
+
+/* Back button */
+.back-btn {
+  display: inline-block;
+  margin-bottom: 1.5rem;
+  background: #e8a1b3; /* pink */
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.back-btn:hover {
+  background: #d6859e; /* darker pink */
+}
+
+/* FAQ items */
+.faq-item {
+  background: #f9f9f9; /* light grey */
+  border-radius: 10px;
+  padding: 1.2rem 1.5rem;
+  margin-bottom: 1rem;
+  border-left: 5px solid #b8c9a9; /* sage accent */
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.faq-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Question */
+.faq-item h4 {
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+  color: #e8a1b3; /* pink */
+}
+
+/* Answer */
+.faq-item p {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #444;
+  margin: 0;
+}
+
+.search-bar {
+  width: 100%;
+  max-width: 400px;
+  padding: 0.5rem;
+  margin: 1rem 0;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
