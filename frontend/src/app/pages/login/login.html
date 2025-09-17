@@ -1,45 +1,50 @@
-<section class="auth-layout">
-  <!-- LEFT: vertical stack of 3 slides -->
-  <aside class="media-stack">
-    <!-- Brand bar: logo + title -->
-    <div class="brand-bar">
-      <img class="brand-logo" src="assets/logo.jpg" alt="Vows & Veils logo" />
-      <h1 class="brand-title">Vows & Veils</h1>
-    </div>
+<header class="topbar">
+  <section class="logo-area">
+    <img class="logo-img" src="assets/logo.jpg" alt="Vows & Veils logo" />
+    <h1 class="logo-text">Vows & Veils</h1>
+  </section>
 
-    <!-- Image panels -->
-    <div class="media-rail">
-      <div class="media">
-        <img [src]="currentA" alt="Panel A" loading="eager" (error)="onImageError('A')" />
-        <div class="overlay"></div>
-      </div>
+  <nav class="nav-links">
+    <a routerLink="/landing">Home</a>
+    <a routerLink="/support-page">Support</a>
+  </nav>
+</header>
 
-      <div class="media">
-        <img [src]="currentB" alt="Panel B" loading="eager" (error)="onImageError('B')" />
-        <div class="overlay"></div>
-      </div>
 
-      <div class="media">
-        <img [src]="currentC" alt="Panel C" loading="eager" (error)="onImageError('C')" />
-        <div class="overlay"></div>
-      </div>
-    </div>
-  </aside>
+<section class="auth-vertical">
 
-  <!-- RIGHT: panel with ONLY the Google button -->
-  <main class="panel">
-    <header class="panel-head">
-      <h2>Welcome back</h2>
-      <p class="sub">Sign in to continue planning your day.</p>
+  <section class="auth-right">
+    <header class="auth-header">
+      <h2>Sign in to begin planning your special day</h2>
     </header>
 
-    <div class="actions">
+    <section class="auth-divider">
+  <span class="material-symbols-outlined divider-heart">favorite</span>
+    </section>
+
+
+    <section class="auth-actions">
       <button type="button" class="btn btn-primary" (click)="onGoogle()" [disabled]="auth.loading()">
         Continue with Google
       </button>
-    </div>
+    </section>
 
-    <footer class="signed">
+    <footer class="auth-media">
+    <figure class="media">
+      <img [src]="currentA" alt="Panel A" (error)="onImageError('A')" />
+      <figcaption class="overlay"></figcaption>
+    </figure>
+    <figure class="media">
+      <img [src]="currentB" alt="Panel B" (error)="onImageError('B')" />
+      <figcaption class="overlay"></figcaption>
+    </figure>
+    <figure class="media">
+      <img [src]="currentC" alt="Panel C" (error)="onImageError('C')" />
+      <figcaption class="overlay"></figcaption>
+    </figure>
+  </footer>
+
+    <section class="auth-status">
       <ng-container *ngIf="auth.user() as u; else notSignedIn">
         <p class="signed-in">Signed in as <strong>{{ u.email ?? '(no email)' }}</strong></p>
       </ng-container>
@@ -50,6 +55,9 @@
       @if (auth.error()) {
         <p class="error-line">{{ auth.error() }}</p>
       }
-    </footer>
-  </main>
+    </section>
+  </section>
+
 </section>
+
+
