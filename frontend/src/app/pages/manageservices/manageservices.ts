@@ -222,7 +222,7 @@ async SubmitUpdate() {
     // Append new files
     if (this.newUpdateFiles) {
       for (let i = 0; i < this.newUpdateFiles.length; i++) {
-        formData.append('newImages', this.newUpdateFiles[i]);
+        formData.append('images', this.newUpdateFiles[i]);
       }
     }
 

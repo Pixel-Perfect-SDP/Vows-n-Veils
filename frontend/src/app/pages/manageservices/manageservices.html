@@ -82,7 +82,7 @@
       <section *ngIf="!addingVenue && !editingVenue" class="venue-list">
         <section class="card" *ngFor="let venue of venues">
           <h3>{{ venue.venuename }}</h3>
-          <img *ngIf="venue.images && venue.images[1]?.url" [src]="venue.images[1].url" alt="{{venue.venuename}}" />
+          <img *ngIf="venue.images && venue.images[0]?.url" [src]="venue.images[0].url" alt="{{venue.venuename}}" />
           <label class="statuslabel">Status:{{venue.status}}</label>
           <button class="btn" (click)="UpdateVenue(venue)">Update Venue Details</button>
           <button class="btn delete-btn" (click)="DeleteVenue(venue)">Delete Venue</button>
