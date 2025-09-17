@@ -228,7 +228,7 @@ export class Manageservices implements OnInit {
       formData.append('images', this.selectedFiles[i]);
     }
   }
-    this.http.post(`https://site--vowsandveils--5dl8fyl4jyqm.code.run/venues`, this.newVenueData)
+    this.http.post(`https://site--vowsandveils--5dl8fyl4jyqm.code.run/venues`, formData)
       .subscribe({
         next: () => { alert('New venue added successfully!'); this.addingVenue = false; this.fetchVenues(); this.loading=false;},
         error: err => { console.error('Error adding venue', err); alert('Failed to add venue.'); this.loading=false;}

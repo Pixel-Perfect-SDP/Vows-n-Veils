@@ -152,6 +152,8 @@ const upload = multer({
 
 router.post('/', upload.array('images', 6), async (req, res) => {
   try {
+    console.log('req.body:', req.body); 
+    console.log('req.files:', req.files); 
     const venue = JSON.parse(req.body.venue); 
 
     if (!venue.venuename || !venue.address || !venue.capacity ||
