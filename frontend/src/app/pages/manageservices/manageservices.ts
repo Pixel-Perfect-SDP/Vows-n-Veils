@@ -14,6 +14,25 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { auth } from '../firebase/firebase-config';
 import { signOut } from 'firebase/auth';
 
+interface VenueImage {
+  url: string;
+  name: string; // this is the Firebase Storage path/filename
+}
+
+interface Venue {
+  id: string;
+  venuename: string;
+  description: string;
+  address: string;
+  email: string;
+  phonenumber: string;
+  capacity: number;
+  price: number;
+  status: string;
+  companyID: string;
+  images: VenueImage[];
+}
+
 @Component({
   selector: 'app-manageservices',
   standalone: true,
@@ -180,7 +199,7 @@ onNewFilesSelected(event: any) {
   UpdateVenue(venue: any) {
     this.editingVenue = { ...venue };
     this.updateData = { ...venue };
-
+    
    this.updateData.imagesToDelete = this.editingVenue.images?.map(() => false) || [];
   }
 
@@ -191,14 +210,16 @@ async SubmitUpdate() {
   try {
     const venueId = this.editingVenue.id;
 
-    // Prepare images to delete
     const imagesToDelete = this.updateData.imagesToDelete
-      ?.map((v: boolean, idx: number) => (v ? this.editingVenue.images[idx] : null))
-      .filter((v: string | null) => v !== null) || [];
+      ?.map((checked: boolean, idx: number) => 
+        checked ? this.editingVenue!.images[idx].name : null
+      )
+      .filter((v: string | null) => v) || [];
 
     const formData = new FormData();
     formData.append('deleteImages', JSON.stringify(imagesToDelete));
 
+    // Append new files
     if (this.newUpdateFiles) {
       for (let i = 0; i < this.newUpdateFiles.length; i++) {
         formData.append('newImages', this.newUpdateFiles[i]);
@@ -214,9 +235,11 @@ async SubmitUpdate() {
     const result: any = await this.http.put(apiUrl, formData).toPromise();
 
     this.editingVenue.images = result.images || [];
+
     alert('Venue updated successfully!');
     this.editingVenue = null;
     this.fetchVenues();
+
   } catch (err) {
     console.error('Error updating venue', err);
     alert('Failed to update venue.');
@@ -225,8 +248,6 @@ async SubmitUpdate() {
     this.newUpdateFiles = null;
   }
 }
-
-
   CancelUpdate() { this.editingVenue = null; }
 
   AddVenue() {

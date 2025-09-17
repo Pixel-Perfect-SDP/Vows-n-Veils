@@ -82,7 +82,7 @@
       <section *ngIf="!addingVenue && !editingVenue" class="venue-list">
         <section class="card" *ngFor="let venue of venues">
           <h3>{{ venue.venuename }}</h3>
-          <img *ngIf="venue.images && venue.images[1]" [src]="venue.images[1]" alt="{{venue.venuename}}" />
+          <img *ngIf="venue.images && venue.images[1]?.url" [src]="venue.images[1].url" alt="{{venue.venuename}}" />
           <label class="statuslabel">Status:{{venue.status}}</label>
           <button class="btn" (click)="UpdateVenue(venue)">Update Venue Details</button>
           <button class="btn delete-btn" (click)="DeleteVenue(venue)">Delete Venue</button>
@@ -120,7 +120,7 @@
         <!-- Existing images -->
         <div class="image-list" *ngIf="editingVenue.images?.length > 0">
           <div class="image-item" *ngFor="let img of editingVenue.images; let i = index">
-            <img *ngIf="img" [src]="img" alt="Venue Image" />
+            <img *ngIf="img?.url" [src]="img.url" alt="Venue Image" />
             <label *ngIf="img">
               <input type="checkbox" [(ngModel)]="updateData.imagesToDelete[i]" />
               Delete

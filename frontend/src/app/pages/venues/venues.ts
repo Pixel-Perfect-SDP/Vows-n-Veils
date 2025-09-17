@@ -6,6 +6,12 @@ import { collection, query, where, getDocs, updateDoc, doc } from 'firebase/fire
 import { auth, db } from '../firebase/firebase-config';
 import { onAuthStateChanged } from 'firebase/auth';
 
+
+interface VenueImage {
+  url: string;
+  name: string;
+}
+
 interface Venue {
   id: string;
   venuename: string;
@@ -17,7 +23,7 @@ interface Venue {
   phonenumber: string;
   price: number;
   image?: string;
-  images?: string[];
+  images?: VenueImage[];
 }
 
 @Component({
