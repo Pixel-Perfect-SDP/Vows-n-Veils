@@ -11,9 +11,17 @@ import { RouterModule } from '@angular/router';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
+
+import { environment } from '../../../environments/environment';
+
+import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { lastValueFrom } from 'rxjs';
+
 type ServiceDoc = {
   id: string;
-  serviceName: string;
+  serviceName?: string;
+ 
+  name?: string;
   type: string;
   price?: number;
   capacity?: number | null;
@@ -21,7 +29,9 @@ type ServiceDoc = {
   bookingNotes?: string;
   companyID?: string;
   status?: string;
+  images?: string[];
 };
+
 type ServiceWithCompany = ServiceDoc & { companyName?: string };
 
 type OrderRow = {
@@ -38,10 +48,12 @@ type OrderRow = {
   companyName?: string;
 };
 
+const API_BASE = `${environment.apiUrl}/vendors`;
+
 @Component({
   selector: 'app-vendor-couples',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterModule, HttpClientModule],
   templateUrl: './vendor-couples.html',
   styleUrls: ['./vendor-couples.css'],
 })
@@ -49,23 +61,23 @@ export class VendorCouples {
   private fb = inject(FormBuilder);
   private auth = inject(AuthService);
 
+  constructor(private router: Router, private http: HttpClient) {
+    this.serviceTypes.forEach(t => this.expanded[t] = true);
+  }
 
   loading = false;
   loaded = false;
   errorMsg = '';
   totalCount = 0;
 
-
   serviceTypes: string[] = ['Venue', 'Catering', 'Photography', 'Decor', 'Music/DJ', 'Florist', 'Other'];
   groups: Record<string, ServiceWithCompany[]> = {};
   expanded: Record<string, boolean> = {};
-
 
   showOrders = false;
   loadingOrders = false;
   ordersError = '';
   orders: OrderRow[] = [];
-
 
   showOrder = false;
   ordering = false;
@@ -73,7 +85,6 @@ export class VendorCouples {
   orderSuccess = '';
   selectedService: ServiceWithCompany | null = null;
 
- 
   myEventId: string | null = null;
   myEventTitle = 'Your Event';
 
@@ -86,10 +97,6 @@ export class VendorCouples {
     note: ['']
   });
 
-  constructor(private router: Router) {
-    this.serviceTypes.forEach(t => this.expanded[t] = true);
-  }
-
   private async waitForUser(): Promise<any> {
     const u = this.auth.user?.() ?? null;
     if (u) return u;
@@ -101,7 +108,6 @@ export class VendorCouples {
       setTimeout(() => { clearInterval(iv); resolve(null); }, 5000);
     });
   }
-
 
   private normalizeType(raw?: string | null): string {
     const t = (raw || '').toLowerCase();
@@ -126,7 +132,7 @@ export class VendorCouples {
   trackById(_: number, item: { id: string }) { return item.id; }
   toggle(type: string) { this.expanded[type] = !this.expanded[type]; }
 
-//used for filtering logic of displayed vendor services
+  
   priceRanges = [
     { label: 'Any', min: null, max: null },
     { label: 'Under R1,000', min: null, max: 1000 },
@@ -147,13 +153,12 @@ export class VendorCouples {
   selectedCapacityRange = this.capacityRanges[0];
 
   clearFilters() {
-  this.selectedPriceRange = { label: 'Any', min: null, max: null };
-  this.selectedCapacityRange = { label: 'Any', min: null, max: null };
-  this.loadAllVendors();
-}
+    this.selectedPriceRange = { label: 'Any', min: null, max: null };
+    this.selectedCapacityRange = { label: 'Any', min: null, max: null };
+    this.loadAllVendors();
+  }
 
 
-  
   async loadAllVendors() {
     this.loading = true;
     this.loaded = false;
@@ -162,11 +167,14 @@ export class VendorCouples {
     this.totalCount = 0;
 
     try {
-      const db = getFirestore(getApp());
-      const snap = await getDocs(collection(db, 'Vendors'));
-      const services: ServiceWithCompany[] = snap.docs.map(d => ({ id: d.id, ...(d.data() as any) }));
+      const apiVendors = await lastValueFrom(this.http.get<ServiceWithCompany[]>(API_BASE));
 
-      // company names
+      const services: ServiceWithCompany[] = (apiVendors || []).map(v => ({
+        ...v,
+        serviceName: v.serviceName ?? v.name ?? '',
+      }));
+
+      const db = getFirestore(getApp());
       const ids = Array.from(new Set(services.map(s => s.companyID).filter(Boolean) as string[]));
       const nameById = new Map<string, string>();
       await Promise.all(ids.map(async uid => {
@@ -174,30 +182,15 @@ export class VendorCouples {
         if (cSnap.exists()) nameById.set(uid, (cSnap.data() as any)?.companyName || 'Unknown company');
       }));
 
-      //apply filter logic by price and capacity
-      const filtered = services.filter(s =>{
+      const filtered = services.filter(s => {
         let ok = true;
-
-        //price filter
-        if (this.selectedPriceRange.min != null) {
-          ok = ok && (s.price ?? 0) >= this.selectedPriceRange.min;
-        }
-        if (this.selectedPriceRange.max != null) {
-          ok = ok && (s.price ?? 0) <= this.selectedPriceRange.max;
-        }
-
-        // capacity filter
-        if (this.selectedCapacityRange.min != null) {
-          ok = ok && (s.capacity ?? 0) >= this.selectedCapacityRange.min;
-        }
-        if (this.selectedCapacityRange.max != null) {
-          ok = ok && (s.capacity ?? 0) <= this.selectedCapacityRange.max;
-        }
-
-        return ok;  
+        if (this.selectedPriceRange.min != null) ok = ok && (s.price ?? 0) >= this.selectedPriceRange.min;
+        if (this.selectedPriceRange.max != null) ok = ok && (s.price ?? 0) <= this.selectedPriceRange.max;
+        if (this.selectedCapacityRange.min != null) ok = ok && (s.capacity ?? 0) >= this.selectedCapacityRange.min;
+        if (this.selectedCapacityRange.max != null) ok = ok && (s.capacity ?? 0) <= this.selectedCapacityRange.max;
+        return ok;
       });
 
- 
       const tmp: Record<string, ServiceWithCompany[]> = {};
       for (const s of filtered) {
         const key = this.normalizeType(s.type);
@@ -205,17 +198,18 @@ export class VendorCouples {
         (tmp[key] ||= []).push(withCompany);
       }
 
-      //alphabetical sort
       for (const k of Object.keys(tmp)) {
-        tmp[k].sort((a, b) => (a.serviceName || '').localeCompare(b.serviceName || '', undefined, { sensitivity: 'base' }));
+        tmp[k].sort((a, b) =>
+          (a.serviceName || '').localeCompare(b.serviceName || '', undefined, { sensitivity: 'base' })
+        );
       }
+
       const ordered: Record<string, ServiceWithCompany[]> = {};
       this.serviceTypes.forEach(k => { if (tmp[k]?.length) ordered[k] = tmp[k]; });
       for (const k of Object.keys(tmp)) if (!ordered[k]) ordered[k] = tmp[k];
 
       this.groups = ordered;
-      this.totalCount=filtered.length;
-      //this.totalCount = services.length;
+      this.totalCount = filtered.length;
       this.loaded = true;
     } catch (e: any) {
       console.error(e);
@@ -264,7 +258,6 @@ export class VendorCouples {
         };
       });
 
-   
       const vendorIds = Array.from(new Set(rows.map(r => r.vendorID).filter(Boolean)));
       const companyIds = Array.from(new Set(rows.map(r => r.companyID).filter(Boolean)));
       const vendorMap = new Map<string, any>();
@@ -272,11 +265,11 @@ export class VendorCouples {
 
       await Promise.all([
         ...vendorIds.map(async id => {
-          const s = await getDoc(doc(db, 'Vendors', id));
+          const s = await getDoc(doc(getFirestore(getApp()), 'Vendors', id));
           if (s.exists()) vendorMap.set(id, s.data());
         }),
         ...companyIds.map(async id => {
-          const c = await getDoc(doc(db, 'Companies', id));
+          const c = await getDoc(doc(getFirestore(getApp()), 'Companies', id));
           if (c.exists()) companyMap.set(id, c.data());
         })
       ]);
@@ -284,7 +277,7 @@ export class VendorCouples {
       for (const r of rows) {
         const v = vendorMap.get(r.vendorID);
         if (v) {
-          r.serviceName = v.serviceName || r.serviceName;
+          r.serviceName = v.serviceName || v.name || r.serviceName;
           r.price = (typeof v.price === 'number') ? v.price : (r.price ?? null);
         }
         const c = companyMap.get(r.companyID);
@@ -299,7 +292,6 @@ export class VendorCouples {
       this.loadingOrders = false;
     }
   }
-
 
   async openOrder(s: ServiceWithCompany) {
     this.selectedService = s;
@@ -390,8 +382,7 @@ export class VendorCouples {
     }
   }
 
-
-   backTohome(): void {
-  this.router.navigate(['/homepage']);
+  backTohome(): void {
+    this.router.navigate(['/homepage']);
   }
 }

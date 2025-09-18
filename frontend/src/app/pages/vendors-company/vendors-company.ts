@@ -2,6 +2,7 @@ import { Component, inject, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
+
 import {
   addDoc, collection, deleteDoc, doc, getDoc, getDocs, onSnapshot, query,
   serverTimestamp, setDoc, where
@@ -13,27 +14,32 @@ import { AuthService } from '../../core/auth';
 import { auth } from '../firebase/firebase-config';
 import { signOut } from 'firebase/auth';
 
+import { environment } from '../../../environments/environment';
+
+import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
+
 interface CompanyDoc {
   userID: string;
   companyName: string;
   email: string;
   phoneNumber: string;
-  type?: string; 
+  type?: string;
 }
 
 type ServiceDoc = {
   id: string;
-  serviceName: string;
+  serviceName: string; 
   type: string;
   price?: number;
   capacity?: number | null;
   status?: string;
   description?: string;
   bookingNotes?: string;
-  companyID?: string;  
-  companyId?: string;  
-  ownerId?: string;     
-  createdBy?: string;  
+  companyID?: string;
+  companyId?: string;
+  ownerId?: string;
+  createdBy?: string;
 };
 
 type OrderStatus = 'pending' | 'accepted' | 'declined' | 'cancelled';
@@ -56,10 +62,13 @@ type OrderRow = {
   endAtDate: Date | null;
 };
 
+
+const API_BASE = `${environment.apiUrl}/vendors`;
+
 @Component({
   selector: 'app-vendors-company',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, HttpClientModule],
   templateUrl: './vendors-company.html',
   styleUrls: ['./vendors-company.css']
 })
@@ -68,19 +77,18 @@ export class VendorsCompany implements OnDestroy {
   auth = inject(AuthService);
   private fb = inject(FormBuilder);
 
-  
-  hasVendorCompany: boolean | null = null; // null = loading
+  constructor(private http: HttpClient) {}
+
+  hasVendorCompany: boolean | null = null;
   companyVendorData: CompanyDoc | null = null;
   companyId: string | null = null;
   errorMsg = '';
 
-  
   form = this.fb.group({
     companyName: ['', [Validators.required]],
     companyEmail: ['', [Validators.required, Validators.email]],
     companyNumber: ['', [Validators.required, Validators.pattern('^[0-9+ ]+$')]],
   });
-
 
   showServiceForm = false;
   busy = false;
@@ -116,18 +124,15 @@ export class VendorsCompany implements OnDestroy {
   }
   getServiceName(id: string) { return this.serviceNameMap.get(id) || '—'; }
 
-  
   orders: OrderRow[] = [];
   loadingOrders = false;
   orderBusyId: string | null = null;
   orderBusyAction: 'accept' | 'decline' | null = null;
 
- 
   private liveUnsub: (() => void) | null = null;
   private ordersUnsub: (() => void) | null = null;
   private authUnsub: (() => void) | null = null;
 
-  
   async ngOnInit() {
     const appAuth = getAuth();
     this.authUnsub = onAuthStateChanged(appAuth, async (user: User | null) => {
@@ -146,10 +151,10 @@ export class VendorsCompany implements OnDestroy {
       await this.loadCompany(user.uid);
 
       if (this.hasVendorCompany && this.companyId) {
-        await this.loadLegacyOnce(this.companyId);
+        await this.loadServicesFromApi(this.companyId);
         this.rebuildServiceNameMap();
-        this.attachLive(this.companyId);
-        this.attachOrders(this.companyId);
+        this.attachLive(this.companyId);   
+        this.attachOrders(this.companyId); 
       }
     });
   }
@@ -189,32 +194,33 @@ export class VendorsCompany implements OnDestroy {
     }
   }
 
-  private async loadLegacyOnce(uid: string) {
+
+  private async loadServicesFromApi(uid: string) {
+    this.loadingServices = true;
+    this.errorMsg = '';
     try {
-      this.loadingServices = true;
-      const db = getFirestore(getApp());
-      const col = collection(db, 'Vendors');
+      const data = await firstValueFrom(this.http.get<any[]>(`${API_BASE}/company/${uid}`));
+      const mapped: ServiceDoc[] = (data || []).map(v => ({
+        id: v.id,
+        serviceName: v.serviceName ?? v.name ?? '',
+        type: v.type ?? '',
+        price: typeof v.price === 'number' ? v.price : null,
+        capacity: v.capacity ?? null,
+        description: v.description ?? '',
+        bookingNotes: v.bookingNotes ?? '',
+        status: v.status ?? 'active',
+        companyID: v.companyID ?? uid
+      }));
 
-      const [s1, s2, s3, s4] = await Promise.all([
-        getDocs(query(col, where('companyID', '==', uid))),
-        getDocs(query(col, where('companyId', '==', uid))),
-        getDocs(query(col, where('ownerId', '==', uid))),
-        getDocs(query(col, where('createdBy', '==', uid))),
-      ]);
-
-      const byId = new Map<string, ServiceDoc>();
-      for (const snap of [s1, s2, s3, s4]) {
-        snap.forEach(d => byId.set(d.id, { id: d.id, ...(d.data() as any) }));
-      }
-
-      this.services = Array.from(byId.values()).sort((a, b) => {
+      this.services = mapped.sort((a, b) => {
         const an = (a.serviceName || '').toLowerCase();
         const bn = (b.serviceName || '').toLowerCase();
         return an < bn ? -1 : an > bn ? 1 : 0;
       });
     } catch (e: any) {
       console.error(e);
-      this.errorMsg = e?.message ?? 'Failed to load services.';
+      this.errorMsg = e?.message ?? 'Failed to load services from API.';
+      this.services = [];
     } finally {
       this.loadingServices = false;
     }
@@ -228,7 +234,20 @@ export class VendorsCompany implements OnDestroy {
       qy,
       snap => {
         const byId = new Map(this.services.map(s => [s.id, s]));
-        snap.forEach(d => byId.set(d.id, { id: d.id, ...(d.data() as any) }));
+        snap.forEach(d => {
+          const raw = d.data() as any;
+          byId.set(d.id, {
+            id: d.id,
+            serviceName: raw.serviceName ?? raw.name ?? '',
+            type: raw.type ?? '',
+            price: typeof raw.price === 'number' ? raw.price : null,
+            capacity: raw.capacity ?? null,
+            description: raw.description ?? '',
+            bookingNotes: raw.bookingNotes ?? '',
+            status: raw.status ?? 'active',
+            companyID: raw.companyID ?? uid
+          });
+        });
         this.services = Array.from(byId.values()).sort((a, b) => {
           const an = (a.serviceName || '').toLowerCase();
           const bn = (b.serviceName || '').toLowerCase();
@@ -243,12 +262,12 @@ export class VendorsCompany implements OnDestroy {
     );
   }
 
+  
   async addService() {
     this.errorMsg = '';
     this.successMsg = '';
     if (this.serviceForm.invalid || !this.companyId) return;
 
-    const db = getFirestore(getApp());
     const v = this.serviceForm.getRawValue() as {
       serviceName: string;
       type: string;
@@ -258,10 +277,13 @@ export class VendorsCompany implements OnDestroy {
       bookingNotes?: string;
     };
 
+    const email = this.companyVendorData?.email ?? '';
+    const phonenumber = this.companyVendorData?.phoneNumber ?? '';
+
     this.busy = true;
     try {
-      await addDoc(collection(db, 'Vendors'), {
-        serviceName: v.serviceName,
+      const body = {
+        name: v.serviceName,
         type: v.type,
         price: v.price != null ? Number(v.price) : 0,
         capacity: v.capacity != null ? Number(v.capacity) : null,
@@ -269,39 +291,44 @@ export class VendorsCompany implements OnDestroy {
         bookingNotes: v.bookingNotes ?? '',
         status: 'active',
         companyID: this.companyId,
-        createdBy: this.companyId,
-        createdAt: serverTimestamp(),
-      });
+        email,
+        phonenumber
+      };
+      await firstValueFrom(this.http.post<{ id: string }>(`${API_BASE}`, body));
+
       this.successMsg = 'Service saved!';
       this.serviceForm.reset(this.defaultServiceValues);
       this.showServiceForm = false;
+
+      await this.loadServicesFromApi(this.companyId);
+      this.rebuildServiceNameMap();
     } catch (e: any) {
       console.error(e);
-      this.errorMsg = e?.message ?? 'Failed to save service.';
+      this.errorMsg = e?.error?.error || e?.message || 'Failed to save service.';
     } finally {
       this.busy = false;
     }
   }
 
+
   async deleteService(s: ServiceDoc) {
     if (!s?.id) return;
     if (!confirm(`Delete service "${s.serviceName}"?`)) return;
 
-    const db = getFirestore(getApp());
     this.busyId = s.id;
     try {
-      await deleteDoc(doc(db, 'Vendors', s.id));
+      await firstValueFrom(this.http.delete(`${API_BASE}/${s.id}`));
       this.services = this.services.filter(x => x.id !== s.id);
       this.rebuildServiceNameMap();
     } catch (e: any) {
       console.error(e);
-      this.errorMsg = e?.message ?? 'Failed to delete service.';
+      this.errorMsg = e?.error?.error || e?.message || 'Failed to delete service.';
     } finally {
       this.busyId = null;
     }
   }
 
-
+ //this wont be changed
   private attachOrders(uid: string) {
     const db = getFirestore(getApp());
     const qy = query(collection(db, 'Orders'), where('companyID', '==', uid));
@@ -351,7 +378,6 @@ export class VendorsCompany implements OnDestroy {
   }
 
   canAct(o: OrderRow) { return o.status === 'pending'; }
-
   async acceptOrder(o: OrderRow) { await this.updateOrderStatus(o, 'accepted'); }
   async declineOrder(o: OrderRow) { await this.updateOrderStatus(o, 'declined'); }
 
@@ -366,7 +392,6 @@ export class VendorsCompany implements OnDestroy {
       if (!snap.exists()) throw new Error('Order not found.');
       const data = snap.data() as any;
 
-     
       const payload = {
         customerID: data.customerID,
         eventID: data.eventID,
@@ -389,7 +414,6 @@ export class VendorsCompany implements OnDestroy {
     }
   }
 
-  
   toggleServiceForm() {
     this.showServiceForm = !this.showServiceForm;
     if (this.showServiceForm) {
@@ -401,11 +425,10 @@ export class VendorsCompany implements OnDestroy {
 
   refreshServices() {
     if (!this.companyId) return;
-    this.loadLegacyOnce(this.companyId);
+    this.loadServicesFromApi(this.companyId);
   }
 
   trackById(_: number, item: ServiceDoc | OrderRow) { return item.id; }
-
 
   async createVendorCompany() {
     if (this.form.invalid) return;
@@ -427,7 +450,7 @@ export class VendorsCompany implements OnDestroy {
 
       await this.loadCompany(uid);
       if (this.hasVendorCompany) {
-        await this.loadLegacyOnce(uid);
+        await this.loadServicesFromApi(uid);
         this.rebuildServiceNameMap();
         this.attachLive(uid);
         this.attachOrders(uid);
@@ -440,9 +463,7 @@ export class VendorsCompany implements OnDestroy {
     }
   }
 
-
-    logout(): void
-  {
+  logout(): void {
     signOut(auth)
       .then(() => {
         console.log('User signed out successfully');
