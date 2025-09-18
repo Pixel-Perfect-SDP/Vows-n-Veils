@@ -10,6 +10,8 @@ const allowedOrigins = [
 ];
 
 
+const vendorsRoutes = require('./routes/vendors.routes'); //add in for vendor API
+
 // Middleware
 app.use(cors({
   origin: function (origin, callback) {
@@ -21,6 +23,8 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json());
+
+app.use('/vendors', vendorsRoutes);  //added in for vendor API
 
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, { explorer: true }));
