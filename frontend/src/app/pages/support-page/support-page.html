@@ -1,5 +1,15 @@
+<header class="topbar">
+  <section class="logo-area">
+    <img class="logo-img" src="assets/logo.jpg" alt="Vows & Veils logo" />
+    <h1 class="logo-text">Vows & Veils</h1>
+  </section>
+
+  <nav class="nav-links">
+    <a routerLink="/landing">Back</a>
+  </nav>
+</header>
+
 <section class="support-page">
-  <button class="backLandingBtn" routerLink="/landing">Back</button>
   <h1>Welcome to Vows & Veils Support</h1>
 
   <section class="siteSummary">
@@ -7,7 +17,7 @@
         Whether you’re a couple planning your big day, a guest attending a celebration, 
         or a company offering venues and services, you’ll find guidance here.
   </p>
-  <p> Choose a section below to get answers to common questions and step-by-step help.</p>
+  <p class="p1"> Choose a section below to get answers to common questions and step-by-step help.</p>
   </section>
 
   <!-- Show cards only if no section selected -->
@@ -33,7 +43,7 @@
 
   <!-- Couples FAQ -->
   <section class="faq-section" *ngIf="selectedSection === 'couples'">
-    <button class="back-btn" (click)="goBack()">← Back</button>
+
     <h2>Couples Support</h2>
 
     <input 
@@ -44,7 +54,7 @@
     />
 
     <section class="faq-item" *ngIf="matchesSearch('How do I start planning my wedding on Vows & Veils?')">
-      <h4>💍 How do I start planning my wedding on Vows & Veils?</h4>
+      <h4>How do I start planning my wedding on Vows & Veils?</h4>
       <p>Sign in using Google and fill in basic wedding details on the provided form.</p>
     </section>
     <section class="faq-item" *ngIf="matchesSearch('What do I do once I have signed in?')">
@@ -87,11 +97,13 @@
       <h4>How will I know the price of venues and vendor services?</h4>
       <p>The company owning your selected venue or vendor service will contact your privately to discuss payment options. This is not done on-site.</p>
     </section>
+
+    <button class="back-btn" (click)="goBack()">← Back</button>
   </section>
 
   <!-- Guests FAQ -->
   <section class="faq-section" *ngIf="selectedSection === 'guests'">
-    <button class="back-btn" (click)="goBack()">← Back</button>
+
     <h2>Guests Support</h2>
 
     <input 
@@ -109,11 +121,13 @@
       <h4>What if I am unable to RSVP on the website?</h4>
       <p>Let the couple know and they will manually RSVP for you?</p>
     </section>
+
+    <button class="back-btn" (click)="goBack()">← Back</button>
   </section>
 
   <!-- Companies FAQ -->
   <section class="faq-section" *ngIf="selectedSection === 'companies'">
-    <button class="back-btn" (click)="goBack()">← Back</button>
+
     <h2>Companies Support</h2>
 
     <input 
@@ -171,5 +185,7 @@
       <h4>How do payments work?</h4>
       <p>Payments are arranged between the company and the couple privately. This is not done on-site.</p>
     </section>
+    <button class="back-btn" (click)="goBack()">← Back</button>
   </section>
+
 </section>
