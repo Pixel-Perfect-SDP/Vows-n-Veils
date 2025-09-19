@@ -6,6 +6,12 @@ import { collection, query, where, getDocs, updateDoc, doc } from 'firebase/fire
 import { auth, db } from '../firebase/firebase-config';
 import { onAuthStateChanged } from 'firebase/auth';
 
+
+interface VenueImage {
+  url: string;
+  name: string;
+}
+
 interface Venue {
   id: string;
   venuename: string;
@@ -17,7 +23,7 @@ interface Venue {
   phonenumber: string;
   price: number;
   image?: string;
-  images?: string[];
+  images?: VenueImage[];
 }
 
 @Component({
@@ -52,10 +58,11 @@ export class Venues implements OnInit {
 
 
   getVenues(): void {
+    this.loading = true;
     this.http.get<Venue[]>('https://site--vowsandveils--5dl8fyl4jyqm.code.run/venues')
       .subscribe({
         next: (data) => {
-          this.venues = data;
+          this.venues = data.filter((venue: any) => venue.status === 'active');
           this.loading = false;
         },
         error: (err) => {
@@ -66,13 +73,16 @@ export class Venues implements OnInit {
   }
 
   viewVenue(id: string): void {
+    this.loading = true;
     this.http.get<Venue>(`https://site--vowsandveils--5dl8fyl4jyqm.code.run/venues/${id}`)
       .subscribe({
         next: (data) => {
           this.selectedVenue = data;
+          this.loading=false;
         },
         error: (err) => {
           this.error = 'Failed to load venue: ' + err.message;
+          this.loading = false;
         }
       });
   }
@@ -84,12 +94,12 @@ export class Venues implements OnInit {
 
 
   selectVenue(id: string): void {
-    alert('Venue will be updated');
-
+    this.loading = true;
     const user = auth.currentUser;
 
     if (!user) {
       console.log('No user logged in');
+      this.loading = false;
       return;
     }
 
@@ -101,6 +111,7 @@ export class Venues implements OnInit {
       .then((querySnapshot) => {
         if (querySnapshot.empty) {
           console.log('No event found for this user');
+          this.loading = false;
           return;
         }
 
@@ -108,15 +119,21 @@ export class Venues implements OnInit {
         const eventDocRef = doc(db, 'Events', eventDoc.id);
 
         updateDoc(eventDocRef, { VenueID: id })
-          .then(() => console.log(`VenueID updated for event ${eventDoc.id}`))
+          .then(() =>{
+            console.log(`VenueID updated for event ${eventDoc.id}`);
+            this.loading = false;
+          }
+          )
           .catch((error) => console.error('Error updating VenueID:', error))
           .finally(() => {
-            alert('Venue has been updated');
             this.chosenVenueName = this.selectedVenue ? this.selectedVenue.venuename : null;
-            ;
+             this.loading = false;
           })
       })
-      .catch((error) => console.error('Error fetching events:', error));
+      .catch((error) =>{
+        console.error('Error fetching events:', error);
+        this.loading = false;
+        });
   }
 
   getChosenVenue(): void {
@@ -126,7 +143,6 @@ export class Venues implements OnInit {
       this.chosenVenueName = null;
       return;
     }
-
     const uid = user.uid;
     const eventsRef = collection(db, 'Events');
     const q = query(eventsRef, where('EventID', '==', uid));
@@ -162,6 +178,7 @@ export class Venues implements OnInit {
       })
       .catch(() => {
         this.chosenVenueName = null;
+        
       });
   }
 

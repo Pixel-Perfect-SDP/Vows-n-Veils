@@ -1,4 +1,11 @@
 <section class="venueCouples-section">
+
+    <section class="loading-overlay" *ngIf="loading">
+        <div class="loading-content">
+            <p>Loading...</p>
+        </div>
+    </section>
+
     <section class="header">
         <h1>Elegant venues to choose from</h1>
     </section>
@@ -7,6 +14,7 @@
         <section class="chosen-venue">
             <p *ngIf="!chosenVenueName">No chosen venue yet</p>
             <p *ngIf="chosenVenueName">Chosen Venue: {{ chosenVenueName }}</p>
+            <button>Confirm Venue</button>
         </section>
 
         <section class="venue-list">
@@ -14,7 +22,7 @@
                 <li *ngFor="let venue of venues">
                     <h3>{{ venue.venuename }}</h3>
                     <section class="images">
-                        <img *ngIf="venue.images?.length" [src]="venue.images?.[1] || venue.images?.[0]" width="300" />
+                        <img *ngIf="venue.images?.length" [src]="venue.images?.[0]?.url" width="300" />
                     </section>
 
                     <p class="venue-address">{{ venue.address }}</p>
@@ -39,7 +47,7 @@
         <p class="viewPhone">Phone: {{ selectedVenue.phonenumber }}</p>
         <h3>Venue images: </h3>
         <section class="venue-images" *ngIf="selectedVenue.images?.length">
-            <img *ngFor="let img of selectedVenue.images?.slice(1)" [src]="img" width="200" />
+            <img *ngFor="let img of selectedVenue.images?.slice(1)" [src]="img.url" width="200" />
         </section>
     </section>
 
