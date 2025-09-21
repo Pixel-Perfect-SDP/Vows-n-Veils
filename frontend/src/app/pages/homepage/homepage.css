@@ -539,6 +539,27 @@
   border: 1px solid #e6d7cf;
 }
 
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: #fff;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+.icon-btn:hover { background: #f7f3ef; }
+.icon-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.icon-btn.danger {
+  border-color: #f1c4c4;
+}
+.icon-btn.danger:hover {
+  background: #fdeeee;
+}
+
 /* ======= Util: truncate long text (emails) ======= */
 .td-clip {
   max-width: 260px;

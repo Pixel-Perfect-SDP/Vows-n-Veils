@@ -318,6 +318,50 @@ export class Homepage
     });
   }
 
+  /*---------Delete guest----------*/
+  async onDeleteGuest(g: Guest) {
+  if (!g?.id) {
+    alert('Missing guest id.');
+    return;
+  }
+
+  const sure = window.confirm(`Are you sure you want to delete "${g.Name}"?`);
+  if (!sure) return;
+
+  try {
+    this.guestsLoading = true;
+
+    const user = await this.waitForUser();
+    if (!user) {
+      this.guestsLoading = false;
+      this.guestsError = 'No authenticated user.';
+      return;
+    }
+
+    const eventId = user.uid;
+    this.dataService.deleteGuest(eventId, g.id).subscribe({
+      next: async () => {
+        // refresh table + dynamic filters (in case values disappear)
+        await this.loadGuests();
+        await this.loadGuestFilterOptions();
+
+        this.guestsLoading = false;
+        alert('Guest deleted successfully.');
+      },
+      error: (err) => {
+        console.error('Failed to delete guest', err);
+        this.guestsLoading = false;
+        alert('Failed to delete guest. Please try again.');
+      }
+    });
+  } catch (e) {
+    console.error(e);
+    this.guestsLoading = false;
+    alert('Unexpected error. Please try again.');
+  }
+}
+
+
 
 
   /*------------------------------user has NO event--------------------------*/

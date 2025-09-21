@@ -88,3 +88,29 @@ exports.createGuestForEvent = async (req, res) => {
     return res.status(500).json({ message: 'Failed to create guest' });
   }
 };
+
+//deletes guest
+exports.deleteGuestForEvent = async (req, res) => {
+  try {
+    const { eventId, guestId } = req.params;
+
+    const ref = db.collection('Guests').doc(guestId);
+    const snap = await ref.get();
+
+    if (!snap.exists) {
+      return res.status(404).json({ message: 'Guest not found' });
+    }
+
+    const data = snap.data();
+    // Guard: ensure this guest belongs to this event
+    if (data.EventID !== eventId) {
+      return res.status(403).json({ message: 'Guest does not belong to this event' });
+    }
+
+    await ref.delete();
+    return res.status(200).json({ message: 'Guest deleted', id: guestId });
+  } catch (err) {
+    console.error('Error deleting guest:', err);
+    return res.status(500).json({ message: 'Failed to delete guest' });
+  }
+};
