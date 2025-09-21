@@ -73,4 +73,10 @@ export class DataService {
     const params = new HttpParams().set('location', location).set('date', date);
     return this.http.get<any>(`${this.apiUrl}/weather-crossing`, { params });  
   }
+
+  // delete guest
+  deleteGuest(eventId: string, guestId: string) {
+    return this.http.delete<{ message: string; id: string }>(`${this.apiUrl}/events/${eventId}/guests/${guestId}`);
+  }
+
 }
