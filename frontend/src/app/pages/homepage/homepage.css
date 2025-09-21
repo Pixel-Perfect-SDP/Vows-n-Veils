@@ -559,6 +559,11 @@
 .icon-btn.danger:hover {
   background: #fdeeee;
 }
+.addGuest {
+  gap: 12px; /* adds spacing between all children */
+}
+
+
 
 /* ======= Util: truncate long text (emails) ======= */
 .td-clip {

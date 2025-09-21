@@ -184,6 +184,10 @@
             <button type="button" class="btn" (click)="toggleAddGuest()">
               {{ showAddGuest ? 'Close' : 'Add Guest' }}
             </button>
+            
+            <button type="button" class="btn" (click)="toggleExport()">
+            {{ showExport ? 'Close' : 'Export' }}
+            </button>
           </div>
         </div>
 
@@ -234,6 +238,23 @@
               </button>
             </div>
           </form>
+        </div>
+
+        <!-- Add download options -->
+        <div class="add-card" *ngIf="showExport">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <strong>Export Guest List</strong>
+            <small style="color:#666;">Applies current filters</small>
+          </div>
+
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <button type="button" class="btn btn-primary" (click)="exportCsv()">
+              Download CSV
+            </button>
+            <button type="button" class="btn btn-primary" (click)="exportPdf()">
+              Download PDF
+            </button>
+          </div>
         </div>
 
 
