@@ -184,6 +184,10 @@
             <button type="button" class="btn" (click)="toggleAddGuest()">
               {{ showAddGuest ? 'Close' : 'Add Guest' }}
             </button>
+            
+            <button type="button" class="btn" (click)="toggleExport()">
+            {{ showExport ? 'Close' : 'Export' }}
+            </button>
           </div>
         </div>
 
@@ -236,6 +240,23 @@
           </form>
         </div>
 
+        <!-- Add download options -->
+        <div class="add-card" *ngIf="showExport">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <strong>Export Guest List</strong>
+            <small style="color:#666;">Applies current filters</small>
+          </div>
+
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <button type="button" class="btn btn-primary" (click)="exportCsv()">
+              Download CSV
+            </button>
+            <button type="button" class="btn btn-primary" (click)="exportPdf()">
+              Download PDF
+            </button>
+          </div>
+        </div>
+
 
         <!-- Card -->
         <div class="table-card">
@@ -275,6 +296,7 @@
                   <th>Allergies</th>
                   <th>RSVP</th>
                   <th>Song</th>
+                  <th style="width:1%; white-space: nowrap;">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -295,6 +317,20 @@
                     </span>
                   </td>
                   <td class="td-clip" title="{{ g.Song }}">{{ g.Song }}</td>
+                  <td>
+                    <button
+                      type="button"
+                      class="icon-btn danger"
+                      title="Delete guest"
+                      aria-label="Delete guest"
+                      (click)="onDeleteGuest(g)"
+                      [disabled]="guestsLoading">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M5.5 5.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0V6H7v6.5a.5.5 0 0 1-1 0v-7z"/>
+                        <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4H2.5a1 1 0 0 1 0-2h3.086a1 1 0 0 1 .707-.293h2.414a1 1 0 0 1 .707.293H13.5a1 1 0 0 1 1 1zM4.118 4l.39 9.447A1 1 0 0 0 5.5 14.5h5a1 1 0 0 0 .992-.947L11.882 4H4.118z"/>
+                      </svg>
+                    </button>
+                  </td>
                 </tr>
               </tbody>
             </table>

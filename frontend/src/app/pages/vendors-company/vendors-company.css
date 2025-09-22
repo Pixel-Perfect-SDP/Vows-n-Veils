@@ -346,3 +346,74 @@
     width: 100%;
   }
 }
+
+
+/*filters */
+.serviceCount {
+  margin: 20px 0;
+  margin-left: 260px; 
+  padding: 16px 20px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  font-size: 1.1rem;
+  color: #3F3A34;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Filters container */
+.serviceCount .filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  align-items: flex-end;
+}
+
+/* Label + select block */
+.serviceCount .filters label {
+  display: flex;
+  flex-direction: column;
+  font-weight: 600;
+  color: #3F3A34;
+  font-size: 0.95rem;
+}
+
+/* Dropdowns */
+.serviceCount .filters select {
+  margin-top: 4px;
+  padding: 8px 12px;
+  border: 1px solid #bbb;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  background-color: #fff;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.serviceCount .filters select:focus {
+  border-color: #C57E6D;
+  box-shadow: 0 0 4px rgba(197, 126, 109, 0.3);
+  outline: none;
+}
+
+/* Clear button */
+.serviceCount .filters button {
+  padding: 10px 16px;
+  background: linear-gradient(90deg, #C57E6D, #A76858);
+  border: none;
+  border-radius: 8px;
+  color: #000;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s, background 0.2s;
+}
+
+.serviceCount .filters button:hover {
+  background: linear-gradient(90deg, #A76858, #C57E6D);
+  transform: translateY(-2px);
+}
+
+

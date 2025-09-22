@@ -16,10 +16,32 @@
           {{ loadingOrders ? 'Loading…' : (showOrders ? 'Hide my orders' : 'Check my orders') }}
         </button>
     </section>
+
+
     <section class="loading-container" *ngIf="loading">
   <section class="Loading-1"></section>
 </section>
-    <section class="serviceCount" *ngIf="loaded && totalCount">{{ totalCount }} services available</section>
+
+    <section class="serviceCount" *ngIf="loaded">
+      {{ totalCount }} services available
+    <section class="filters" *ngIf="loaded">
+    <label>
+      Price:
+      <select [(ngModel)]="selectedPriceRange" (change)="loadAllVendors()">
+        <option *ngFor="let r of priceRanges" [ngValue]="r">{{ r.label }}</option>
+      </select>
+    </label>
+
+    <label>
+      Capacity:
+      <select [(ngModel)]="selectedCapacityRange" (change)="loadAllVendors()">
+        <option *ngFor="let r of capacityRanges" [ngValue]="r">{{ r.label }}</option>
+      </select>
+    </label>
+
+    <button type="button" (click)="clearFilters()">Clear Filters</button>
+  </section>
+    </section>
   <p *ngIf="errorMsg" class="error">{{ errorMsg }}</p>
   </section>
 
