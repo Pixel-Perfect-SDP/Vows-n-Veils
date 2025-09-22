@@ -42,9 +42,12 @@ app.use('/events', eventsRoutes);
 const weatherCrossingRoutes = require('./routes/weather-crossing.routes');
 app.use('/weather-crossing', weatherCrossingRoutes);
 
+// Map API
+const mapRoutes = require('./routes/map.routes');
+app.use('/map', mapRoutes);
+
 app.get('/', (req, res) => {
   res.send('Backend is up ');
 });
 
 module.exports = app;
-
