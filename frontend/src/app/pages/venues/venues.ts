@@ -39,7 +39,8 @@ export class Venues implements OnInit {
   loading = true;
   error: string | null = null;
   chosenVenueName: string | null = null;
-
+chosenVenueID:string | null = null;
+chosenVenuecompanyID:string |null =null;
   constructor(private http: HttpClient, private router: Router) { }
 
   ngOnInit(): void {
@@ -47,6 +48,7 @@ export class Venues implements OnInit {
       if (user) {
         console.log('User is logged in:', user.uid);
         this.getChosenVenue();
+        this.checkVenueOrder();
       } else {
         console.log('No user logged in yet');
       }
@@ -127,6 +129,9 @@ export class Venues implements OnInit {
           .catch((error) => console.error('Error updating VenueID:', error))
           .finally(() => {
             this.chosenVenueName = this.selectedVenue ? this.selectedVenue.venuename : null;
+            this.chosenVenueID = this.selectedVenue ? this.selectedVenue.id: null;
+            this.chosenVenuecompanyID= this.selectedVenue ? this.selectedVenue.companyID: null;
+
              this.loading = false;
           })
       })
@@ -141,6 +146,8 @@ export class Venues implements OnInit {
 
     if (!user) {
       this.chosenVenueName = null;
+      this.chosenVenueID = null;
+      this.chosenVenuecompanyID=null;
       return;
     }
     const uid = user.uid;
@@ -151,6 +158,8 @@ export class Venues implements OnInit {
       .then(async (querySnapshot) => {
         if (querySnapshot.empty) {
           this.chosenVenueName = null;
+          this.chosenVenueID = null;
+          this.chosenVenuecompanyID=null;
           return;
         }
 
@@ -158,11 +167,15 @@ export class Venues implements OnInit {
         const venueId = eventDoc.data()?.['VenueID'];
         if (!venueId) {
           this.chosenVenueName = null;
+          this.chosenVenueID = null;
+          this.chosenVenuecompanyID=null;
           return;
         }
 
         if (!venueId) {
           this.chosenVenueName = null;
+          this.chosenVenueID = null;
+          this.chosenVenuecompanyID=null;
           return;
         }
 
@@ -170,15 +183,20 @@ export class Venues implements OnInit {
           .subscribe({
             next: (data) => {
               this.chosenVenueName = data.venuename;
+              this.chosenVenueID = data.id;
+              this.chosenVenuecompanyID=data.companyID;
             },
             error: () => {
               this.chosenVenueName = null;
+              this.chosenVenueID = null;
+              this.chosenVenuecompanyID=null;
             }
           });
       })
       .catch(() => {
         this.chosenVenueName = null;
-        
+        this.chosenVenueID = null;
+        this.chosenVenuecompanyID=null;
       });
   }
 
@@ -186,4 +204,76 @@ export class Venues implements OnInit {
   backTohome(): void {
     this.router.navigate(['/homepage']);
   }
+
+
+confirmVenue(): void {
+  const user = auth.currentUser;
+  if (!user || !this.chosenVenueID || !this.chosenVenuecompanyID) return;
+
+  const uid = user.uid;
+
+  const eventsRef = collection(db, 'Events');
+  const q = query(eventsRef, where('EventID', '==', uid));
+  
+  getDocs(q).then(querySnapshot => {
+    if (querySnapshot.empty) {
+      alert('No event found.');
+      return;
+    }
+
+    const eventDoc = querySnapshot.docs[0];
+    const eventData: any = eventDoc.data();
+
+    const weddingDate = new Date(eventData.Date_Time);
+
+    if (!confirm('Once confirmed, you won’t be able to change this venue. Are you sure?')) return;
+
+    const payload = {
+      customerID: uid,
+      venueID: this.chosenVenueID,
+      companyID: this.chosenVenuecompanyID,
+      note: "",
+      startAt: weddingDate.toISOString(),
+      endAt: new Date(weddingDate.getTime() + 2*60*60*1000).toISOString(), 
+      eventID: uid,
+      guestsNum: eventData.guestsNum || 150
+    };
+
+    this.http.post<{ ok: boolean, orderID: string }>(
+      'https://site--vowsandveils--5dl8fyl4jyqm.code.run/venues/confirm-order', payload
+    ).subscribe({
+      next: res => {
+        if (res.ok) {
+          alert('Venue order created! Waiting for confirmation.');
+          const btn = document.querySelector('.btn-confirm') as HTMLElement;
+          if (btn) btn.style.opacity = '0.3'; 
+        }
+      },
+      error: err => {
+        alert(err.error?.error || 'Failed to confirm venue.');
+      }
+    });
+
+  }).catch(err => console.error(err));
+}
+
+checkVenueOrder(): void {
+  const user = auth.currentUser;
+  if (!user) return;
+
+  const ordersRef = collection(db, 'VenuesOrders');
+  const q = query(ordersRef, where('customerID', '==', user.uid));
+
+  getDocs(q).then(snapshot => {
+    const btn = document.querySelector('.btn-confirm') as HTMLElement;
+    if (!btn) return;
+
+    if (snapshot.empty) {
+      btn.style.opacity = '1'; 
+    } else {
+      btn.style.opacity = '0.3'; 
+    }
+  });
+}
+
 }

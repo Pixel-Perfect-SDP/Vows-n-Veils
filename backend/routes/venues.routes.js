@@ -377,5 +377,108 @@ router.put('/:id/images', upload.array('images'), async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /venues/confirm-order:
+ *   post:
+ *     summary: Confirm a venue order
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - customerID
+ *               - venueID
+ *               - companyID
+ *               - startAt
+ *               - endAt
+ *               - eventID
+ *             properties:
+ *               customerID:
+ *                 type: string
+ *               venueID:
+ *                 type: string
+ *               companyID:
+ *                 type: string
+ *               startAt:
+ *                 type: string
+ *                 format: date-time
+ *               endAt:
+ *                 type: string
+ *                 format: date-time
+ *               eventID:
+ *                 type: string
+ *               note:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Venue order created
+ *       400:
+ *         description: Missing required fields
+ *       500:
+ *         description: Failed to confirm venue
+ */
+
+router.post('/confirm-order', async (req, res) => {
+  try {
+    const {
+      customerID,
+      venueID,
+      companyID,
+      startAt,
+      endAt,
+      eventID,
+      note
+    } = req.body;
+
+    if (!customerID || !venueID || !companyID || !startAt || !endAt || !eventID) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    const ordersRef = db.collection('VenuesOrders');
+
+    const startDate = new Date(startAt);
+    const endDate = new Date(endAt);
+
+    const existingOrdersSnap = await ordersRef.where('venueID', '==', venueID).get();
+    let conflict = false;
+
+    existingOrdersSnap.forEach(doc => {
+      const order = doc.data();
+      const existingStart = new Date(order.startAt);
+      const existingEnd = new Date(order.endAt);
+
+      if (
+        (startDate >= new Date(existingStart.getTime() - 24*60*60*1000) && startDate <= new Date(existingEnd.getTime() + 24*60*60*1000)) ||
+        (endDate >= new Date(existingStart.getTime() - 24*60*60*1000) && endDate <= new Date(existingEnd.getTime() + 24*60*60*1000))
+      ) {
+        conflict = true;
+      }
+    });
+
+    if (conflict) {
+      return res.status(400).json({ error: 'Sorry, this venue is not available on your wedding date ±1 day. Choose a different date or venue.' });
+    }
+
+    const orderDoc = await ordersRef.add({
+      companyID,
+      createdAt: new Date(),
+      customerID,
+      endAt: endDate,
+      eventID,
+      note: note || "",
+      startAt: startDate,
+      status: "pending",
+      venueID
+    });
+
+    res.json({ ok: true, orderID: orderDoc.id });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
 
 module.exports = router;

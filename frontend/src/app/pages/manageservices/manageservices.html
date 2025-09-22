@@ -34,11 +34,6 @@
   <section class="services" *ngIf="hasVenueCompany && companyVenueData">
     <h3 class="my-venues">My venues:</h3>
     <section class="button-container">
-      <button (click)="select('Venues')" [ngClass]="selected === 'Venues' ? 'yes-style' : 'default-style'">View my
-        venues</button>
-      <button class="add-venue-btn" *ngIf="selected === 'Venues' && !addingVenue && !editingVenue"
-        (click)="AddVenue()">Add Venue</button>
-
       <button (click)="select('Venues')"[ngClass]="selected === 'Venues' ? 'yes-style' : 'default-style'">View my venues</button>
         <button class="add-venue-btn" *ngIf="selected === 'Venues' && !addingVenue && !editingVenue" (click)="AddVenue()">Add Venue</button>
         <button class="map-toggle-btn" *ngIf="selected === 'Venues'" (click)="toggleMap()">
