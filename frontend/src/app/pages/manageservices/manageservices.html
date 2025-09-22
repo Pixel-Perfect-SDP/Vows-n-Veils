@@ -39,7 +39,86 @@
       <button class="add-venue-btn" *ngIf="selected === 'Venues' && !addingVenue && !editingVenue"
         (click)="AddVenue()">Add Venue</button>
 
+      <button (click)="select('Venues')"[ngClass]="selected === 'Venues' ? 'yes-style' : 'default-style'">View my venues</button>
+        <button class="add-venue-btn" *ngIf="selected === 'Venues' && !addingVenue && !editingVenue" (click)="AddVenue()">Add Venue</button>
+        <button class="map-toggle-btn" *ngIf="selected === 'Venues'" (click)="toggleMap()">
+          {{ mapVisible ? 'Hide Map' : 'Show Map' }}
+        </button>
     </section> <!--button-container-->
+
+    <!-- Map Section -->
+    <section class="map-section" *ngIf="mapVisible && selected === 'Venues'">
+      <!-- Map Search Bar -->
+      <div class="map-search-bar">
+        <input 
+          type="text" 
+          [(ngModel)]="searchAddress" 
+          placeholder="Search for a location..." 
+          class="map-search-input"
+          (keyup.enter)="searchLocation()"
+        />
+        <button (click)="searchLocation()" class="map-search-btn" [disabled]="mapLoading">
+          {{ mapLoading ? 'Searching...' : 'Search' }}
+        </button>
+      </div>
+
+      <!-- Loading -->
+      <div class="map-loading" *ngIf="mapLoading">
+        <div class="map-loader"></div>
+        <span>Loading map data...</span>
+      </div>
+
+      <!-- Error -->
+      <div class="map-error" *ngIf="mapError && !mapLoading">
+        <span>{{ mapError }}</span>
+        <div class="map-error-help" *ngIf="mapError.includes('temporarily unavailable')">
+          <small>💡 You can still enter addresses manually in the venue form below</small>
+        </div>
+      </div>
+
+      <!-- Map Display -->
+      <div class="map-container" *ngIf="mapVisible && !mapError">
+        <div class="map-display">
+          <!-- Real Leaflet Map -->
+          <div id="leaflet-map" class="leaflet-map-container"></div>
+          
+          <!-- Map Info Panel -->
+          <div class="map-info-panel">
+            <div class="map-info-section" *ngIf="mapPin">
+              <h4>📍 Current Location</h4>
+              <p class="location-address">{{ mapPin?.address || 'Click on the map to select a location' }}</p>
+              <p class="location-coords" *ngIf="mapPin">{{ mapPin.lat | number:'1.4-4' }}, {{ mapPin.lon | number:'1.4-4' }}</p>
+              
+              <button 
+                *ngIf="(addingVenue || editingVenue) && mapPin" 
+                (click)="useLocationForVenue()" 
+                class="use-location-btn"
+              >
+                Use this address for venue
+              </button>
+            </div>
+            
+            <div class="map-info-section" *ngIf="!mapPin && mapVisible">
+              <h4>🗺️ Interactive Map</h4>
+              <p class="location-address">Click anywhere on the map to select a location</p>
+              <small>You can also search for addresses using the search box above</small>
+            </div>
+
+            <!-- Nearby Places -->
+            <div class="map-info-section" *ngIf="nearbyPlaces.length > 0">
+              <h4>🏛️ Nearby Venues</h4>
+              <div class="nearby-places">
+                <div class="nearby-place" *ngFor="let venue of nearbyPlaces | slice:0:5">
+                  <span class="place-name">{{ venue.name }}</span>
+                  <span class="place-type">{{ getVenueTypeLabel(venue.venueType) }}</span>
+                  <span class="venue-address" *ngIf="venue.address">{{ venue.address }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
 
 
     <section class="content" *ngIf="selected === 'Venues'; else noVenues">

@@ -318,6 +318,116 @@ export class Homepage
     });
   }
 
+  /*---------Delete guest----------*/
+  async onDeleteGuest(g: Guest) {
+    if (!g?.id) {
+      alert('Missing guest id.');
+      return;
+    }
+
+    const sure = window.confirm(`Are you sure you want to delete "${g.Name}"?`);
+    if (!sure) return;
+
+    try {
+      this.guestsLoading = true;
+
+      const user = await this.waitForUser();
+      if (!user) {
+        this.guestsLoading = false;
+        this.guestsError = 'No authenticated user.';
+        return;
+      }
+
+      const eventId = user.uid;
+      this.dataService.deleteGuest(eventId, g.id).subscribe({
+        next: async () => {
+          // refresh table + dynamic filters (in case values disappear)
+          await this.loadGuests();
+          await this.loadGuestFilterOptions();
+
+          this.guestsLoading = false;
+          alert('Guest deleted successfully.');
+        },
+        error: (err) => {
+          console.error('Failed to delete guest', err);
+          this.guestsLoading = false;
+          alert('Failed to delete guest. Please try again.');
+        }
+      });
+    } catch (e) {
+      console.error(e);
+      this.guestsLoading = false;
+      alert('Unexpected error. Please try again.');
+    }
+  }
+
+  /*---------Download files----------*/
+  //Export UI toggle
+  showExport = false;
+  toggleExport() {
+    this.showExport = !this.showExport;
+  }
+
+  //helpers
+  private makeExportOpts() {
+    const opts: any = {};
+    if (this.selectedDietary) opts.dietary = this.selectedDietary;
+    if (this.selectedAllergy) opts.allergy = this.selectedAllergy;
+    if (this.selectedRsvp !== 'all') opts.rsvp = this.selectedRsvp === 'true';
+    return opts;
+  }
+
+  private saveBlob(blob: Blob, filename: string) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  private buildFilename(ext: 'csv' | 'pdf') {
+    const parts = ['guest-list'];
+    if (this.selectedDietary) parts.push(`diet_${this.selectedDietary}`);
+    if (this.selectedAllergy) parts.push(`allergy_${this.selectedAllergy}`);
+    if (this.selectedRsvp !== 'all') parts.push(`rsvp_${this.selectedRsvp}`);
+    return `${parts.join('-')}.${ext}`;
+  }
+
+  //csv
+  async exportCsv() {
+    const user = await this.waitForUser();
+    if (!user) return;
+    const eventId = user.uid;
+    const opts = this.makeExportOpts();
+
+    this.dataService.downloadGuestsCsv(eventId, opts).subscribe({
+      next: (blob) => this.saveBlob(blob, this.buildFilename('csv')),
+      error: (err) => {
+        console.error('CSV export failed', err);
+        alert('Failed to export CSV.');
+      }
+    });
+  }
+
+  //pdf
+  async exportPdf() {
+    const user = await this.waitForUser();
+    if (!user) return;
+    const eventId = user.uid;
+    const opts = this.makeExportOpts();
+
+    this.dataService.downloadGuestsPdf(eventId, opts).subscribe({
+      next: (blob) => this.saveBlob(blob, this.buildFilename('pdf')),
+      error: (err) => {
+        console.error('PDF export failed', err);
+        alert('Failed to export PDF.');
+      }
+    });
+  }
+
 
 
   /*------------------------------user has NO event--------------------------*/

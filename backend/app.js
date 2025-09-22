@@ -10,6 +10,8 @@ const allowedOrigins = [
 ];
 
 
+const vendorsRoutes = require('./routes/vendors.routes'); //add in for vendor API
+
 // Middleware
 app.use(cors({
   origin: function (origin, callback) {
@@ -21,6 +23,8 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json());
+
+app.use('/vendors', vendorsRoutes);  //added in for vendor API
 
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, { explorer: true }));
@@ -38,9 +42,12 @@ app.use('/events', eventsRoutes);
 const weatherCrossingRoutes = require('./routes/weather-crossing.routes');
 app.use('/weather-crossing', weatherCrossingRoutes);
 
+// Map API
+const mapRoutes = require('./routes/map.routes');
+app.use('/map', mapRoutes);
+
 app.get('/', (req, res) => {
   res.send('Backend is up ');
 });
 
 module.exports = app;
-

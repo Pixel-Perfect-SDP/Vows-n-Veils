@@ -11,7 +11,7 @@ if (!admin.apps.length) {
       clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
       privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
     }),
-    storageBucket: "ppep-2651c.firebasestorage.app"
+    storageBucket: process.env.FIREBASE_STORAGE_BUCKET || "ppep-2651c.firebasestorage.app"
   
   });
 }

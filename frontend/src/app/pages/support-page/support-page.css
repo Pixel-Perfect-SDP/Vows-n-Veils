@@ -1,102 +1,168 @@
-.support-page {
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
-  font-family: "Segoe UI", Arial, sans-serif;
-  background: #f9f9f9; /* very light grey background */
+
+.topbar {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background: #fff; 
+  border-bottom: 2px solid #f8dfe6;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  box-sizing: border-box;
 }
 
-.support-page h1 {
-  font-size: 2.2rem;
-  margin-bottom: 0.5rem;
-  color: #333;
+.logo-area {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
 }
 
-.support-page h3 {
-  font-weight: normal;
-  color: #666;
-  margin-bottom: 2rem;
-}
-
-/* Intro section */
-.siteSummary {
-  max-width: 800px;
-  margin: 0 auto 2.5rem auto;
-  font-size: 1.1rem;
-  line-height: 1.6;
-  color: #444;
-  background: #f2f2f2; /* soft grey background */
-  border-left: 5px solid #b8c9a9; /* sage accent */
-  padding: 1rem 1.5rem;
+.logo-img {
+  height: 42px;
+  width: auto;
   border-radius: 8px;
 }
 
-.siteSummary p {
-  margin: 0.5rem 0;
+.logo-text {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #d46a6a; 
+  margin: 0;
+  font-family: "Georgia", serif;
 }
 
-/* Grid for cards */
-.support-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+.nav-links {
+  display: flex;
   gap: 1.5rem;
-  margin-top: 2rem;
 }
 
-/* Card styling */
-.support-card {
-  background: #fff;
-  border-radius: 12px;
-  padding: 2rem 1.5rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+.nav-links a {
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #333;
+  transition: color 0.3s ease, border-bottom 0.3s ease;
+  padding-bottom: 0.2rem;
+}
+
+.nav-links a:hover {
+  color: #e75480; 
+  border-bottom: 2px solid #d4af37; 
+}
+
+@media (max-width: 768px) {
+  .topbar {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1rem;
+  }
+
+  .nav-links {
+    margin-top: 0.8rem;
+    gap: 1rem;
+    flex-wrap: wrap; 
+  }
+}
+
+
+
+.support-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem;
+  font-family: "Georgia", serif;
   text-align: center;
+  background: linear-gradient(135deg, #fffdfd, #fff8fa);
+  color: #333;
+}
+
+/* === Title === */
+.support-page h1 {
+  font-size: 2.4rem;
+  font-family: "Lucida Handwriting", cursive;
+  margin-bottom: 1rem;
+  font-weight: 700;
+  background: linear-gradient(
+    270deg,
+    #c84c61,
+    #9caf88,
+    #e75480,
+    #c84c61
+  );
+  background-size: 600% 600%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: flowGradient 12s ease infinite;
+}
+
+.support-page h1::after {
+  content: "";
+  display: block;
+  width: 60%;
+  height: 2px;
+  margin: 1rem auto 0 auto;
+  background: linear-gradient(to right, #d4af37, #f7e9a0, #d4af37);
+  border-radius: 2px;
+}
+
+
+.siteSummary {
+  margin-bottom: 2.5rem;
+}
+
+.siteSummary p {
+  font-size: 1.1rem;
+  color: #555;
+  line-height: 1.6;
+}
+
+.p1{
+  font-size: 1.1rem;
+  color: #555;
+  line-height: 1.6;
+}
+
+.p1::after {
+  content: "";
+  display: block;
+  width: 60%;
+  height: 2px;
+  margin: 1rem auto 0 auto;
+  background: linear-gradient(to right, #d4af37, #f7e9a0, #d4af37);
+  border-radius: 2px;
+}
+
+.support-grid {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+  margin-bottom: 3rem;
+}
+
+.support-card {
+  flex: 1 1 260px;
+  background: #fff;
+  padding: 2rem 1.5rem;
+  border-radius: 16px;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
   border: 2px solid transparent;
 }
 
-.support-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
-}
-
-/* Different card themes */
-.support-card.couples {
-  border-color: #e8a1b3; /* soft pink */
-}
-
-.support-card.guests {
-  border-color: #b8c9a9; /* sage */
-}
-
-.support-card.companies {
-  border-color: #d3d3d3; /* light grey */
-}
-
-.support-card span.material-symbols-outlined {
-  font-size: 3rem;
+.support-card span {
+  font-size: 2.5rem;
+  color: #c84c61;
   margin-bottom: 1rem;
   display: block;
 }
 
-/* Match icons with themes */
-.support-card.couples span {
-  color: #e8a1b3; /* pink */
-}
-
-.support-card.guests span {
-  color: #b8c9a9; /* sage */
-}
-
-.support-card.companies span {
-  color: #7b7b7b; /* grey */
-}
-
 .support-card h2 {
-  margin: 0.5rem 0;
   font-size: 1.4rem;
-  color: #333;
+  margin-bottom: 0.5rem;
+  color: #444;
 }
 
 .support-card p {
@@ -104,114 +170,101 @@
   color: #666;
 }
 
-/* FAQ section */
+.support-card:hover {
+  transform: translateY(-8px) scale(1.03);
+  border: 2px solid #9caf88;
+  box-shadow: 0 10px 24px rgba(156, 175, 136, 0.3);
+}
+
 .faq-section {
   max-width: 800px;
   margin: 0 auto;
-  padding: 2rem;
   text-align: left;
-  background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .faq-section h2 {
-  text-align: center;
-  margin-bottom: 2rem;
   font-size: 1.8rem;
-  color: #333;
-}
-
-/* Back button */
-.back-btn {
-  display: inline-block;
+  color: #c84c61;
   margin-bottom: 1.5rem;
-  background: #e8a1b3; /* pink */
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  font-size: 0.95rem;
-  color: #fff;
-  cursor: pointer;
-  transition: background 0.2s ease;
+  text-align: center;
 }
 
-.back-btn:hover {
-  background: #d6859e; /* darker pink */
-}
-
-/* FAQ items */
-.faq-item {
-  background: #f9f9f9; /* light grey */
-  border-radius: 10px;
-  padding: 1.2rem 1.5rem;
-  margin-bottom: 1rem;
-  border-left: 5px solid #b8c9a9; /* sage accent */
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.faq-item:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-/* Question */
-.faq-item h4 {
-  font-size: 1.1rem;
-  margin-bottom: 0.5rem;
-  color: #e8a1b3; /* pink */
-}
-
-/* Answer */
-.faq-item p {
-  font-size: 0.95rem;
-  line-height: 1.6;
-  color: #444;
-  margin: 0;
-}
 
 .search-bar {
   width: 100%;
-  max-width: 400px;
-  padding: 0.5rem;
-  margin: 1rem 0;
-  border: 1px solid #ccc;
-  border-radius: 8px;
+  padding: 0.8rem 1rem;
+  margin-bottom: 2rem;
+  border: 2px solid #f0dfe4;
+  border-radius: 10px;
   font-size: 1rem;
+  outline: none;
+  transition: border 0.3s ease, box-shadow 0.3s ease;
+}
+
+.search-bar:focus {
+  border: 2px solid #9caf88;
+  box-shadow: 0 0 8px rgba(156,175,136,0.4);
+}
+
+.faq-item {
+  margin-bottom: 1.5rem;
+  padding: 1.2rem;
+  border-radius: 12px;
+  background: #fff;
+  border-left: 4px solid #c84c61;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+  transition: transform 0.2s ease;
+}
+
+.faq-item:hover {
+  transform: translateX(5px);
+  box-shadow: 0 5px 16px rgba(231,84,128,0.15);
+}
+
+.faq-item h4 {
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.faq-item h4::before {
+  content: "♥ ";
+  color: #d4af37;   
+  font-size: 1.1rem;
+  margin-right: 0.3rem;
 }
 
 
-.backLandingBtn {
-  background-color: #f8e9f0; /* soft pink */
-  color: #444; /* subtle grey text */
-  border: 2px solid #d6d6d6; /* light grey border */
+.faq-item p {
+  font-size: 0.95rem;
+  color: #555;
+  line-height: 1.5;
+}
+
+
+.back-btn {
+  display: block;             
+  margin: 0 auto 1.5rem auto; 
   padding: 0.6rem 1.2rem;
-  border-radius: 12px;
-  font-size: 1rem;
-  font-weight: 500;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, #f8b8c0, #e75480);
+  border: none;
+  border-radius: 30px;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-family: "Segoe UI", Arial, sans-serif;
-}
-
-/* Hover effect */
-.backLandingBtn:hover {
-  background-color: #d7e2d0; /* sage green */
-  color: #222;
-  border-color: #b5c4b0;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.1);
-}
-
-/* Active / clicked */
-.backLandingBtn:active {
-  background-color: #c9d8c1;
-  transform: scale(0.97);
-}
-
-/* Focus outline for accessibility */
-.backLandingBtn:focus {
-  outline: 3px solid #e2cad9; /* pink focus glow */
-  outline-offset: 2px;
+  text-align: center;         
 }
 
 
+.back-btn:hover {
+  background: linear-gradient(135deg, #e75480, #b43b61);
+  box-shadow: 0 6px 16px rgba(231, 84, 128, 0.3);
+}
+
+@keyframes flowGradient {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}

@@ -73,4 +73,53 @@ export class DataService {
     const params = new HttpParams().set('location', location).set('date', date);
     return this.http.get<any>(`${this.apiUrl}/weather-crossing`, { params });  
   }
+
+  // Get map data (geocoding or reverse geocoding)
+  getMapData(address?: string, lat?: number, lon?: number): Observable<any> {
+    let params = new HttpParams();
+    if (address) params = params.set('address', address);
+    if (lat !== undefined) params = params.set('lat', lat.toString());
+    if (lon !== undefined) params = params.set('lon', lon.toString());
+    return this.http.get<any>(`${this.apiUrl}/map`, { params });
+  }
+
+  // Get nearby places for a location
+  getNearbyPlaces(lat: number, lon: number, radius: number = 1000): Observable<any> {
+    const params = new HttpParams()
+      .set('lat', lat.toString())
+      .set('lon', lon.toString())
+      .set('radius', radius.toString());
+    return this.http.get<any>(`${this.apiUrl}/map/nearby`, { params });
+  }
+
+  // delete guest
+  deleteGuest(eventId: string, guestId: string) {
+    return this.http.delete<{ message: string; id: string }>(`${this.apiUrl}/events/${eventId}/guests/${guestId}`);
+  }
+
+  // download CSV
+downloadGuestsCsv(eventId: string, opts?: { dietary?: string; allergy?: string; rsvp?: boolean }) {
+  let params = new HttpParams();
+  if (opts?.dietary) params = params.set('dietary', opts.dietary);
+  if (opts?.allergy) params = params.set('allergy', opts.allergy);
+  if (typeof opts?.rsvp === 'boolean') params = params.set('rsvp', String(opts.rsvp));
+  return this.http.get(`${this.apiUrl}/events/${eventId}/guests/export.csv`, {
+    params,
+    responseType: 'blob'
+  });
+}
+
+// download PDF
+downloadGuestsPdf(eventId: string, opts?: { dietary?: string; allergy?: string; rsvp?: boolean }) {
+  let params = new HttpParams();
+  if (opts?.dietary) params = params.set('dietary', opts.dietary);
+  if (opts?.allergy) params = params.set('allergy', opts.allergy);
+  if (typeof opts?.rsvp === 'boolean') params = params.set('rsvp', String(opts.rsvp));
+  return this.http.get(`${this.apiUrl}/events/${eventId}/guests/export.pdf`, {
+    params,
+    responseType: 'blob'
+  });
+}
+
+
 }
