@@ -50,16 +50,11 @@ export class Venues implements OnInit {
         console.log('User is logged in:', user.uid);
         this.getChosenVenue();
         this.checkVenueOrder();
-        this.getUserBudget();
+        this,this.getUserBudget();
       } else {
         console.log('No user logged in yet');
       }
     });
-    if (auth.currentUser)
-    {
-      console.log('Direct budget check:', auth.currentUser.uid);
-      this.getUserBudget();
-    }
     this.getVenues()
 
   }
