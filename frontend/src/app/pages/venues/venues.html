@@ -21,10 +21,10 @@
             </button>
         </section>
         <!-- recommended venues-->
-        <section *ngIf="venueRecommened.length>0">
+        <section *ngIf="venueRecommended().length>0">
             <h2>The following venues are recommended for you </h2>
             <ul>
-                <li *ngFor="let venue of venueRecommened()">
+                <li *ngFor="let venue of venueRecommended()">
                     <h3>{{ venue.venuename }}</h3>
                     <section class="images">
                         <img *ngIf="venue.images?.length" [src]="venue.images?.[0]?.url" width="300" />
