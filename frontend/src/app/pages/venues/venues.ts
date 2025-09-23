@@ -49,13 +49,10 @@ export class Venues implements OnInit {
       if (user) {
         console.log('User is logged in:', user.uid);
         await this.getUserBudget();
+      }
         this.getVenues();
         this.getChosenVenue();
         this.checkVenueOrder();
-      } else {
-        console.log('No user logged in yet');
-        this.getVenues();
-      }
     });
 
   }
