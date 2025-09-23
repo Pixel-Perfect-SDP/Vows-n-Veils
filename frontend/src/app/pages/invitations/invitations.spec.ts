@@ -3,6 +3,7 @@ import { Invitations } from './invitations';
 import { ReactiveFormsModule, FormBuilder } from '@angular/forms'; 
 import { Router } from '@angular/router'; 
 import { RouterTestingModule } from '@angular/router/testing'; 
+import { routes } from '../../app.routes';
 
 
 import { getFirestore, doc, getDoc, setDoc } from 'firebase/firestore';
@@ -20,7 +21,7 @@ describe('Invitations', () => {
 
   beforeEach(async () => { 
     await TestBed.configureTestingModule({ 
-      imports: [ Invitations, ReactiveFormsModule, RouterTestingModule.withRoutes([]) ],
+      imports: [ Invitations, ReactiveFormsModule, RouterTestingModule.withRoutes(routes) ],
      
     }).compileComponents(); 
 
