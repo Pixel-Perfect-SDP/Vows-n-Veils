@@ -12,6 +12,9 @@
             <button (click)="logout()" class="logout-btn">Logout</button>
         </span>
         <h2>Venues</h2>
+        <span *ngIf="venues.length==0" class="noItems">
+            <p>There are no pending venues</p>
+        </span>
         <section class="disp-container">
 
             <span class="disp-box" *ngFor="let venue of venues">
@@ -22,6 +25,9 @@
             </span>
         </section>
         <h2>Vendors</h2>
+        <span *ngIf="vendors.length==0" class="noItems">
+            <p>There are no pending vendors</p>
+        </span>
         <section class="disp-container">
 
             <span class="disp-box" *ngFor="let vendor of vendors">
