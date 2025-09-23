@@ -55,7 +55,11 @@ export class Venues implements OnInit {
         console.log('No user logged in yet');
       }
     });
-
+    if (auth.currentUser)
+    {
+      console.log('Direct budget check:', auth.currentUser.uid);
+      this.getUserBudget();
+    }
     this.getVenues()
 
   }
@@ -286,6 +290,7 @@ checkVenueOrder(): void {
 
   getUserBudget(): void
     {
+      console.log("Fetching user budget...");
       const user=auth.currentUser;
       if(!user)
       {
@@ -309,6 +314,8 @@ checkVenueOrder(): void {
         const eventDoc=querySnapshot.docs[0];
         const budget=eventDoc.data()?.['budget'];
         this.userBudget=budget||null;
+
+        console.log("Fetched budget:", budget, "Assigned userBudget:", this.userBudget);
 
       })
       .catch(err=>
