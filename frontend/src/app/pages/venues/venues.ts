@@ -50,6 +50,7 @@ export class Venues implements OnInit {
         console.log('User is logged in:', user.uid);
         this.getChosenVenue();
         this.checkVenueOrder();
+        this.getUserBudget();
       } else {
         console.log('No user logged in yet');
       }
@@ -265,7 +266,7 @@ export class Venues implements OnInit {
 
     }).catch(err => console.error(err));
   }
-hasExistingOrder = false; 
+hasExistingOrder = false;
 
 checkVenueOrder(): void {
   const user = auth.currentUser;
@@ -278,5 +279,54 @@ checkVenueOrder(): void {
     })
     .catch(err => console.error(err));
 }
+
+//getting recommened venues
+
+  userBudget: number | null = null;
+
+  getUserBudget(): void
+    {
+      const user=auth.currentUser;
+      if(!user)
+      {
+        this.userBudget=null;
+        return;
+      }
+
+
+      const uid=user.uid;
+      const eventsRef=collection(db,'Events');
+      const  q=query(eventsRef,where('EventID','==',uid));
+
+      getDocs(q).then(querySnapshot=>
+        {
+        if(querySnapshot.empty)
+        {
+          this.userBudget=null;
+          return;
+        }
+
+        const eventDoc=querySnapshot.docs[0];
+        const budget=eventDoc.data()?.['budget'];
+        this.userBudget=budget||null;
+
+      })
+      .catch(err=>
+        {
+          console.error(err);
+          this.userBudget=null;
+        });
+    }
+
+     venueRecommened(): Venue[]
+    {
+      if(!this.venues || this.venues.length==0 || this.userBudget===null)
+      {
+        return [];
+      }
+      const recommened=this.venues.filter(venue=> venue.price <=this.userBudget!);
+
+      return recommened
+    }
 
 }
