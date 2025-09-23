@@ -139,7 +139,7 @@
       </section>
     </body>
 
-    
+
 
       <!-- Default landing content -->
       <section class="content" *ngIf="activeTab==='overview'">
@@ -184,7 +184,7 @@
             <button type="button" class="btn" (click)="toggleAddGuest()">
               {{ showAddGuest ? 'Close' : 'Add Guest' }}
             </button>
-            
+
             <button type="button" class="btn" (click)="toggleExport()">
             {{ showExport ? 'Close' : 'Export' }}
             </button>
@@ -371,6 +371,9 @@
 
     <label>Time of wedding:</label>
     <input type="time" formControlName="time" />
+
+    <label>Budget:</label>
+    <input type="number" formControlName="budget" />
 
     <button type="submit" [disabled]="form.invalid">Create our wedding</button>
   </form>
