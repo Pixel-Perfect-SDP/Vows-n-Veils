@@ -423,15 +423,7 @@ router.put('/:id/images', upload.array('images'), async (req, res) => {
 
 router.post('/confirm-order', async (req, res) => {
   try {
-    const {
-      customerID,
-      venueID,
-      companyID,
-      startAt,
-      endAt,
-      eventID,
-      note
-    } = req.body;
+    const { customerID, venueID, companyID, startAt, endAt, eventID, note } = req.body;
 
     if (!customerID || !venueID || !companyID || !startAt || !endAt || !eventID) {
       return res.status(400).json({ error: 'Missing required fields' });
@@ -447,12 +439,13 @@ router.post('/confirm-order', async (req, res) => {
 
     existingOrdersSnap.forEach(doc => {
       const order = doc.data();
-      const existingStart = new Date(order.startAt);
-      const existingEnd = new Date(order.endAt);
+
+      const existingStart = order.startAt?.seconds ? new Date(order.startAt.seconds * 1000) : new Date(order.startAt);
+      const existingEnd   = order.endAt?.seconds   ? new Date(order.endAt.seconds * 1000)   : new Date(order.endAt);
 
       if (
         (startDate >= new Date(existingStart.getTime() - 24*60*60*1000) && startDate <= new Date(existingEnd.getTime() + 24*60*60*1000)) ||
-        (endDate >= new Date(existingStart.getTime() - 24*60*60*1000) && endDate <= new Date(existingEnd.getTime() + 24*60*60*1000))
+        (endDate   >= new Date(existingStart.getTime() - 24*60*60*1000) && endDate   <= new Date(existingEnd.getTime() + 24*60*60*1000))
       ) {
         conflict = true;
       }

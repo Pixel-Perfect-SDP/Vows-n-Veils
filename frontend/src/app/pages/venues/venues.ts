@@ -39,8 +39,9 @@ export class Venues implements OnInit {
   loading = true;
   error: string | null = null;
   chosenVenueName: string | null = null;
-chosenVenueID:string | null = null;
-chosenVenuecompanyID:string |null =null;
+  chosenVenueID: string | null = null;
+  chosenVenuecompanyID: string | null = null;
+  weddingDate: Date = new Date();
   constructor(private http: HttpClient, private router: Router) { }
 
   ngOnInit(): void {
@@ -80,7 +81,7 @@ chosenVenuecompanyID:string |null =null;
       .subscribe({
         next: (data) => {
           this.selectedVenue = data;
-          this.loading=false;
+          this.loading = false;
         },
         error: (err) => {
           this.error = 'Failed to load venue: ' + err.message;
@@ -121,7 +122,7 @@ chosenVenuecompanyID:string |null =null;
         const eventDocRef = doc(db, 'Events', eventDoc.id);
 
         updateDoc(eventDocRef, { VenueID: id })
-          .then(() =>{
+          .then(() => {
             console.log(`VenueID updated for event ${eventDoc.id}`);
             this.loading = false;
           }
@@ -129,16 +130,16 @@ chosenVenuecompanyID:string |null =null;
           .catch((error) => console.error('Error updating VenueID:', error))
           .finally(() => {
             this.chosenVenueName = this.selectedVenue ? this.selectedVenue.venuename : null;
-            this.chosenVenueID = this.selectedVenue ? this.selectedVenue.id: null;
-            this.chosenVenuecompanyID= this.selectedVenue ? this.selectedVenue.companyID: null;
+            this.chosenVenueID = this.selectedVenue ? this.selectedVenue.id : null;
+            this.chosenVenuecompanyID = this.selectedVenue ? this.selectedVenue.companyID : null;
 
-             this.loading = false;
+            this.loading = false;
           })
       })
-      .catch((error) =>{
+      .catch((error) => {
         console.error('Error fetching events:', error);
         this.loading = false;
-        });
+      });
   }
 
   getChosenVenue(): void {
@@ -147,7 +148,7 @@ chosenVenuecompanyID:string |null =null;
     if (!user) {
       this.chosenVenueName = null;
       this.chosenVenueID = null;
-      this.chosenVenuecompanyID=null;
+      this.chosenVenuecompanyID = null;
       return;
     }
     const uid = user.uid;
@@ -159,7 +160,7 @@ chosenVenuecompanyID:string |null =null;
         if (querySnapshot.empty) {
           this.chosenVenueName = null;
           this.chosenVenueID = null;
-          this.chosenVenuecompanyID=null;
+          this.chosenVenuecompanyID = null;
           return;
         }
 
@@ -168,14 +169,14 @@ chosenVenuecompanyID:string |null =null;
         if (!venueId) {
           this.chosenVenueName = null;
           this.chosenVenueID = null;
-          this.chosenVenuecompanyID=null;
+          this.chosenVenuecompanyID = null;
           return;
         }
 
         if (!venueId) {
           this.chosenVenueName = null;
           this.chosenVenueID = null;
-          this.chosenVenuecompanyID=null;
+          this.chosenVenuecompanyID = null;
           return;
         }
 
@@ -184,19 +185,19 @@ chosenVenuecompanyID:string |null =null;
             next: (data) => {
               this.chosenVenueName = data.venuename;
               this.chosenVenueID = data.id;
-              this.chosenVenuecompanyID=data.companyID;
+              this.chosenVenuecompanyID = data.companyID;
             },
             error: () => {
               this.chosenVenueName = null;
               this.chosenVenueID = null;
-              this.chosenVenuecompanyID=null;
+              this.chosenVenuecompanyID = null;
             }
           });
       })
       .catch(() => {
         this.chosenVenueName = null;
         this.chosenVenueID = null;
-        this.chosenVenuecompanyID=null;
+        this.chosenVenuecompanyID = null;
       });
   }
 
@@ -206,74 +207,111 @@ chosenVenuecompanyID:string |null =null;
   }
 
 
-confirmVenue(): void {
-  const user = auth.currentUser;
-  if (!user || !this.chosenVenueID || !this.chosenVenuecompanyID) return;
+  confirmVenue(): void {
+    const user = auth.currentUser;
+    if (!user || !this.chosenVenueID || !this.chosenVenuecompanyID) return;
 
-  const uid = user.uid;
+    const uid = user.uid;
 
-  const eventsRef = collection(db, 'Events');
-  const q = query(eventsRef, where('EventID', '==', uid));
-  
-  getDocs(q).then(querySnapshot => {
-    if (querySnapshot.empty) {
-      alert('No event found.');
-      return;
-    }
+    const eventsRef = collection(db, 'Events');
+    const q = query(eventsRef, where('EventID', '==', uid));
 
-    const eventDoc = querySnapshot.docs[0];
-    const eventData: any = eventDoc.data();
-
-    const weddingDate = new Date(eventData.Date_Time);
-
-    if (!confirm('Once confirmed, you won’t be able to change this venue. Are you sure?')) return;
-
-    const payload = {
-      customerID: uid,
-      venueID: this.chosenVenueID,
-      companyID: this.chosenVenuecompanyID,
-      note: "",
-      startAt: weddingDate.toISOString(),
-      endAt: new Date(weddingDate.getTime() + 2*60*60*1000).toISOString(), 
-      eventID: uid,
-      guestsNum: eventData.guestsNum || 150
-    };
-
-    this.http.post<{ ok: boolean, orderID: string }>(
-      'https://site--vowsandveils--5dl8fyl4jyqm.code.run/venues/confirm-order', payload
-    ).subscribe({
-      next: res => {
-        if (res.ok) {
-          alert('Venue order created! Waiting for confirmation.');
-          const btn = document.querySelector('.btn-confirm') as HTMLElement;
-          if (btn) btn.style.opacity = '0.3'; 
-        }
-      },
-      error: err => {
-        alert(err.error?.error || 'Failed to confirm venue.');
+    getDocs(q).then(querySnapshot => {
+      if (querySnapshot.empty) {
+        alert('No event found.');
+        return;
       }
-    });
 
-  }).catch(err => console.error(err));
-}
+      const eventDoc = querySnapshot.docs[0];
+      const eventData: any = eventDoc.data();
 
-checkVenueOrder(): void {
-  const user = auth.currentUser;
-  if (!user) return;
 
-  const ordersRef = collection(db, 'VenuesOrders');
-  const q = query(ordersRef, where('customerID', '==', user.uid));
+      if (!confirm('Once confirmed, you won’t be able to change this venue. Are you sure?')) return;
+      if (!eventData.Date_Time) {
+        alert('Event does not have a wedding date set.');
+        return;
+      }
+      this.weddingDate = eventData.Date_Time.toDate();
 
-  getDocs(q).then(snapshot => {
-    const btn = document.querySelector('.btn-confirm') as HTMLElement;
-    if (!btn) return;
+      this.loading = true;
+      const payload = {
+        customerID: uid,
+        venueID: this.chosenVenueID,
+        companyID: this.chosenVenuecompanyID,
+        note: "",
+        startAt: this.weddingDate.toISOString(),
+        endAt: new Date(this.weddingDate.getTime() + 2 * 60 * 60 * 1000).toISOString(),
+        eventID: uid,
+        guestsNum: eventData.guestsNum || 150
+      };
 
-    if (snapshot.empty) {
-      btn.style.opacity = '1'; 
-    } else {
-      btn.style.opacity = '0.3'; 
-    }
-  });
-}
+      this.http.post<{ ok: boolean, orderID: string }>(
+        'https://site--vowsandveils--5dl8fyl4jyqm.code.run/venues/confirm-order', payload
+      ).subscribe({
+        next: res => {
+          if (res.ok) {
+            alert('Venue order created! Waiting for confirmation.');
+            const btn = document.querySelector('.btn-confirm') as HTMLElement;
+            if (btn) btn.style.opacity = '0.3';
+            this.loading = false;
+
+          }
+        },
+        error: err => {
+          alert(err.error?.error || 'Failed to confirm venue.');
+          this.loading = false;
+        }
+      });
+
+    }).catch(err => console.error(err));
+  }
+
+  checkVenueOrder(): void {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    const ordersRef = collection(db, 'VenuesOrders');
+
+    getDocs(query(ordersRef, where('customerID', '==', user.uid)))
+      .then(snapshot => {
+        const confirmBtn = document.querySelector('.btn-confirm') as HTMLElement;
+        const chooseBtns = document.querySelectorAll('.btn-choose-venue') as NodeListOf<HTMLElement>;
+
+        if (!confirmBtn) return;
+
+        let disableConfirm = false;
+        const disableChoose: string[] = [];
+
+        snapshot.forEach(doc => {
+          const order = doc.data();
+          const start = order['startAt']?.seconds ? new Date(order['startAt'].seconds * 1000) : new Date(order['startAt']);
+          const end = order['endAt']?.seconds ? new Date(order['endAt'].seconds * 1000) : new Date(order['endAt']);
+
+          const today = this.weddingDate;
+          if (today >= new Date(start.getTime() - 24 * 60 * 60 * 1000) &&
+            today <= new Date(end.getTime() + 24 * 60 * 60 * 1000)) {
+            disableConfirm = true;
+          }
+
+          disableChoose.push(order['venueID']);
+        });
+
+        confirmBtn.style.opacity = disableConfirm ? '0.3' : '1';
+        confirmBtn.toggleAttribute('disabled', disableConfirm);
+
+        chooseBtns.forEach(btn => {
+          const venueId = btn.getAttribute('data-venue-id');
+          if (venueId && disableChoose.includes(venueId)) {
+            btn.style.opacity = '0.3';
+            btn.setAttribute('disabled', 'true');
+          } else {
+            btn.style.opacity = '1';
+            btn.removeAttribute('disabled');
+          }
+        });
+      })
+      .catch(err => console.error('Error checking venue orders:', err));
+  }
+
 
 }
