@@ -20,7 +20,25 @@
                 Confirm Venue
             </button>
         </section>
+        <!-- recommended venues-->
+        <section *ngIf="venueRecommened.length>0">
+            <h2>The following venues are recommended for you </h2>
+            <ul>
+                <li *ngFor="let venue of venueRecommened()">
+                    <h3>{{ venue.venuename }}</h3>
+                    <section class="images">
+                        <img *ngIf="venue.images?.length" [src]="venue.images?.[0]?.url" width="300" />
+                    </section>
 
+                    <p class="venue-address">{{ venue.address }}</p>
+                    <p class="venue-capacity">Capacity: {{ venue.capacity }}</p>
+                    <button class="btn" (click)="viewVenue(venue.id)">View Venue</button>
+                </li>
+            </ul>
+        </section>
+
+        <!-- all possible venues -->
+        <h2>All venues  </h2>
         <section class="venue-list">
             <ul>
                 <li *ngFor="let venue of venues">
