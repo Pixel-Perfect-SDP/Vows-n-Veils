@@ -50,7 +50,7 @@ export class Venues implements OnInit {
         console.log('User is logged in:', user.uid);
         this.getChosenVenue();
         this.checkVenueOrder();
-        this,this.getUserBudget();
+        this.getUserBudget();
       } else {
         console.log('No user logged in yet');
       }
@@ -327,7 +327,7 @@ checkVenueOrder(): void {
         return [];
       }
       const recommened=this.venues.filter(venue=> venue.price <=this.userBudget!);
-
+      console.log("Recommened venues based on budget", this.userBudget, recommened);
       return recommened
     }
 
