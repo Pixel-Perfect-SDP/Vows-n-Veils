@@ -45,17 +45,18 @@ export class Venues implements OnInit {
   constructor(private http: HttpClient, private router: Router) { }
 
   ngOnInit(): void {
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, async (user) => {
       if (user) {
         console.log('User is logged in:', user.uid);
+        await this.getUserBudget();
+        this.getVenues();
         this.getChosenVenue();
         this.checkVenueOrder();
-        this.getUserBudget();
       } else {
         console.log('No user logged in yet');
+        this.getVenues();
       }
     });
-    this.getVenues()
 
   }
 
@@ -66,6 +67,13 @@ export class Venues implements OnInit {
       .subscribe({
         next: (data) => {
           this.venues = data.filter((venue: any) => venue.status === 'active');
+
+          //filtering for the recommended venues
+          if (this.userBudget !== null)
+          {
+            const recommended=this.venues.filter(venue=> venue.price <=this.userBudget!);
+            console.log("Recommended venues based on budget", this.userBudget, recommended);
+          }
           this.loading = false;
         },
         error: (err) => {
@@ -283,52 +291,50 @@ checkVenueOrder(): void {
 
   userBudget: number | null = null;
 
-  getUserBudget(): void
-    {
-      console.log("Fetching user budget...");
-      const user=auth.currentUser;
-      if(!user)
-      {
-        this.userBudget=null;
+  getUserBudget(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const user = auth.currentUser;
+      if (!user) {
+        this.userBudget = null;
+        resolve();
         return;
       }
 
+      const uid = user.uid;
+      const eventsRef = collection(db,'Events');
+      const q = query(eventsRef, where('EventID','==',uid));
 
-      const uid=user.uid;
-      const eventsRef=collection(db,'Events');
-      const  q=query(eventsRef,where('EventID','==',uid));
+      getDocs(q)
+        .then(querySnapshot => {
+          if (querySnapshot.empty) {
+            this.userBudget = null;
+            resolve();
+            return;
+          }
 
-      getDocs(q).then(querySnapshot=>
-        {
-        if(querySnapshot.empty)
-        {
-          this.userBudget=null;
-          return;
-        }
-
-        const eventDoc=querySnapshot.docs[0];
-        const budget=eventDoc.data()?.['budget'];
-        this.userBudget=budget||null;
-
-        console.log("Fetched budget:", budget, "Assigned userBudget:", this.userBudget);
-
-      })
-      .catch(err=>
-        {
+          const eventDoc = querySnapshot.docs[0];
+          const budget = eventDoc.data()?.['budget'];
+          this.userBudget = budget || null;
+          console.log("Fetched budget:", budget, "Assigned userBudget:", this.userBudget);
+          resolve();
+        })
+        .catch(err => {
           console.error(err);
-          this.userBudget=null;
+          this.userBudget = null;
+          resolve();
         });
-    }
+    });
 
-     venueRecommened(): Venue[]
-    {
-      if(!this.venues || this.venues.length==0 || this.userBudget===null)
-      {
-        return [];
-      }
-      const recommened=this.venues.filter(venue=> venue.price <=this.userBudget!);
-      console.log("Recommened venues based on budget", this.userBudget, recommened);
-      return recommened
+
+  }
+
+  venueRecommended(): Venue[]
+  {
+    if (!this.venues || this.venues.length === 0 || this.userBudget === null) {
+      return [];
     }
+    return this.venues.filter(venue => venue.price <= this.userBudget!);
+  }
+
 
 }
