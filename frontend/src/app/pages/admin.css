@@ -1,0 +1,95 @@
+.hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  border-bottom: 1px solid rgba(197,126,109,0.3);
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.logout-btn {
+  background-color: white;
+  color: #C57E6D;
+  border: 2px solid #C57E6D;
+  padding: 0.8rem 1.5rem;
+  font-size: 0.8rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.logout-btn:hover {
+  background-color: #C57E6D;
+  color: white;
+}
+.logo {
+  max-width: 100px;
+  height: auto;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: #fff;
+  box-shadow: 0 2px 12px rgba(0,0,0,.06);
+}
+
+
+@media (max-width: 500px) {
+  .hero-content {
+    align-items: center;
+  }
+}
+
+.disp-container
+{
+  display: flex;
+  gap: 1rem;
+  flex-direction: row;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.disp-box
+{
+  display: inline-block;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-color: rgba(197,126,109,0.3) ;
+  box-shadow: 0 2px 12px rgba(0,0,0,.06);
+  padding: 1rem;
+  border-radius: 8px;
+  max-width: 300px;
+  width: auto;
+  height: auto;
+  box-sizing: border-box;
+  text-align: center;
+
+}
+.disp-box:hover
+{
+  box-shadow: 0 4px 24px #C57E6D;
+  transform: translateY(-2px);
+  transition: all 0.3s ease;
+}
+
+.disp-btn
+{
+  background-color: white;
+  color: #C57E6D;
+  border: 2px solid;
+  border-color: #C57E6D;
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 10px;
+  margin-top: 10px;
+  margin-right: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+.disp-btn:hover
+{
+  background-color: #C57E6D;
+  color: white;
+}
