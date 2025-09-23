@@ -265,53 +265,18 @@ export class Venues implements OnInit {
 
     }).catch(err => console.error(err));
   }
+hasExistingOrder = false; 
 
-  checkVenueOrder(): void {
-    const user = auth.currentUser;
-    if (!user) return;
+checkVenueOrder(): void {
+  const user = auth.currentUser;
+  if (!user) return;
 
-    const ordersRef = collection(db, 'VenuesOrders');
-
-    getDocs(query(ordersRef, where('customerID', '==', user.uid)))
-      .then(snapshot => {
-        const confirmBtn = document.querySelector('.btn-confirm') as HTMLElement;
-        const chooseBtns = document.querySelectorAll('.btn-choose-venue') as NodeListOf<HTMLElement>;
-
-        if (!confirmBtn) return;
-
-        let disableConfirm = false;
-        const disableChoose: string[] = [];
-
-        snapshot.forEach(doc => {
-          const order = doc.data();
-          const start = order['startAt']?.seconds ? new Date(order['startAt'].seconds * 1000) : new Date(order['startAt']);
-          const end = order['endAt']?.seconds ? new Date(order['endAt'].seconds * 1000) : new Date(order['endAt']);
-
-          const today = this.weddingDate;
-          if (today >= new Date(start.getTime() - 24 * 60 * 60 * 1000) &&
-            today <= new Date(end.getTime() + 24 * 60 * 60 * 1000)) {
-            disableConfirm = true;
-          }
-
-          disableChoose.push(order['venueID']);
-        });
-
-        confirmBtn.style.opacity = disableConfirm ? '0.3' : '1';
-        confirmBtn.toggleAttribute('disabled', disableConfirm);
-
-        chooseBtns.forEach(btn => {
-          const venueId = btn.getAttribute('data-venue-id');
-          if (venueId && disableChoose.includes(venueId)) {
-            btn.style.opacity = '0.3';
-            btn.setAttribute('disabled', 'true');
-          } else {
-            btn.style.opacity = '1';
-            btn.removeAttribute('disabled');
-          }
-        });
-      })
-      .catch(err => console.error('Error checking venue orders:', err));
-  }
-
+  const ordersRef = collection(db, 'VenuesOrders');
+  getDocs(query(ordersRef, where('customerID', '==', user.uid)))
+    .then(snapshot => {
+      this.hasExistingOrder = !snapshot.empty;
+    })
+    .catch(err => console.error(err));
+}
 
 }
