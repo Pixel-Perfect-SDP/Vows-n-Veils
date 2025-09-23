@@ -6,46 +6,41 @@
       <p>Browse all available services from our vendor community.</p>
     </section>
     <section class="button-group">
-    <button class="home-btn" (click)="backTohome()">
-      Back to Home
-    </button>
+      <button class="home-btn" (click)="backTohome()">Back to Home</button>
       <button (click)="loadAllVendors()" [disabled]="loading">
-          {{ loading ? 'Loading…' : (loaded ? 'Refresh list' : 'Show all vendors') }}
-        </button>
+        {{ loading ? 'Loading…' : (loaded ? 'Refresh list' : 'Show all vendors') }}
+      </button>
       <button (click)="toggleOrders()" [disabled]="loadingOrders">
-          {{ loadingOrders ? 'Loading…' : (showOrders ? 'Hide my orders' : 'Check my orders') }}
-        </button>
+        {{ loadingOrders ? 'Loading…' : (showOrders ? 'Hide my orders' : 'Check my orders') }}
+      </button>
     </section>
 
-
     <section class="loading-container" *ngIf="loading">
-  <section class="Loading-1"></section>
-</section>
+      <section class="Loading-1"></section>
+    </section>
 
     <section class="serviceCount" *ngIf="loaded">
       {{ totalCount }} services available
-    <section class="filters" *ngIf="loaded">
-    <label>
-      Price:
-      <select [(ngModel)]="selectedPriceRange" (change)="loadAllVendors()">
-        <option *ngFor="let r of priceRanges" [ngValue]="r">{{ r.label }}</option>
-      </select>
-    </label>
+      <section class="filters" *ngIf="loaded">
+        <label>
+          Price:
+          <select [(ngModel)]="selectedPriceRange" (change)="loadAllVendors()">
+            <option *ngFor="let r of priceRanges" [ngValue]="r">{{ r.label }}</option>
+          </select>
+        </label>
 
-    <label>
-      Capacity:
-      <select [(ngModel)]="selectedCapacityRange" (change)="loadAllVendors()">
-        <option *ngFor="let r of capacityRanges" [ngValue]="r">{{ r.label }}</option>
-      </select>
-    </label>
+        <label>
+          Capacity:
+          <select [(ngModel)]="selectedCapacityRange" (change)="loadAllVendors()">
+            <option *ngFor="let r of capacityRanges" [ngValue]="r">{{ r.label }}</option>
+          </select>
+        </label>
 
-    <button type="button" (click)="clearFilters()">Clear Filters</button>
-  </section>
+        <button type="button" (click)="clearFilters()">Clear Filters</button>
+      </section>
     </section>
-  <p *ngIf="errorMsg" class="error">{{ errorMsg }}</p>
+    <p *ngIf="errorMsg" class="error">{{ errorMsg }}</p>
   </section>
-
-
 
   <section class="my-orders" *ngIf="showOrders">
     <section class="order-summary" *ngIf="orders?.length">
@@ -54,14 +49,14 @@
     <section class="orders-list" *ngIf="orders?.length; else noOrders">
       <section class="order-card" *ngFor="let o of orders">
         <section class="row2">
-            <p *ngIf="o.companyName">Company: {{ o.companyName }}</p>
-            <p>Date: {{ o.startAt | date:'mediumDate' }}</p>
-            <p>Time: {{ o.startAt | date:'shortTime' }}–{{ o.endAt | date:'shortTime' }}</p>
-            <p>Number of guests: {{ o.guestsNum }}</p>
+          <p *ngIf="o.companyName">Company: {{ o.companyName }}</p>
+          <p>Date: {{ o.startAt | date:'mediumDate' }}</p>
+          <p>Time: {{ o.startAt | date:'shortTime' }}–{{ o.endAt | date:'shortTime' }}</p>
+          <p>Number of guests: {{ o.guestsNum }}</p>
         </section>
         <section class="card1">
-            <p>Service name: {{ o.serviceName || 'Service' }}</p>
-            <p *ngIf="o.price != null">Price: R{{ o.price | number:'1.0-2' }}</p>
+          <p>Service name: {{ o.serviceName || 'Service' }}</p>
+          <p *ngIf="o.price != null">Price: R{{ o.price | number:'1.0-2' }}</p>
         </section>
 
         <p
@@ -83,17 +78,14 @@
     <p class="error" *ngIf="ordersError">{{ ordersError }}</p>
   </section>
 
-
- <section class="vendor-results" *ngIf="loaded">
-  <ng-container *ngFor="let t of serviceTypes">
-  
-    <section class="result-group" *ngIf="groups[t]?.length">
-      <section class="result-group-header" (click)="toggle(t)">
+  <section class="vendor-results" *ngIf="loaded">
+    <ng-container *ngFor="let t of serviceTypes">
+      <section class="result-group" *ngIf="groups[t]?.length">
+        <section class="result-group-header" (click)="toggle(t)">
           <h2>{{ typeLabel(t) }}</h2>
           <p class="pill">{{ groups[t].length }} options</p>
           <p class="chev" [class.up]="expanded[t]">▾</p>
-      </section>
-
+        </section>
 
         <section class="vresults-grid" *ngIf="expanded[t]">
           <section class="vc-card" *ngFor="let s of groups[t]; trackBy: trackById">
@@ -105,6 +97,7 @@
             <p class="company" *ngIf="s.companyName">Company: {{ s.companyName }}</p>
 
             <ul class="meta">
+              <li *ngIf="s.phonenumber">Contact Number: {{ s.phonenumber }}</li>
               <li *ngIf="s.capacity != null">Capacity: {{ s.capacity }}</li>
               <li *ngIf="s.status">Status: <span class="status">{{ s.status }}</span></li>
             </ul>
@@ -112,49 +105,46 @@
             <p class="desc" *ngIf="s.description">{{ s.description }}</p>
             <p class="notes" *ngIf="s.bookingNotes">{{ s.bookingNotes }}</p>
 
-
             <section class="actions">
               <button class="primary" (click)="openOrder(s)">Order</button>
               <button class="secondary" disabled>View details</button>
             </section>
           </section>
-
         </section>
+      </section>
+    </ng-container>
 
+    <p class="empty" *ngIf="!totalCount">No services yet.</p>
+  </section>
 
+  <section class="order-form" *ngIf="showOrder">
+    <section class="orders">
+      <h3>Request booking</h3>
 
-    </section>
-
-  </ng-container>
-
-  <p class="empty" *ngIf="!totalCount">No services yet.</p>
- </section>
-    
-
-
-<section class="order-form" *ngIf="showOrder">
-  <section class="orders">
-    <h3>Request booking</h3>
-
-    <section class="vendor-summary" *ngIf="selectedService">
-       <section class="left">
+      <section class="vendor-summary" *ngIf="selectedService">
+        <section class="left">
           <section class="name">Service name: {{ selectedService.serviceName }}</section>
           <section class="company" *ngIf="selectedService.companyName">Company: {{ selectedService.companyName }}</section>
-          </section>
-        <section class="price" *ngIf="selectedService.price != null">Price: R{{ selectedService.price | number:'1.0-2' }}</section>
-    </section>
+          <ul class="meta" *ngIf="selectedService.phonenumber">
+            <li>Contact Number: {{ selectedService.phonenumber }}</li>
+          </ul>
+        </section>
+        <section class="price" *ngIf="selectedService.price != null">
+          Price: R{{ selectedService.price | number:'1.0-2' }}
+        </section>
+      </section>
 
-    <form [formGroup]="orderForm" (ngSubmit)="submitOrder()">
-      <section class="event-row" *ngIf="myEventId">
+      <form [formGroup]="orderForm" (ngSubmit)="submitOrder()">
+        <section class="event-row" *ngIf="myEventId">
           <label>Wedding of </label>
           <section class="event-chip"><strong>{{ myEventTitle }}</strong></section>
-      </section>
-      <section class="eventDate">
-        <label>Date: </label>
-        <input type="date" formControlName="date" />
-      </section>
+        </section>
+        <section class="eventDate">
+          <label>Date: </label>
+          <input type="date" formControlName="date" />
+        </section>
 
-      <section class="row">
+        <section class="row">
           <section class="col">
             <label>Start time: </label>
             <input type="time" formControlName="startTime" />
@@ -163,32 +153,29 @@
             <label>End time: </label>
             <input type="time" formControlName="endTime" />
           </section>
-      </section>
+        </section>
 
-      <section class="guests">
-        <label>Number of guests: </label>
-        <input type="number" min="1" formControlName="guestsNum" placeholder="e.g. 120" />
-      </section>
+        <section class="guests">
+          <label>Number of guests: </label>
+          <input type="number" min="1" formControlName="guestsNum" placeholder="e.g. 120" />
+        </section>
 
-      <section class="vendorNotes">
-        <label>Notes for the vendor: </label>
-        <textarea rows="3" formControlName="note" placeholder="Anything the vendor should know?"></textarea>
-      </section>
+        <section class="vendorNotes">
+          <label>Notes for the vendor: </label>
+          <textarea rows="3" formControlName="note" placeholder="Anything the vendor should know?"></textarea>
+        </section>
 
-      <section class="actions">
+        <section class="actions">
           <button type="button" class="secondary" (click)="closeOrder()" [disabled]="ordering">Cancel</button>
           <button type="submit" [disabled]="orderForm.invalid || ordering">
             {{ ordering ? 'Sending…' : 'Send request' }}
           </button>
-      </section>
+        </section>
 
         <p class="error" *ngIf="orderError">{{ orderError }}</p>
         <p class="success" *ngIf="orderSuccess">{{ orderSuccess }}</p>
-
-    </form>
-
+      </form>
+    </section>
   </section>
-</section>
-  
 
 </section>
