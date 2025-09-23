@@ -310,6 +310,8 @@ checkVenueOrder(): void {
         const budget=eventDoc.data()?.['budget'];
         this.userBudget=budget||null;
 
+        console.log("Fetched budget:", budget, "Assigned userBudget:", this.userBudget);
+
       })
       .catch(err=>
         {
