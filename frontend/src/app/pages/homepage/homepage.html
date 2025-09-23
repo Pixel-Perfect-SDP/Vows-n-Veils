@@ -30,7 +30,6 @@
 
     <!-- Main content column -->
     <div class="main">
-
       <!-- Header / event banner lives INSIDE the flow (no overlap) -->
       <header class="event-header">
         <!-- Hamburger -->
@@ -42,6 +41,72 @@
           <p class="names">Welcome, {{ eventData.Name1 }} and {{ eventData.Name2 }}</p>
         </div>
       </header>
+
+      <!-- Weather Bar (full-width, under header) -->
+      <section class="weather-bar" *ngIf="eventData?.VenueID">
+        <!-- Loading -->
+        <ng-container *ngIf="weatherLoading">
+          <div class="wb-row">
+            <div class="wb-icon-skel"></div>
+            <div class="wb-text-skel"></div>
+            <div class="wb-text-skel short"></div>
+          </div>
+        </ng-container>
+
+        <!-- Error -->
+        <ng-container *ngIf="weatherError && !weatherLoading">
+          <div class="wb-row wb-error">
+            <span>{{ weatherError }}</span>
+          </div>
+        </ng-container>
+
+        <!-- Data -->
+        <!-- Data -->
+        <ng-container *ngIf="weather && !weatherLoading && !weatherError">
+          <div class="wb-row">
+            <!-- ICON (auto picks class based on conditions/probability) -->
+            <div class="wb-icon" [ngClass]="getWeatherIconClass(weather.days[0])" aria-hidden="true"></div>
+
+            <div class="wb-col">
+              <div class="wb-title">Wedding Weather</div>
+              <div class="wb-sub">
+                <strong>{{ weather.resolvedAddress || weather.address }}</strong>
+                • {{ weather.days[0].datetime }}
+                <ng-container *ngIf="weather.days[0].description">
+                  • {{ weather.days[0].description }}
+                </ng-container>
+                <ng-container *ngIf="!weather.days[0].description">
+                  • {{ getConditionLabel(weather.days[0]) }}
+                </ng-container>
+              </div>
+            </div>
+
+            <div class="wb-metrics">
+              <div class="wb-chip">
+                🌡️ {{ (((weather.days[0].temp - 32) * 5) / 9) | number:'1.0-0' }}°C
+              </div>
+              <div class="wb-chip" *ngIf="weather.days[0].humidity !== undefined">
+                💧 {{ weather.days[0].humidity }}%
+              </div>
+              <div class="wb-chip" *ngIf="getPrecipPercent(weather.days[0]) !== null">
+                ☔ {{ getPrecipPercent(weather.days[0]) }}%
+              </div>
+            </div>
+          </div>
+        </ng-container>
+      </section>
+
+      <!-- If no venue yet -->
+      <section class="weather-bar wb-empty" *ngIf="!eventData?.VenueID">
+        <div class="wb-row">
+          <div class="wb-icon" aria-hidden="true">⛅</div>
+          <div class="wb-col">
+            <div class="wb-title">Add a venue to see your wedding weather</div>
+            <div class="wb-sub">We’ll pull the forecast for your exact location & date.</div>
+          </div>
+        </div>
+      </section>
+
 
       <body>
         <h2 class=countHead>Time until we tie the knot.....</h2>
@@ -73,6 +138,8 @@
 
       </section>
     </body>
+
+    
 
       <!-- Default landing content -->
       <section class="content" *ngIf="activeTab==='overview'">
@@ -116,6 +183,10 @@
           <div class="addGuest">
             <button type="button" class="btn" (click)="toggleAddGuest()">
               {{ showAddGuest ? 'Close' : 'Add Guest' }}
+            </button>
+            
+            <button type="button" class="btn" (click)="toggleExport()">
+            {{ showExport ? 'Close' : 'Export' }}
             </button>
           </div>
         </div>
@@ -169,6 +240,23 @@
           </form>
         </div>
 
+        <!-- Add download options -->
+        <div class="add-card" *ngIf="showExport">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <strong>Export Guest List</strong>
+            <small style="color:#666;">Applies current filters</small>
+          </div>
+
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <button type="button" class="btn btn-primary" (click)="exportCsv()">
+              Download CSV
+            </button>
+            <button type="button" class="btn btn-primary" (click)="exportPdf()">
+              Download PDF
+            </button>
+          </div>
+        </div>
+
 
         <!-- Card -->
         <div class="table-card">
@@ -208,6 +296,7 @@
                   <th>Allergies</th>
                   <th>RSVP</th>
                   <th>Song</th>
+                  <th style="width:1%; white-space: nowrap;">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -228,6 +317,20 @@
                     </span>
                   </td>
                   <td class="td-clip" title="{{ g.Song }}">{{ g.Song }}</td>
+                  <td>
+                    <button
+                      type="button"
+                      class="icon-btn danger"
+                      title="Delete guest"
+                      aria-label="Delete guest"
+                      (click)="onDeleteGuest(g)"
+                      [disabled]="guestsLoading">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M5.5 5.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0V6H7v6.5a.5.5 0 0 1-1 0v-7z"/>
+                        <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4H2.5a1 1 0 0 1 0-2h3.086a1 1 0 0 1 .707-.293h2.414a1 1 0 0 1 .707.293H13.5a1 1 0 0 1 1 1zM4.118 4l.39 9.447A1 1 0 0 0 5.5 14.5h5a1 1 0 0 0 .992-.947L11.882 4H4.118z"/>
+                      </svg>
+                    </button>
+                  </td>
                 </tr>
               </tbody>
             </table>

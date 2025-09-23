@@ -2,38 +2,27 @@ import { Component, inject, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import {
-  addDoc, collection, deleteDoc, doc, getDoc, getDocs, onSnapshot, query,
-  serverTimestamp, setDoc, where
-} from 'firebase/firestore';
+import { collection, doc, getDoc, onSnapshot, query, serverTimestamp, setDoc, where, getFirestore } from 'firebase/firestore';
 import { getApp } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore';
 import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
 import { AuthService } from '../../core/auth';
 import { auth } from '../firebase/firebase-config';
 import { signOut } from 'firebase/auth';
+import { environment } from '../../../environments/environment';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 
-interface CompanyDoc {
-  userID: string;
-  companyName: string;
-  email: string;
-  phoneNumber: string;
-  type?: string; 
-}
-
-type ServiceDoc = {
+type ServiceRow = {
   id: string;
   serviceName: string;
   type: string;
-  price?: number;
-  capacity?: number | null;
-  status?: string;
-  description?: string;
-  bookingNotes?: string;
-  companyID?: string;  
-  companyId?: string;  
-  ownerId?: string;     
-  createdBy?: string;  
+  price: number | null;
+  capacity: number | null;
+  description: string;
+  bookingNotes: string;
+  status: string;
+  companyID: string;
+  phonenumber: string;
 };
 
 type OrderStatus = 'pending' | 'accepted' | 'declined' | 'cancelled';
@@ -50,16 +39,25 @@ type OrderRow = {
   note?: string;
   status: OrderStatus;
   createdAt?: any;
-
   createdAtDate: Date | null;
   startAtDate: Date | null;
   endAtDate: Date | null;
 };
 
+type CompanyDoc = {
+  userID: string;
+  companyName: string;
+  email: string;
+  phoneNumber: string;
+  type?: string;
+};
+
+const API_BASE = `${environment.apiUrl}/vendors`;
+
 @Component({
   selector: 'app-vendors-company',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, HttpClientModule],
   templateUrl: './vendors-company.html',
   styleUrls: ['./vendors-company.css']
 })
@@ -68,19 +66,18 @@ export class VendorsCompany implements OnDestroy {
   auth = inject(AuthService);
   private fb = inject(FormBuilder);
 
-  
-  hasVendorCompany: boolean | null = null; // null = loading
+  constructor(private http: HttpClient) {}
+
+  hasVendorCompany: boolean | null = null;
   companyVendorData: CompanyDoc | null = null;
   companyId: string | null = null;
   errorMsg = '';
 
-  
   form = this.fb.group({
     companyName: ['', [Validators.required]],
     companyEmail: ['', [Validators.required, Validators.email]],
-    companyNumber: ['', [Validators.required, Validators.pattern('^[0-9+ ]+$')]],
+    companyNumber: ['', [Validators.required, Validators.pattern('^[0-9+ ()\\-]{7,20}$')]],
   });
-
 
   showServiceForm = false;
   busy = false;
@@ -94,7 +91,8 @@ export class VendorsCompany implements OnDestroy {
     price: null as number | null,
     capacity: null as number | null,
     description: '',
-    bookingNotes: ''
+    bookingNotes: '',
+    phonenumber: ''
   };
 
   serviceForm = this.fb.group({
@@ -104,9 +102,10 @@ export class VendorsCompany implements OnDestroy {
     capacity: [null as number | null, [Validators.min(0)]],
     description: [''],
     bookingNotes: [''],
+    phonenumber: ['', [Validators.required, Validators.pattern('^[0-9+ ()\\-]{7,20}$')]],
   });
 
-  services: ServiceDoc[] = [];
+  services: ServiceRow[] = [];
   loadingServices = false;
 
   private serviceNameMap = new Map<string, string>();
@@ -116,18 +115,33 @@ export class VendorsCompany implements OnDestroy {
   }
   getServiceName(id: string) { return this.serviceNameMap.get(id) || '—'; }
 
-  
   orders: OrderRow[] = [];
   loadingOrders = false;
   orderBusyId: string | null = null;
   orderBusyAction: 'accept' | 'decline' | null = null;
 
- 
   private liveUnsub: (() => void) | null = null;
   private ordersUnsub: (() => void) | null = null;
   private authUnsub: (() => void) | null = null;
 
-  
+  editPhoneId: string | null = null;
+  phoneInput = '';
+  phoneBusyId: string | null = null;
+  phoneErrorId: string | null = null;
+  phoneInlineError = '';
+
+  editPriceId: string | null = null;
+  priceInput: number | null = null;
+  priceBusyId: string | null = null;
+  priceErrorId: string | null = null;
+  priceInlineError = '';
+
+  editCapacityId: string | null = null;
+  capacityInput: number | null = null;
+  capacityBusyId: string | null = null;
+  capacityErrorId: string | null = null;
+  capacityInlineError = '';
+
   async ngOnInit() {
     const appAuth = getAuth();
     this.authUnsub = onAuthStateChanged(appAuth, async (user: User | null) => {
@@ -141,12 +155,10 @@ export class VendorsCompany implements OnDestroy {
         this.orders = [];
         return;
       }
-
       this.companyId = user.uid;
       await this.loadCompany(user.uid);
-
       if (this.hasVendorCompany && this.companyId) {
-        await this.loadLegacyOnce(this.companyId);
+        await this.loadServicesFromApi(this.companyId);
         this.rebuildServiceNameMap();
         this.attachLive(this.companyId);
         this.attachOrders(this.companyId);
@@ -183,38 +195,36 @@ export class VendorsCompany implements OnDestroy {
         this.hasVendorCompany = false;
       }
     } catch (e: any) {
-      console.error(e);
       this.errorMsg = e?.message ?? 'Failed to load company.';
       this.hasVendorCompany = false;
     }
   }
 
-  private async loadLegacyOnce(uid: string) {
+  private async loadServicesFromApi(uid: string) {
+    this.loadingServices = true;
+    this.errorMsg = '';
     try {
-      this.loadingServices = true;
-      const db = getFirestore(getApp());
-      const col = collection(db, 'Vendors');
-
-      const [s1, s2, s3, s4] = await Promise.all([
-        getDocs(query(col, where('companyID', '==', uid))),
-        getDocs(query(col, where('companyId', '==', uid))),
-        getDocs(query(col, where('ownerId', '==', uid))),
-        getDocs(query(col, where('createdBy', '==', uid))),
-      ]);
-
-      const byId = new Map<string, ServiceDoc>();
-      for (const snap of [s1, s2, s3, s4]) {
-        snap.forEach(d => byId.set(d.id, { id: d.id, ...(d.data() as any) }));
-      }
-
-      this.services = Array.from(byId.values()).sort((a, b) => {
+      const data = await firstValueFrom(this.http.get<any[]>(`${API_BASE}/company/${uid}`));
+      const mapped: ServiceRow[] = (data || []).map(v => ({
+        id: v.id,
+        serviceName: v.serviceName ?? v.name ?? '',
+        type: v.type ?? '',
+        price: typeof v.price === 'number' ? v.price : null,
+        capacity: v.capacity ?? null,
+        description: v.description ?? '',
+        bookingNotes: v.bookingNotes ?? '',
+        status: v.status ?? 'pending',
+        companyID: v.companyID ?? uid,
+        phonenumber: v.phonenumber ?? ''
+      }));
+      this.services = mapped.sort((a, b) => {
         const an = (a.serviceName || '').toLowerCase();
         const bn = (b.serviceName || '').toLowerCase();
         return an < bn ? -1 : an > bn ? 1 : 0;
       });
     } catch (e: any) {
-      console.error(e);
-      this.errorMsg = e?.message ?? 'Failed to load services.';
+      this.errorMsg = e?.message ?? 'Failed to load services from API.';
+      this.services = [];
     } finally {
       this.loadingServices = false;
     }
@@ -228,7 +238,21 @@ export class VendorsCompany implements OnDestroy {
       qy,
       snap => {
         const byId = new Map(this.services.map(s => [s.id, s]));
-        snap.forEach(d => byId.set(d.id, { id: d.id, ...(d.data() as any) }));
+        snap.forEach(d => {
+          const raw = d.data() as any;
+          byId.set(d.id, {
+            id: d.id,
+            serviceName: raw.serviceName ?? raw.name ?? '',
+            type: raw.type ?? '',
+            price: typeof raw.price === 'number' ? raw.price : null,
+            capacity: raw.capacity ?? null,
+            description: raw.description ?? '',
+            bookingNotes: raw.bookingNotes ?? '',
+            status: raw.status ?? 'pending',
+            companyID: raw.companyID ?? uid,
+            phonenumber: raw.phonenumber ?? ''
+          });
+        });
         this.services = Array.from(byId.values()).sort((a, b) => {
           const an = (a.serviceName || '').toLowerCase();
           const bn = (b.serviceName || '').toLowerCase();
@@ -237,7 +261,6 @@ export class VendorsCompany implements OnDestroy {
         this.rebuildServiceNameMap();
       },
       err => {
-        console.error(err);
         this.errorMsg = err?.message ?? 'Failed to stream services.';
       }
     );
@@ -248,7 +271,6 @@ export class VendorsCompany implements OnDestroy {
     this.successMsg = '';
     if (this.serviceForm.invalid || !this.companyId) return;
 
-    const db = getFirestore(getApp());
     const v = this.serviceForm.getRawValue() as {
       serviceName: string;
       type: string;
@@ -256,58 +278,152 @@ export class VendorsCompany implements OnDestroy {
       capacity: number | null;
       description?: string;
       bookingNotes?: string;
+      phonenumber: string;
     };
 
+    const email = this.companyVendorData?.email ?? '';
     this.busy = true;
     try {
-      await addDoc(collection(db, 'Vendors'), {
-        serviceName: v.serviceName,
+      const body = {
+        name: v.serviceName,
         type: v.type,
         price: v.price != null ? Number(v.price) : 0,
         capacity: v.capacity != null ? Number(v.capacity) : null,
         description: v.description ?? '',
         bookingNotes: v.bookingNotes ?? '',
-        status: 'active',
+        status: 'pending',
         companyID: this.companyId,
-        createdBy: this.companyId,
-        createdAt: serverTimestamp(),
-      });
+        email,
+        phonenumber: v.phonenumber?.trim() || ''
+      };
+      await firstValueFrom(this.http.post<{ id: string }>(`${API_BASE}`, body));
       this.successMsg = 'Service saved!';
-      this.serviceForm.reset(this.defaultServiceValues);
+      this.serviceForm.reset({
+        serviceName: '',
+        type: '',
+        price: null,
+        capacity: null,
+        description: '',
+        bookingNotes: '',
+        phonenumber: ''
+      });
       this.showServiceForm = false;
+      await this.loadServicesFromApi(this.companyId);
+      this.rebuildServiceNameMap();
     } catch (e: any) {
-      console.error(e);
-      this.errorMsg = e?.message ?? 'Failed to save service.';
+      this.errorMsg = e?.error?.error || e?.message || 'Failed to save service.';
     } finally {
       this.busy = false;
     }
   }
 
-  async deleteService(s: ServiceDoc) {
+  beginEditPhone(s: ServiceRow) {
+    this.editPhoneId = s.id;
+    this.phoneInput = s.phonenumber || '';
+    this.phoneErrorId = null;
+    this.phoneInlineError = '';
+  }
+  cancelEditPhone() {
+    this.editPhoneId = null;
+    this.phoneInput = '';
+    this.phoneErrorId = null;
+    this.phoneInlineError = '';
+  }
+  private validPhone(p: string) { return /^[0-9+ ()\-]{7,20}$/.test((p || '').trim()); }
+  async saveEditPhone(s: ServiceRow) {
+    const phone = (this.phoneInput || '').trim();
+    if (!this.validPhone(phone)) {
+      this.phoneErrorId = s.id; this.phoneInlineError = 'Enter a valid phone number'; return;
+    }
+    this.phoneBusyId = s.id;
+    try {
+      await firstValueFrom(this.http.put(`${API_BASE}/${s.id}`, { phonenumber: phone }));
+      const idx = this.services.findIndex(x => x.id === s.id);
+      if (idx >= 0) this.services[idx] = { ...this.services[idx], phonenumber: phone };
+      this.cancelEditPhone();
+    } catch (e: any) {
+      this.phoneErrorId = s.id; this.phoneInlineError = e?.error?.error || e?.message || 'Failed to update phone';
+    } finally {
+      this.phoneBusyId = null;
+    }
+  }
+
+  beginEditPrice(s: ServiceRow) {
+    this.editPriceId = s.id;
+    this.priceInput = s.price ?? 0;
+    this.priceErrorId = null;
+    this.priceInlineError = '';
+  }
+  cancelEditPrice() {
+    this.editPriceId = null;
+    this.priceInput = null;
+    this.priceErrorId = null;
+    this.priceInlineError = '';
+  }
+  async saveEditPrice(s: ServiceRow) {
+    const val = Number(this.priceInput);
+    if (!(val >= 0)) { this.priceErrorId = s.id; this.priceInlineError = 'Enter a valid price'; return; }
+    this.priceBusyId = s.id;
+    try {
+      await firstValueFrom(this.http.put(`${API_BASE}/${s.id}`, { price: val }));
+      const idx = this.services.findIndex(x => x.id === s.id);
+      if (idx >= 0) this.services[idx] = { ...this.services[idx], price: val };
+      this.cancelEditPrice();
+    } catch (e: any) {
+      this.priceErrorId = s.id; this.priceInlineError = e?.error?.error || e?.message || 'Failed to update price';
+    } finally {
+      this.priceBusyId = null;
+    }
+  }
+
+  beginEditCapacity(s: ServiceRow) {
+    this.editCapacityId = s.id;
+    this.capacityInput = s.capacity ?? 0;
+    this.capacityErrorId = null;
+    this.capacityInlineError = '';
+  }
+  cancelEditCapacity() {
+    this.editCapacityId = null;
+    this.capacityInput = null;
+    this.capacityErrorId = null;
+    this.capacityInlineError = '';
+  }
+  async saveEditCapacity(s: ServiceRow) {
+    const val = Number(this.capacityInput);
+    if (!(val >= 0)) { this.capacityErrorId = s.id; this.capacityInlineError = 'Enter a valid capacity'; return; }
+    this.capacityBusyId = s.id;
+    try {
+      await firstValueFrom(this.http.put(`${API_BASE}/${s.id}`, { capacity: val }));
+      const idx = this.services.findIndex(x => x.id === s.id);
+      if (idx >= 0) this.services[idx] = { ...this.services[idx], capacity: val };
+      this.cancelEditCapacity();
+    } catch (e: any) {
+      this.capacityErrorId = s.id; this.capacityInlineError = e?.error?.error || e?.message || 'Failed to update capacity';
+    } finally {
+      this.capacityBusyId = null;
+    }
+  }
+
+  async deleteService(s: ServiceRow) {
     if (!s?.id) return;
     if (!confirm(`Delete service "${s.serviceName}"?`)) return;
-
-    const db = getFirestore(getApp());
     this.busyId = s.id;
     try {
-      await deleteDoc(doc(db, 'Vendors', s.id));
+      await firstValueFrom(this.http.delete(`${API_BASE}/${s.id}`));
       this.services = this.services.filter(x => x.id !== s.id);
       this.rebuildServiceNameMap();
     } catch (e: any) {
-      console.error(e);
-      this.errorMsg = e?.message ?? 'Failed to delete service.';
+      this.errorMsg = e?.error?.error || e?.message || 'Failed to delete service.';
     } finally {
       this.busyId = null;
     }
   }
-
 
   private attachOrders(uid: string) {
     const db = getFirestore(getApp());
     const qy = query(collection(db, 'Orders'), where('companyID', '==', uid));
     this.detachOrders();
     this.loadingOrders = true;
-
     this.ordersUnsub = onSnapshot(
       qy,
       snap => {
@@ -332,18 +448,15 @@ export class VendorsCompany implements OnDestroy {
             endAtDate: toDate(data.endAt),
           });
         });
-
         rows.sort((a, b) => {
           const aTs = (a.createdAtDate?.getTime?.() ?? a.startAtDate?.getTime?.() ?? 0);
           const bTs = (b.createdAtDate?.getTime?.() ?? b.startAtDate?.getTime?.() ?? 0);
           return bTs - aTs;
         });
-
         this.orders = rows;
         this.loadingOrders = false;
       },
       err => {
-        console.error(err);
         this.loadingOrders = false;
         this.errorMsg = err?.message ?? 'Failed to stream orders.';
       }
@@ -351,7 +464,6 @@ export class VendorsCompany implements OnDestroy {
   }
 
   canAct(o: OrderRow) { return o.status === 'pending'; }
-
   async acceptOrder(o: OrderRow) { await this.updateOrderStatus(o, 'accepted'); }
   async declineOrder(o: OrderRow) { await this.updateOrderStatus(o, 'declined'); }
 
@@ -365,8 +477,6 @@ export class VendorsCompany implements OnDestroy {
       const snap = await getDoc(ref);
       if (!snap.exists()) throw new Error('Order not found.');
       const data = snap.data() as any;
-
-     
       const payload = {
         customerID: data.customerID,
         eventID: data.eventID,
@@ -381,7 +491,6 @@ export class VendorsCompany implements OnDestroy {
       };
       await setDoc(ref, payload, { merge: false });
     } catch (e: any) {
-      console.error(e);
       this.errorMsg = e?.message ?? 'Failed to update order.';
     } finally {
       this.orderBusyId = null;
@@ -389,32 +498,36 @@ export class VendorsCompany implements OnDestroy {
     }
   }
 
-  
   toggleServiceForm() {
     this.showServiceForm = !this.showServiceForm;
     if (this.showServiceForm) {
       this.errorMsg = '';
       this.successMsg = '';
-      this.serviceForm.reset(this.defaultServiceValues);
+      this.serviceForm.reset({
+        serviceName: '',
+        type: '',
+        price: null,
+        capacity: null,
+        description: '',
+        bookingNotes: '',
+        phonenumber: ''
+      });
     }
   }
 
   refreshServices() {
     if (!this.companyId) return;
-    this.loadLegacyOnce(this.companyId);
+    this.loadServicesFromApi(this.companyId);
   }
 
-  trackById(_: number, item: ServiceDoc | OrderRow) { return item.id; }
-
+  trackById(_: number, item: ServiceRow | OrderRow) { return item.id; }
 
   async createVendorCompany() {
     if (this.form.invalid) return;
     const uid = this.companyId;
     if (!uid) { this.errorMsg = 'Please sign in again.'; return; }
-
     const db = getFirestore(getApp());
     const ref = doc(db, 'Companies', uid);
-
     try {
       await setDoc(ref, {
         userID: uid,
@@ -424,32 +537,23 @@ export class VendorsCompany implements OnDestroy {
         type: 'vendor',
         createdAt: serverTimestamp(),
       });
-
       await this.loadCompany(uid);
       if (this.hasVendorCompany) {
-        await this.loadLegacyOnce(uid);
+        await this.loadServicesFromApi(uid);
         this.rebuildServiceNameMap();
         this.attachLive(uid);
         this.attachOrders(uid);
       }
       alert('Vendor Company created successfully!');
     } catch (e: any) {
-      console.error(e);
       this.errorMsg = e?.message ?? 'Error creating your Vendor Company.';
       alert('Error creating your Vendor Company.');
     }
   }
 
-
-    logout(): void
-  {
+  logout(): void {
     signOut(auth)
-      .then(() => {
-        console.log('User signed out successfully');
-        this.router.navigate(['/landing']);
-      })
-      .catch((error) => {
-        console.error('Error signing out:', error);
-      });
+      .then(() => { this.router.navigate(['/landing']); })
+      .catch(() => {});
   }
 }

@@ -98,6 +98,7 @@ export class Homepage
     }
   }
 
+  /*----------fetch weather helpers-------- */
   private fetchVenueAndWeather(venueId: string, eventDate: any) {
     this.weatherLoading = true;
     this.weatherError = null;
@@ -140,6 +141,36 @@ export class Homepage
     const dd = String(date.getDate()).padStart(2, '0');
     return `${yyyy}-${mm}-${dd}`;
   }
+
+  /** Safely return precip probability (0–100) or null if missing */
+  getPrecipPercent(day: any): number | null {
+    // API may give precipprob as %, while precip can be amount (mm/in) — we only use precipprob.
+    const p = day?.precipprob;
+    if (p === undefined || p === null) return null;
+    const n = Number(p);
+    return Number.isFinite(n) ? Math.round(n) : null;
+  }
+
+  /** Human-friendly fallback label if description is empty */
+  getConditionLabel(day: any): string {
+    const cond = (day?.conditions || '').trim();
+    if (!cond) return '—';
+    return cond;
+  }
+
+  /** Decide which icon class to use based on conditions + rain probability */
+  getWeatherIconClass(day: any): 'icon-rain' | 'icon-snow' | 'icon-overcast' | 'icon-clear' {
+    const cond = (day?.conditions || '').toLowerCase();
+    const precipProb = Number(day?.precipprob ?? 0);
+
+    if (Number.isFinite(precipProb) && precipProb > 50) return 'icon-rain';
+    if (cond.includes('snow')) return 'icon-snow';
+    if (cond.includes('overcast') || cond.includes('cloud')) return 'icon-overcast';
+    if (cond.includes('clear')) return 'icon-clear';
+    // default: if we can’t tell, prefer clear (fits the romantic theme)
+    return 'icon-clear';
+  }
+
 
   ngOnDestroy()
   {
@@ -283,6 +314,116 @@ export class Homepage
         console.error('Failed to create guest', err);
         this.guestsLoading = false;
         this.guestsError = 'Failed to create guest';
+      }
+    });
+  }
+
+  /*---------Delete guest----------*/
+  async onDeleteGuest(g: Guest) {
+    if (!g?.id) {
+      alert('Missing guest id.');
+      return;
+    }
+
+    const sure = window.confirm(`Are you sure you want to delete "${g.Name}"?`);
+    if (!sure) return;
+
+    try {
+      this.guestsLoading = true;
+
+      const user = await this.waitForUser();
+      if (!user) {
+        this.guestsLoading = false;
+        this.guestsError = 'No authenticated user.';
+        return;
+      }
+
+      const eventId = user.uid;
+      this.dataService.deleteGuest(eventId, g.id).subscribe({
+        next: async () => {
+          // refresh table + dynamic filters (in case values disappear)
+          await this.loadGuests();
+          await this.loadGuestFilterOptions();
+
+          this.guestsLoading = false;
+          alert('Guest deleted successfully.');
+        },
+        error: (err) => {
+          console.error('Failed to delete guest', err);
+          this.guestsLoading = false;
+          alert('Failed to delete guest. Please try again.');
+        }
+      });
+    } catch (e) {
+      console.error(e);
+      this.guestsLoading = false;
+      alert('Unexpected error. Please try again.');
+    }
+  }
+
+  /*---------Download files----------*/
+  //Export UI toggle
+  showExport = false;
+  toggleExport() {
+    this.showExport = !this.showExport;
+  }
+
+  //helpers
+  private makeExportOpts() {
+    const opts: any = {};
+    if (this.selectedDietary) opts.dietary = this.selectedDietary;
+    if (this.selectedAllergy) opts.allergy = this.selectedAllergy;
+    if (this.selectedRsvp !== 'all') opts.rsvp = this.selectedRsvp === 'true';
+    return opts;
+  }
+
+  private saveBlob(blob: Blob, filename: string) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  private buildFilename(ext: 'csv' | 'pdf') {
+    const parts = ['guest-list'];
+    if (this.selectedDietary) parts.push(`diet_${this.selectedDietary}`);
+    if (this.selectedAllergy) parts.push(`allergy_${this.selectedAllergy}`);
+    if (this.selectedRsvp !== 'all') parts.push(`rsvp_${this.selectedRsvp}`);
+    return `${parts.join('-')}.${ext}`;
+  }
+
+  //csv
+  async exportCsv() {
+    const user = await this.waitForUser();
+    if (!user) return;
+    const eventId = user.uid;
+    const opts = this.makeExportOpts();
+
+    this.dataService.downloadGuestsCsv(eventId, opts).subscribe({
+      next: (blob) => this.saveBlob(blob, this.buildFilename('csv')),
+      error: (err) => {
+        console.error('CSV export failed', err);
+        alert('Failed to export CSV.');
+      }
+    });
+  }
+
+  //pdf
+  async exportPdf() {
+    const user = await this.waitForUser();
+    if (!user) return;
+    const eventId = user.uid;
+    const opts = this.makeExportOpts();
+
+    this.dataService.downloadGuestsPdf(eventId, opts).subscribe({
+      next: (blob) => this.saveBlob(blob, this.buildFilename('pdf')),
+      error: (err) => {
+        console.error('PDF export failed', err);
+        alert('Failed to export PDF.');
       }
     });
   }

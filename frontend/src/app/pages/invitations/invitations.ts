@@ -252,7 +252,13 @@ export class Invitations {
 
     wrap(msg, Math.round(this.CANVAS_W * 0.8), 58, Math.round(this.CANVAS_H * 0.90));
 
-    // 7) Download
+  // 7) URL at very bottom
+  const urlText = 'RSVP on: https://mango-mushroom-00c4ce01e.2.azurestaticapps.net/';
+  const urlFont = '500 40px Arial, sans-serif';
+  const urlY = this.CANVAS_H - 40; // Move closer to the bottom edge
+  center(urlY, urlText, urlFont, '#2a2a2a');
+
+    // 8) Download
     canvas.toBlob((blob) => {
       if (!blob) return;
       const url = URL.createObjectURL(blob);

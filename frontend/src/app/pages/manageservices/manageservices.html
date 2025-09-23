@@ -1,9 +1,15 @@
 <section class="manageservices-section">
 
   <!-- Loading -->
-<section class="loading-container" *ngIf="hasVenueCompany === null">
-<section class="Loading-1"></section>
-<section class="Loading-2"></section>
+  <section class="loading-container" *ngIf="hasVenueCompany === null">
+    <section class="Loading-1"></section>
+    <section class="Loading-2"></section>
+  </section>
+
+  <section class="loading-overlay" *ngIf="loading">
+    <div class="loading-content">
+      <p>Loading...</p>
+    </div>
   </section>
 
   <!-- If venue company exists -->
@@ -30,92 +36,194 @@
     <section class="button-container">
       <button (click)="select('Venues')"[ngClass]="selected === 'Venues' ? 'yes-style' : 'default-style'">View my venues</button>
         <button class="add-venue-btn" *ngIf="selected === 'Venues' && !addingVenue && !editingVenue" (click)="AddVenue()">Add Venue</button>
-
+        <button class="map-toggle-btn" *ngIf="selected === 'Venues'" (click)="toggleMap()">
+          {{ mapVisible ? 'Hide Map' : 'Show Map' }}
+        </button>
     </section> <!--button-container-->
+
+    <!-- Map Section -->
+    <section class="map-section" *ngIf="mapVisible && selected === 'Venues'">
+      <!-- Map Search Bar -->
+      <div class="map-search-bar">
+        <input 
+          type="text" 
+          [(ngModel)]="searchAddress" 
+          placeholder="Search for a location..." 
+          class="map-search-input"
+          (keyup.enter)="searchLocation()"
+        />
+        <button (click)="searchLocation()" class="map-search-btn" [disabled]="mapLoading">
+          {{ mapLoading ? 'Searching...' : 'Search' }}
+        </button>
+      </div>
+
+      <!-- Loading -->
+      <div class="map-loading" *ngIf="mapLoading">
+        <div class="map-loader"></div>
+        <span>Loading map data...</span>
+      </div>
+
+      <!-- Error -->
+      <div class="map-error" *ngIf="mapError && !mapLoading">
+        <span>{{ mapError }}</span>
+        <div class="map-error-help" *ngIf="mapError.includes('temporarily unavailable')">
+          <small>💡 You can still enter addresses manually in the venue form below</small>
+        </div>
+      </div>
+
+      <!-- Map Display -->
+      <div class="map-container" *ngIf="mapVisible && !mapError">
+        <div class="map-display">
+          <!-- Real Leaflet Map -->
+          <div id="leaflet-map" class="leaflet-map-container"></div>
+          
+          <!-- Map Info Panel -->
+          <div class="map-info-panel">
+            <div class="map-info-section" *ngIf="mapPin">
+              <h4>📍 Current Location</h4>
+              <p class="location-address">{{ mapPin?.address || 'Click on the map to select a location' }}</p>
+              <p class="location-coords" *ngIf="mapPin">{{ mapPin.lat | number:'1.4-4' }}, {{ mapPin.lon | number:'1.4-4' }}</p>
+              
+              <button 
+                *ngIf="(addingVenue || editingVenue) && mapPin" 
+                (click)="useLocationForVenue()" 
+                class="use-location-btn"
+              >
+                Use this address for venue
+              </button>
+            </div>
+            
+            <div class="map-info-section" *ngIf="!mapPin && mapVisible">
+              <h4>🗺️ Interactive Map</h4>
+              <p class="location-address">Click anywhere on the map to select a location</p>
+              <small>You can also search for addresses using the search box above</small>
+            </div>
+
+            <!-- Nearby Places -->
+            <div class="map-info-section" *ngIf="nearbyPlaces.length > 0">
+              <h4>🏛️ Nearby Venues</h4>
+              <div class="nearby-places">
+                <div class="nearby-place" *ngFor="let venue of nearbyPlaces | slice:0:5">
+                  <span class="place-name">{{ venue.name }}</span>
+                  <span class="place-type">{{ getVenueTypeLabel(venue.venueType) }}</span>
+                  <span class="venue-address" *ngIf="venue.address">{{ venue.address }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
 
 
     <section class="content" *ngIf="selected === 'Venues'; else noVenues">
 
-        <!-- Add Venue Form -->
-        <section *ngIf="addingVenue" class="update-form">
-            <h2>Add a new venue</h2>
+      <!-- Add Venue Form -->
+      <section *ngIf="addingVenue" class="update-form">
+        <h2>Add a new venue</h2>
 
-            <label>Venue Name:</label>
-            <input type="text" [(ngModel)]="newVenueData.venuename" placeholder="Add new venue name" />
+        <label>Venue Name:</label>
+        <input type="text" [(ngModel)]="newVenueData.venuename" placeholder="Add new venue name" />
 
-            <label>Description:</label>
-            <input type="text" [(ngModel)]="newVenueData.description" placeholder="Add venue description" />
+        <label>Description:</label>
+        <input type="text" [(ngModel)]="newVenueData.description" placeholder="Add venue description" />
 
-            <label>Address:</label>
-            <input type="text" [(ngModel)]="newVenueData.address" placeholder="Add venue address" />
+        <label>Address:</label>
+        <input type="text" [(ngModel)]="newVenueData.address" placeholder="Add venue address" />
 
-            <label>Email:</label>
-            <input type="email" [(ngModel)]="newVenueData.email" placeholder="Add contact email" />
+        <label>Email:</label>
+        <input type="email" [(ngModel)]="newVenueData.email" placeholder="Add contact email" />
 
-            <label>Phone Number:</label>
-            <input type="text" [(ngModel)]="newVenueData.phonenumber" placeholder="Add contact number" />
+        <label>Phone Number:</label>
+        <input type="text" [(ngModel)]="newVenueData.phonenumber" placeholder="Add contact number" />
 
-            <label>Capacity:</label>
-            <input type="number" [(ngModel)]="newVenueData.capacity" placeholder="Add venue capacity" />
+        <label>Capacity:</label>
+        <input type="number" [(ngModel)]="newVenueData.capacity" placeholder="Add venue capacity" />
 
-            <label>Price:</label>
-            <input type="number" [(ngModel)]="newVenueData.price" placeholder="Add venue price" />
+        <label>Price:</label>
+        <input type="number" [(ngModel)]="newVenueData.price" placeholder="Add venue price" />
 
-            <!--<label>Image Placeholder:</label>
-            <input type="text" disabled value="placeholder-image.jpg" />-->
+        <label>Upload Images (max 6):</label>
+        <input type="file" (change)="onFileSelected($event)" multiple accept="image/*" />
 
-            <section class="form-buttons">
-                <button (click)="SubmitNewVenue()">Add Venue</button>
-                <button (click)="CancelAdd()">Cancel</button>
-            </section>
-          </section><!--adding venue form-->
+        <section class="form-buttons">
+          <button (click)="SubmitNewVenue()">Add Venue</button>
+          <button (click)="CancelAdd()">Cancel</button>
+        </section>
+      </section><!--adding venue form-->
 
-        <!-- Venue Cards -->
-        <section *ngIf="!addingVenue && !editingVenue" class="venue-list">
-            <section class="card" *ngFor="let venue of venues">
-                <h3>{{ venue.venuename }}</h3>
-                <img *ngIf="venue.images && venue.images[1]" [src]="venue.images[1]" alt="{{venue.venuename}}" />
-                <button class="btn" (click)="UpdateVenue(venue)">Update Venue Details</button>
-                  <button class="btn delete-btn" (click)="DeleteVenue(venue)">Delete Venue</button>
+      <!-- Venue Cards -->
+      <section *ngIf="!addingVenue && !editingVenue" class="venue-list">
+        <section class="card" *ngFor="let venue of venues">
+          <h3>{{ venue.venuename }}</h3>
+          <img *ngIf="venue.images && venue.images[0]?.url" [src]="venue.images[0].url" alt="{{venue.venuename}}" />
+          <label class="statuslabel">Status:{{venue.status}}</label>
+          <button class="btn" (click)="UpdateVenue(venue)">Update Venue Details</button>
+          <button class="btn delete-btn" (click)="DeleteVenue(venue)">Delete Venue</button>
 
-            </section>
-          </section>
 
-        <!-- Update Form -->
-        <section *ngIf="editingVenue" class="update-form">
-            <h2>Update Venue: {{ editingVenue.venuename }}</h2>
-
-            <label>Venue Name</label>
-            <input type="text" [(ngModel)]="updateData.venuename" placeholder="Add new venue name" />
-
-            <label>Description</label>
-            <input type="text" [(ngModel)]="updateData.description" placeholder="Add new description" />
-
-            <label>Address</label>
-            <input type="text" [(ngModel)]="updateData.address" placeholder="Add new address" />
-
-            <label>Email</label>
-            <input type="email" [(ngModel)]="updateData.email" placeholder="Add new email" />
-
-            <label>Phone Number</label>
-            <input type="text" [(ngModel)]="updateData.phonenumber" placeholder="Add new phone number" />
-
-            <label>Capacity</label>
-            <input type="number" [(ngModel)]="updateData.capacity" placeholder="Add new capacity" />
-
-            <label>Price</label>
-            <input type="number" [(ngModel)]="updateData.price" placeholder="Add new price" />
-
-            <section class="form-buttons">
-                <button (click)="SubmitUpdate()">Update</button>
-                <button (click)="CancelUpdate()">Cancel</button>
-            </section>
-          </section>
-
+        </section>
       </section>
 
+      <!-- Update Form -->
+      <section *ngIf="editingVenue" class="update-form">
+        <h2>Update Venue: {{ editingVenue.venuename }}</h2>
+
+        <!-- Venue fields -->
+        <label>Venue Name</label>
+        <input type="text" [(ngModel)]="updateData.venuename" placeholder="Add new venue name" />
+
+        <label>Description</label>
+        <input type="text" [(ngModel)]="updateData.description" placeholder="Add new description" />
+
+        <label>Address</label>
+        <input type="text" [(ngModel)]="updateData.address" placeholder="Add new address" />
+
+        <label>Email</label>
+        <input type="email" [(ngModel)]="updateData.email" placeholder="Add new email" />
+
+        <label>Phone Number</label>
+        <input type="text" [(ngModel)]="updateData.phonenumber" placeholder="Add new phone number" />
+
+        <label>Capacity</label>
+        <input type="number" [(ngModel)]="updateData.capacity" placeholder="Add new capacity" />
+
+        <label>Price</label>
+        <input type="number" [(ngModel)]="updateData.price" placeholder="Add new price" />
+
+        <!-- Existing images -->
+        <div class="image-list" *ngIf="editingVenue.images?.length > 0">
+          <div class="image-item" *ngFor="let img of editingVenue.images; let i = index">
+            <img *ngIf="img?.url" [src]="img.url" alt="Venue Image" />
+            <label *ngIf="img">
+              <input type="checkbox" [(ngModel)]="updateData.imagesToDelete[i]" />
+              Delete
+            </label>
+
+            <p class="disclaimer" *ngIf="img">
+              Deleted images cannot be retrieved once the update button is pressed.
+            </p>
+          </div>
+        </div>
+
+
+
+        <!-- Add new images -->
+        <label>Upload New Images (optional)</label>
+        <input type="file" (change)="onNewFilesSelected($event)" multiple accept="image/*" />
+
+        <!-- Form buttons -->
+        <section class="form-buttons">
+          <button (click)="SubmitUpdate()">Update</button>
+          <button (click)="CancelUpdate()">Cancel</button>
+        </section>
+      </section>
+
+
+    </section>
+
     <ng-template #noVenues>
-        <p>NEED TO PUT VENDOR INFOMATIONS</p>
+      <p>NEED TO PUT VENDOR INFOMATIONS</p>
     </ng-template>
 
   </section>
