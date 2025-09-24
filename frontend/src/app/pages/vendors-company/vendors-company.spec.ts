@@ -130,11 +130,11 @@ describe('VendorsCompany (very simple)', () => {
     expect(component.capacityInput).toBeNull();
   });
 
-  // --- NEW, simple / logic-only tests below ---
+ 
 
   it('validPhone() accepts common formats and rejects bad ones', () => {
     const valid = ['0123456', '+27 11 555 1234', '(011) 555-1234', '011-555-1234'];
-    const invalid = ['', 'abc', '123', '!!!!', '123456789012345678901']; // >20 chars
+    const invalid = ['', 'abc', '123', '!!!!', '123456789012345678901']; 
 
     for (const p of valid) {
       expect((component as any).validPhone(p)).toBeTrue();
@@ -179,7 +179,7 @@ describe('VendorsCompany (very simple)', () => {
 
   it('refreshServices() is safe when companyId is null', () => {
     component.companyId = null;
-    // Should be a no-op without throwing
+  
     component.refreshServices();
     expect(true).toBeTrue();
   });
