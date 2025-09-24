@@ -57,8 +57,6 @@ export class Venues implements OnInit {
     });
 
     this.getVenues()
-
-
   }
 
 

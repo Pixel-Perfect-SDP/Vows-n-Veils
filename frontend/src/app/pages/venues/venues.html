@@ -24,7 +24,7 @@
         </section>
 
         <!-- recommended venues-->
-        <section *ngIf="!loading && userBudget !== null && venues.length > 0 && recommendedVenues.length > 0">
+        <section *ngIf="!loading && recommendedVenues.length > 0">
             <h2>The following venues are recommended for you </h2>
             <ul>
                 <li *ngFor="let venue of recommendedVenues">
