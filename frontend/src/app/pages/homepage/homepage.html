@@ -139,6 +139,97 @@
       </section>
     </body>
 
+      <!-- Event Information Panel -->
+      <section class="event-info-panel" *ngIf="hasEvent && eventData">
+        <!-- Loading State -->
+        <div class="event-info-loading" *ngIf="eventInfoLoading">
+          <div class="loading-spinner"></div>
+          <p>Loading event details...</p>
+        </div>
+
+        <!-- Error State -->
+        <div class="event-info-error" *ngIf="eventInfoError && !eventInfoLoading">
+          <p class="error-message">{{ eventInfoError }}</p>
+        </div>
+
+        <!-- Event Data Display -->
+        <div class="event-info-content" *ngIf="!eventInfoLoading && !eventInfoError">
+          <div class="event-info-grid">
+            
+            <!-- Wedding Title -->
+            <div class="info-card wedding-title" *ngIf="eventDisplayInfo.weddingTitle">
+              <h2 class="card-title">{{ eventDisplayInfo.weddingTitle }}</h2>
+            </div>
+
+            <!-- Venue Information -->
+            <div class="info-card venue-info" *ngIf="eventDisplayInfo.venueName">
+              <div class="card-header">
+                <span class="card-icon">📍</span>
+                <h3>Venue</h3>
+              </div>
+              <p class="card-value">{{ eventDisplayInfo.venueName }}</p>
+            </div>
+
+            <!-- Wedding Time -->
+            <div class="info-card time-info" *ngIf="eventDisplayInfo.weddingTime">
+              <div class="card-header">
+                <span class="card-icon">⏰</span>
+                <h3>Time of Wedding</h3>
+              </div>
+              <p class="card-value">{{ eventDisplayInfo.weddingTime }}</p>
+            </div>
+
+            <!-- Budget -->
+            <div class="info-card budget-info" *ngIf="eventDisplayInfo.budget">
+              <div class="card-header">
+                <span class="card-icon">💰</span>
+                <h3>Budget</h3>
+              </div>
+              <p class="card-value">${{ eventDisplayInfo.budget | number:'1.2-2' }}</p>
+            </div>
+
+            <!-- Total Guests -->
+            <div class="info-card guests-info" *ngIf="eventDisplayInfo.totalGuests !== null">
+              <div class="card-header">
+                <span class="card-icon">👥</span>
+                <h3>Total Guests</h3>
+              </div>
+              <p class="card-value">{{ eventDisplayInfo.totalGuests }}</p>
+            </div>
+
+            <!-- Confirmed RSVPs -->
+            <div class="info-card rsvp-info" *ngIf="eventDisplayInfo.confirmedRSVPs !== null">
+              <div class="card-header">
+                <span class="card-icon">✅</span>
+                <h3>Confirmed RSVPs</h3>
+              </div>
+              <p class="card-value">{{ eventDisplayInfo.confirmedRSVPs }}</p>
+              <p class="card-subtitle" *ngIf="eventDisplayInfo.totalGuests">
+                ({{ (eventDisplayInfo.confirmedRSVPs / eventDisplayInfo.totalGuests * 100) | number:'1.0-0' }}% response rate)
+              </p>
+            </div>
+
+            <!-- Selected Vendors -->
+            <div class="info-card vendors-info" *ngIf="eventDisplayInfo.selectedVendors && eventDisplayInfo.selectedVendors.length > 0">
+              <div class="card-header">
+                <span class="card-icon">🏪</span>
+                <h3>Selected Vendors</h3>
+              </div>
+              <div class="vendors-list">
+                <div class="vendor-item" *ngFor="let vendor of eventDisplayInfo.selectedVendors">
+                  <div class="vendor-name">{{ vendor.serviceName }}</div>
+                  <div class="vendor-date" *ngIf="vendor.orderDate">
+                    Ordered: {{ vendor.orderDate | date:'MMM d, y' }}
+                  </div>
+                </div>
+              </div>
+              <p class="card-subtitle">{{ eventDisplayInfo.selectedVendors.length }} vendor(s) selected</p>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
 
 
       <!-- Default landing content -->

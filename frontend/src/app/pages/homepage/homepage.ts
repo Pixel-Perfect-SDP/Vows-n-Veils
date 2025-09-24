@@ -2,7 +2,7 @@ import { Component, inject, OnInit, OnDestroy, PLATFORM_ID, NgZone, ChangeDetect
 import { isPlatformBrowser, CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import { Firestore, collection, addDoc, doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { Firestore, collection, addDoc, doc, getDoc, setDoc, serverTimestamp, getDocs, query, where } from 'firebase/firestore';
 import { AuthService } from '../../core/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getApp } from 'firebase/app';
@@ -27,6 +27,28 @@ export class Homepage
 
   public hasEvent: boolean | null = null;
   public eventData: any = null;
+
+  // Event Display Data
+  public eventDisplayInfo: {
+    weddingTitle: string | null;
+    venueName: string | null;
+    weddingTime: string | null;
+    budget: number | null;
+    totalGuests: number | null;
+    confirmedRSVPs: number | null;
+    selectedVendors: Array<{companyID: string, serviceName: string, orderDate?: any, status?: string}> | null;
+  } = {
+    weddingTitle: null,
+    venueName: null,
+    weddingTime: null,
+    budget: null,
+    totalGuests: null,
+    confirmedRSVPs: null,
+    selectedVendors: null
+  };
+
+  public eventInfoLoading: boolean = false;
+  public eventInfoError: string | null = null;
 
   // Weather data
   public weather: any = null;
@@ -66,6 +88,262 @@ export class Homepage
     });
   }
 
+  /*------------------------------Event Data API--------------------------*/
+  
+  /**
+   * Comprehensive Event Data API that retrieves all event information for display
+   * Fetches: Wedding title, venue, time, budget, total guests, and confirmed RSVPs
+   */
+  async getEventDataForDisplay(): Promise<void> {
+    this.eventInfoLoading = true;
+    this.eventInfoError = null;
+    
+    try {
+      const user = await this.waitForUser();
+      if (!user) {
+        this.eventInfoError = 'No authenticated user found';
+        this.eventInfoLoading = false;
+        return;
+      }
+
+      const db = getFirestore(getApp());
+      const eventId = user.uid;
+
+      // Get Event Data
+      const eventDocRef = doc(db, 'Events', eventId);
+      const eventDocSnap = await getDoc(eventDocRef);
+      
+      if (!eventDocSnap.exists()) {
+        this.hasEvent = false;
+        this.eventInfoLoading = false;
+        return;
+      }
+
+      const eventData = eventDocSnap.data();
+      this.eventData = eventData; // Keep existing eventData for other parts of the app
+      this.hasEvent = true;
+
+      // Debug: Log the event data to see what we're working with
+      console.log('Event Data:', eventData);
+
+      // 1. Create Wedding Title: "The wedding of Name_1 and Name_2"
+      if (eventData?.['Name1'] && eventData?.['Name2']) {
+        this.eventDisplayInfo.weddingTitle = `The wedding of ${eventData['Name1']} and ${eventData['Name2']}`;
+      }
+
+      // 2. Get Venue Name
+      if (eventData?.['VenueID']) {
+        console.log('VenueID found:', eventData['VenueID']);
+        try {
+          const venueDocRef = doc(db, 'Venues', eventData['VenueID']);
+          const venueDocSnap = await getDoc(venueDocRef);
+          if (venueDocSnap.exists()) {
+            const venueData = venueDocSnap.data();
+            console.log('Venue Data:', venueData);
+            this.eventDisplayInfo.venueName = venueData?.['name'] || venueData?.['venuename'] || 'Venue name not available';
+          } else {
+            console.log('Venue document not found for ID:', eventData['VenueID']);
+            this.eventDisplayInfo.venueName = 'Venue not found';
+          }
+        } catch (venueError) {
+          console.error('Error fetching venue:', venueError);
+          this.eventDisplayInfo.venueName = 'Unable to load venue';
+        }
+      } else {
+        console.log('No VenueID found in event data');
+      }
+
+      // 3. Format Wedding Time
+      if (eventData?.['Date_Time']) {
+        const eventDateTime = eventData['Date_Time'].toDate ? eventData['Date_Time'].toDate() : new Date(eventData['Date_Time']);
+        this.eventDisplayInfo.weddingTime = eventDateTime.toLocaleString('en-US', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+      }
+
+      // 4. Get Budget
+      if (eventData?.['Budget']) {
+        console.log('Budget found:', eventData['Budget']);
+        this.eventDisplayInfo.budget = Number(eventData['Budget']);
+      } else {
+        console.log('No Budget found in event data, Budget field value:', eventData?.['Budget']);
+      }
+
+      // 5. Get Guest Statistics
+      try {
+        console.log('Looking for guests with EventID:', eventId);
+        const guestsQuery = query(collection(db, 'Guests'), where('EventID', '==', eventId));
+        const guestsSnapshot = await getDocs(guestsQuery);
+        
+        console.log('Guests query result - number of docs:', guestsSnapshot.size);
+        
+        let totalGuests = 0;
+        let confirmedRSVPs = 0;
+
+        guestsSnapshot.forEach((doc) => {
+          totalGuests++;
+          const guestData = doc.data();
+          console.log('Guest data:', guestData);
+          if (guestData?.['RSVPstatus'] === true) {
+            confirmedRSVPs++;
+          }
+        });
+
+        console.log('Final counts - Total:', totalGuests, 'Confirmed:', confirmedRSVPs);
+        this.eventDisplayInfo.totalGuests = totalGuests;
+        this.eventDisplayInfo.confirmedRSVPs = confirmedRSVPs;
+
+      } catch (guestsError) {
+        console.error('Error fetching guests data:', guestsError);
+        this.eventDisplayInfo.totalGuests = 0;
+        this.eventDisplayInfo.confirmedRSVPs = 0;
+      }
+
+      // 6. Get Selected Vendors from Orders and Companies
+      try {
+        console.log('Looking for orders with eventID:', eventId);
+        
+        // Check if user has permission to access orders collection
+        const ordersQuery = query(collection(db, 'Orders'), where('eventID', '==', eventId));
+        const ordersSnapshot = await getDocs(ordersQuery);
+        
+        console.log('Orders query result - number of docs:', ordersSnapshot.size);
+        
+        const selectedVendors: Array<{companyID: string, serviceName: string, orderDate?: any, status?: string}> = [];
+
+        // Get all company IDs from orders, excluding declined orders
+        const companyIds: Set<string> = new Set();
+        const orderDetails: {[key: string]: any} = {};
+
+        ordersSnapshot.forEach((doc) => {
+          const orderData = doc.data();
+          console.log('Order data:', orderData);
+          
+          const companyID = orderData?.['companyID'];
+          const status = orderData?.['status'];
+          
+          // Skip declined orders completely
+          if (status === 'declined') {
+            console.log(`Skipping declined order for company: ${companyID}`);
+            return;
+          }
+          
+          if (companyID) {
+            companyIds.add(companyID);
+            orderDetails[companyID] = {
+              orderDate: orderData?.['orderDate'] || orderData?.['date'] || null,
+              orderId: doc.id,
+              status: status || 'unknown'
+            };
+          }
+        });
+
+        console.log('Found company IDs:', Array.from(companyIds));
+
+        // Fetch service names for each company ID from vendors collection
+        for (const companyID of companyIds) {
+          try {
+            // Query vendors collection by companyID field, not document ID
+            const vendorsQuery = query(collection(db, 'Vendors'), where('companyID', '==', companyID));
+            const vendorsSnapshot = await getDocs(vendorsQuery);
+            
+            if (!vendorsSnapshot.empty) {
+              // Get the first matching vendor document
+              const vendorDoc = vendorsSnapshot.docs[0];
+              const vendorData = vendorDoc.data();
+              console.log(`Vendor data for companyID ${companyID}:`, vendorData);
+              
+              let serviceName = vendorData?.['serviceName'] || 
+                               vendorData?.['service_name'] || 
+                               vendorData?.['name'] || 
+                               `Service ${companyID}`;
+              
+              const orderStatus = orderDetails[companyID]?.status;
+              
+              // Format service name based on status
+              if (orderStatus === 'pending') {
+                serviceName = `${serviceName} (pending)`;
+              }
+              // If status is 'accepted' or other, show without brackets
+              
+              selectedVendors.push({
+                companyID: companyID,
+                serviceName: serviceName,
+                orderDate: orderDetails[companyID]?.orderDate,
+                status: orderStatus
+              });
+            } else {
+              console.log(`No vendor found with companyID: ${companyID}`);
+              const orderStatus = orderDetails[companyID]?.status;
+              
+              let serviceName = `Unknown Service (${companyID})`;
+              if (orderStatus === 'pending') {
+                serviceName = `Unknown Service (${companyID}) (pending)`;
+              }
+              
+              selectedVendors.push({
+                companyID: companyID,
+                serviceName: serviceName,
+                orderDate: orderDetails[companyID]?.orderDate,
+                status: orderStatus
+              });
+            }
+          } catch (vendorError) {
+            console.error(`Error fetching vendor with companyID ${companyID}:`, vendorError);
+            const orderStatus = orderDetails[companyID]?.status;
+            
+            let serviceName = `Error loading service (${companyID})`;
+            if (orderStatus === 'pending') {
+              serviceName = `Error loading service (${companyID}) (pending)`;
+            }
+            
+            selectedVendors.push({
+              companyID: companyID,
+              serviceName: serviceName,
+              orderDate: orderDetails[companyID]?.orderDate,
+              status: orderStatus
+            });
+          }
+        }
+
+        console.log('Final selected vendors:', selectedVendors);
+        this.eventDisplayInfo.selectedVendors = selectedVendors.length > 0 ? selectedVendors : null;
+
+      } catch (vendorsError: any) {
+        // Handle Firebase permission errors gracefully
+        if (vendorsError?.code === 'permission-denied') {
+          console.warn('Permission denied accessing orders collection. User may not have proper Firebase rules configured.');
+          this.eventDisplayInfo.selectedVendors = null;
+        } else {
+          console.error('Error fetching vendors data:', vendorsError);
+          this.eventDisplayInfo.selectedVendors = null;
+        }
+      }
+
+      this.eventInfoLoading = false;
+
+      // Continue with existing functionality (countdown, weather)
+      this.updateCountdown();
+      this.countDownInerval = setInterval(() => this.updateCountdown(), 60000);
+
+      if (eventData?.['VenueID']) {
+        this.fetchVenueAndWeather(eventData['VenueID'], eventData['Date_Time']);
+      }
+
+    } catch (error) {
+      console.error('Error in getEventDataForDisplay:', error);
+      this.eventInfoError = 'Failed to load event information';
+      this.eventInfoLoading = false;
+    }
+  }
+
+  /*------------------------------End Event Data API--------------------------*/
+
   //check if user has an existing event
   async ngOnInit() {
     try {
@@ -79,6 +357,10 @@ export class Homepage
       if (docSnap.exists()) {
         this.hasEvent = true;
         this.eventData = docSnap.data();
+        
+        // Get comprehensive event display data
+        await this.getEventDataForDisplay();
+        
         //countdown
         this.updateCountdown();
         this.countDownInerval = setInterval(() => this.updateCountdown(), 60000);
