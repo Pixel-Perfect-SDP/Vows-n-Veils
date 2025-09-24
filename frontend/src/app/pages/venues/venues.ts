@@ -5,6 +5,7 @@ import { Router, RouterModule } from '@angular/router';
 import { collection, query, where, getDocs, updateDoc, doc } from 'firebase/firestore';
 import { auth, db } from '../firebase/firebase-config';
 import { onAuthStateChanged } from 'firebase/auth';
+import { getDoc } from 'firebase/firestore';
 
 
 interface VenueImage {
@@ -307,23 +308,20 @@ checkVenueOrder(): void {
       return;
     }
 
-    const uid = user.uid;
-    const eventsRef = collection(db, 'Events');
-    const q = query(eventsRef, where('EventID', '==', uid));
+    const eventDocRef = doc(db, 'Events',user.uid);
+    getDoc(eventDocRef)
+    .then(eventSnap=>
+    {
+      if(!eventSnap.exists()){
+        throw new Error('No event document found');
+        this.recommendedVenues= [];
+        this.loading = false;
+        return
+      }
 
-    getDocs(q)
-      .then(snapshot =>
-        {
-        if (snapshot.empty) {
-          this.recommendedVenues = [];
-          this.loading = false;
-          return;
-        }
-
-        const eventDoc = snapshot.docs[0];
-        let budget = eventDoc.data()?.['budget'] ?? null;
-        budget = budget ? Number(budget) : null;
-        this.userBudget = budget;
+      let budget=eventSnap.data()?.['budget']??null;
+      budget=budget?Number(budget):null;
+      this.userBudget=budget;
 
         console.log('Budget from Firestore:', budget); //debug
 
@@ -347,11 +345,13 @@ checkVenueOrder(): void {
             }
           });
       })
+
       .catch(err => {
         console.error(err);
         this.recommendedVenues = [];
         this.loading = false;
       });
+
   }
 
 
