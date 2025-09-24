@@ -10,17 +10,13 @@ import { AuthService } from '../../core/auth';
 import { RouterModule } from '@angular/router';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-
-
 import { environment } from '../../../environments/environment';
-
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { lastValueFrom } from 'rxjs';
 
 type ServiceDoc = {
   id: string;
   serviceName?: string;
- 
   name?: string;
   type: string;
   price?: number;
@@ -30,6 +26,7 @@ type ServiceDoc = {
   companyID?: string;
   status?: string;
   images?: string[];
+  phonenumber?: string;
 };
 
 type ServiceWithCompany = ServiceDoc & { companyName?: string };
@@ -42,7 +39,6 @@ type OrderRow = {
   guestsNum: number;
   startAt: Date;
   endAt: Date;
-
   serviceName?: string;
   price?: number | null;
   companyName?: string;
@@ -119,6 +115,7 @@ export class VendorCouples {
     if (t.includes('flor')) return 'Florist';
     return 'Other';
   }
+
   private typeLabels: Record<string, string> = {
     Venue: 'Venues',
     Catering: 'Food & Catering',
@@ -132,7 +129,6 @@ export class VendorCouples {
   trackById(_: number, item: { id: string }) { return item.id; }
   toggle(type: string) { this.expanded[type] = !this.expanded[type]; }
 
-  
   priceRanges = [
     { label: 'Any', min: null, max: null },
     { label: 'Under R1,000', min: null, max: 1000 },
@@ -158,7 +154,6 @@ export class VendorCouples {
     this.loadAllVendors();
   }
 
-
   async loadAllVendors() {
     this.loading = true;
     this.loaded = false;
@@ -172,17 +167,20 @@ export class VendorCouples {
       const services: ServiceWithCompany[] = (apiVendors || []).map(v => ({
         ...v,
         serviceName: v.serviceName ?? v.name ?? '',
+        phonenumber: (v as any).phonenumber ?? ''
       }));
 
+      const onlyActive = services.filter(s => (s.status || '').toLowerCase() === 'active');
+
       const db = getFirestore(getApp());
-      const ids = Array.from(new Set(services.map(s => s.companyID).filter(Boolean) as string[]));
+      const ids = Array.from(new Set(onlyActive.map(s => s.companyID).filter(Boolean) as string[]));
       const nameById = new Map<string, string>();
       await Promise.all(ids.map(async uid => {
         const cSnap = await getDoc(doc(db, 'Companies', uid));
         if (cSnap.exists()) nameById.set(uid, (cSnap.data() as any)?.companyName || 'Unknown company');
       }));
 
-      const filtered = services.filter(s => {
+      const filtered = onlyActive.filter(s => {
         let ok = true;
         if (this.selectedPriceRange.min != null) ok = ok && (s.price ?? 0) >= this.selectedPriceRange.min;
         if (this.selectedPriceRange.max != null) ok = ok && (s.price ?? 0) <= this.selectedPriceRange.max;
@@ -212,7 +210,6 @@ export class VendorCouples {
       this.totalCount = filtered.length;
       this.loaded = true;
     } catch (e: any) {
-      console.error(e);
       this.errorMsg = e?.message ?? 'Failed to load vendors.';
     } finally {
       this.loading = false;
@@ -286,7 +283,6 @@ export class VendorCouples {
 
       this.orders = rows;
     } catch (e: any) {
-      console.error(e);
       this.ordersError = e?.message ?? 'Failed to load your orders.';
     } finally {
       this.loadingOrders = false;
@@ -375,7 +371,6 @@ export class VendorCouples {
       this.orderSuccess = 'Order sent! The vendor will review and respond.';
       setTimeout(() => this.closeOrder(), 900);
     } catch (e: any) {
-      console.error(e);
       this.orderError = e?.message ?? 'Failed to create order.';
     } finally {
       this.ordering = false;

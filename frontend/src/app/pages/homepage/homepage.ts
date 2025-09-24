@@ -43,6 +43,7 @@ export class Homepage
     name2: ['', [Validators.required]],
     date: ['', [Validators.required]],
     time: ['', [Validators.required]],
+    budget: ['', [Validators.required, Validators.min(0)]]
   });
 
     private waitForUser(): Promise<any> {
@@ -444,7 +445,7 @@ export class Homepage
     }
 
     const db = getFirestore(getApp());
-    const { name1, name2, date, time } = this.form.getRawValue();
+    const { name1, name2, date, time, budget } = this.form.getRawValue();
     const docRef = doc(db, 'Events', user.uid);
     const dateTime = new Date(`${date}T${time}`);
 
@@ -457,6 +458,7 @@ export class Homepage
         RSVPcode: null,
         VendorID: null,
         VenueID: null,
+        Budget: this.form.value.budget,
       });
 
       this.hasEvent = true;

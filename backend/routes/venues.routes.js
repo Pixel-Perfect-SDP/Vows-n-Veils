@@ -1,3 +1,4 @@
+const multer = require('multer');
 const express = require('express');
 const admin = require('firebase-admin');
 
@@ -44,7 +45,7 @@ router.get('/', async (req, res) => {
               action: 'read',
               expires: Date.now() + 60 * 60 * 1000,
             });
-            return url;
+            return { url, name: file.name };
           })
         );
 
@@ -90,7 +91,7 @@ router.get('/:id', async (req, res) => {
           action: 'read',
           expires: Date.now() + 60 * 60 * 1000,
         });
-        return url;
+        return {url, name: file.name };
       })
     );
 
@@ -143,17 +144,36 @@ router.get('/:id', async (req, res) => {
  *       400:
  *         description: Missing required fields
  */
-router.post('/', async (req, res) => {
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 } 
+});
+
+router.post('/', upload.array('images', 6), async (req, res) => {
   try {
-    const venue = req.body;
+    console.log('req.body:', req.body); 
+    console.log('req.files:', req.files); 
+    const venue = JSON.parse(req.body.venue); 
+
     if (!venue.venuename || !venue.address || !venue.capacity ||
-      !venue.companyID || !venue.description || !venue.email ||
-      !venue.phonenumber || !venue.price) {
+        !venue.companyID || !venue.description || !venue.email ||
+        !venue.phonenumber || !venue.price || !venue.status) {
       return res.status(400).json({ error: 'Some fields are missing' });
     }
     const ref = await db.collection('Venues').add(venue);
-    res.status(201).json({ id: ref.id });
+    if (req.files && req.files.length > 0) {
+      await Promise.all(req.files.map((file, idx) => {
+        const fileName = `venues/${ref.id}/${Date.now()}_${idx}_${file.originalname}`;
+        const blob = bucket.file(fileName);
+        return blob.save(file.buffer, {
+          metadata: { contentType: file.mimetype }
+        });
+      }));
+    }
+    res.status(201).json({ id: ref.id, message: 'Venue created successfully' });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -263,7 +283,7 @@ router.get('/company/:companyID', async (req, res) => {
               action: 'read',
               expires: Date.now() + 60 * 60 * 1000, 
             });
-            return url;
+            return { url, name: file.name };
           })
         );
 
@@ -274,6 +294,182 @@ router.get('/company/:companyID', async (req, res) => {
 
     res.json(venues);
   } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+/**
+ * @swagger
+ * /venues/{id}/images:
+ *   put:
+ *     summary: Update venue images (delete old ones, add new ones)
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Venue ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               deleteImages:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               newImages:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Images updated successfully
+ */
+const multerUpdate = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
+
+router.put('/:id/images', upload.array('images'), async (req, res) => {
+  try {
+    const venueId = req.params.id;
+    const files = req.files;
+
+    const [existingFiles] = await bucket.getFiles({ prefix: `venues/${venueId}/` });
+    let existingFileNames = existingFiles.map(f => f.name); 
+
+    const deleteImages = req.body.deleteImages ? JSON.parse(req.body.deleteImages) : [];
+
+    if (deleteImages.length > 0) {
+      await Promise.all(deleteImages.map(fileName => bucket.file(fileName).delete()));
+      existingFileNames = existingFileNames.filter(f => !deleteImages.includes(f));
+    }
+
+    if (files && files.length > 0) {
+      await Promise.all(
+        files.map(file => {
+          const blob = bucket.file(`venues/${venueId}/${file.originalname}`);
+          return blob.save(file.buffer, {
+            contentType: file.mimetype,
+            public: false
+          });
+        })
+      );
+      const [updatedFiles] = await bucket.getFiles({ prefix: `venues/${venueId}/` });
+      existingFileNames = updatedFiles.map(f => f.name);
+    }
+
+    const signedUrls = await Promise.all(
+      existingFileNames.map(async (fileName) => {
+        const [url] = await bucket.file(fileName).getSignedUrl({
+          action: 'read',
+          expires: Date.now() + 60 * 60 * 1000, 
+        });
+        return { url, name: fileName };
+      })
+    );
+
+    res.json({ ok: true, images: signedUrls });
+  } catch (error) {
+    console.error('Error updating venue images:', error);
+    res.status(500).json({ error: 'Error updating venue images' });
+  }
+});
+
+/**
+ * @swagger
+ * /venues/confirm-order:
+ *   post:
+ *     summary: Confirm a venue order
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - customerID
+ *               - venueID
+ *               - companyID
+ *               - startAt
+ *               - endAt
+ *               - eventID
+ *             properties:
+ *               customerID:
+ *                 type: string
+ *               venueID:
+ *                 type: string
+ *               companyID:
+ *                 type: string
+ *               startAt:
+ *                 type: string
+ *                 format: date-time
+ *               endAt:
+ *                 type: string
+ *                 format: date-time
+ *               eventID:
+ *                 type: string
+ *               note:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Venue order created
+ *       400:
+ *         description: Missing required fields
+ *       500:
+ *         description: Failed to confirm venue
+ */
+
+router.post('/confirm-order', async (req, res) => {
+  try {
+    const { customerID, venueID, companyID, startAt, endAt, eventID, note } = req.body;
+
+    if (!customerID || !venueID || !companyID || !startAt || !endAt || !eventID) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    const ordersRef = db.collection('VenuesOrders');
+
+    const startDate = new Date(startAt);
+    const endDate = new Date(endAt);
+
+    const existingOrdersSnap = await ordersRef.where('venueID', '==', venueID).get();
+    let conflict = false;
+
+    existingOrdersSnap.forEach(doc => {
+      const order = doc.data();
+
+      const existingStart = order.startAt?.seconds ? new Date(order.startAt.seconds * 1000) : new Date(order.startAt);
+      const existingEnd   = order.endAt?.seconds   ? new Date(order.endAt.seconds * 1000)   : new Date(order.endAt);
+
+      if (
+        (startDate >= new Date(existingStart.getTime() - 24*60*60*1000) && startDate <= new Date(existingEnd.getTime() + 24*60*60*1000)) ||
+        (endDate   >= new Date(existingStart.getTime() - 24*60*60*1000) && endDate   <= new Date(existingEnd.getTime() + 24*60*60*1000))
+      ) {
+        conflict = true;
+      }
+    });
+
+    if (conflict) {
+      return res.status(400).json({ error: 'Sorry, this venue is not available on your wedding date ±1 day. Choose a different date or venue.' });
+    }
+
+    const orderDoc = await ordersRef.add({
+      companyID,
+      createdAt: new Date(),
+      customerID,
+      endAt: endDate,
+      eventID,
+      note: note || "",
+      startAt: startDate,
+      status: "pending",
+      venueID
+    });
+
+    res.json({ ok: true, orderID: orderDoc.id });
+  } catch (err) {
+    console.error(err);
     res.status(500).json({ error: err.message });
   }
 });

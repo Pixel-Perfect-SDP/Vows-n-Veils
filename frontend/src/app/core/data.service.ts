@@ -74,6 +74,24 @@ export class DataService {
     return this.http.get<any>(`${this.apiUrl}/weather-crossing`, { params });  
   }
 
+  // Get map data (geocoding or reverse geocoding)
+  getMapData(address?: string, lat?: number, lon?: number): Observable<any> {
+    let params = new HttpParams();
+    if (address) params = params.set('address', address);
+    if (lat !== undefined) params = params.set('lat', lat.toString());
+    if (lon !== undefined) params = params.set('lon', lon.toString());
+    return this.http.get<any>(`${this.apiUrl}/map`, { params });
+  }
+
+  // Get nearby places for a location
+  getNearbyPlaces(lat: number, lon: number, radius: number = 1000): Observable<any> {
+    const params = new HttpParams()
+      .set('lat', lat.toString())
+      .set('lon', lon.toString())
+      .set('radius', radius.toString());
+    return this.http.get<any>(`${this.apiUrl}/map/nearby`, { params });
+  }
+
   // delete guest
   deleteGuest(eventId: string, guestId: string) {
     return this.http.delete<{ message: string; id: string }>(`${this.apiUrl}/events/${eventId}/guests/${guestId}`);
