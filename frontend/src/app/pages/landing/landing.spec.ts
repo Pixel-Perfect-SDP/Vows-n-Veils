@@ -67,7 +67,7 @@ describe('Landing', () => {
   it('should call signInAndRedirect for admin', async () => {
     await component.onGoogleAdmin();
     expect(mockAuth.signInWithGoogle).toHaveBeenCalled();
-    expect(mockRouter.navigateByUrl).toHaveBeenCalledWith('/landing');
+    expect(mockRouter.navigateByUrl).toHaveBeenCalledWith('/admin');
   });
 
   //test signin and redirect function
