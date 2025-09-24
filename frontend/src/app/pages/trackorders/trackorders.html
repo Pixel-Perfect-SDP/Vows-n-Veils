@@ -1,0 +1,20 @@
+<main>
+<section>
+          <button (click)="backhome();"> Back Home</button>
+
+</section>
+
+<div *ngFor="let order of orders" class="order-card">
+  <h3>Order ID: {{ order.id }}</h3>
+  <p>Customer: {{ order.customerID }}</p>
+  <p>Venue: {{ order.venueID }}</p>
+  <p>Event: {{ order.eventID }}</p>
+  <p>Start: {{ order.startAt}}</p>
+  <p>End: {{ order.endAt }}</p>
+  <p>Note: {{ order.note || 'No note' }}</p>
+  <p>Status: {{ order.status }}</p>
+  <button *ngIf="order.status === 'pending'" (click)="updateStatus(order.id, 'accepted')">Accept</button>
+  <button *ngIf="order.status === 'pending'" (click)="updateStatus(order.id, 'rejected')">Reject</button>
+</div>
+
+</main>

@@ -178,37 +178,6 @@ router.post('/', upload.array('images', 6), async (req, res) => {
   }
 });
 
-/**
- * @swagger
- * /venues/{id}:
- *   put:
- *     summary: Update an existing venue
- *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: string
- *         required: true
- *         description: Venue ID
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *     responses:
- *       200:
- *         description: Venue updated successfully
- */
-
-router.put('/:id', async (req, res) => {
-  try {
-    await db.collection('Venues').doc(req.params.id).update(req.body);
-    res.json({ ok: true });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
 
 /**
  * @swagger
@@ -470,6 +439,43 @@ router.post('/confirm-order', async (req, res) => {
     res.json({ ok: true, orderID: orderDoc.id });
   } catch (err) {
     console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.get('/company/:companyID/orders', async (req, res) => {
+  try {
+    const companyID = req.params.companyID;
+
+    const snap = await db.collection('VenuesOrders').where('companyID', '==', companyID).get();
+    if (snap.empty) return res.status(404).json({ error: 'No orders found' });
+
+    const orders = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    
+    orders.sort((a, b) => {
+      const orderStatus = { pending: 0, accepted: 1, rejected: 2 };
+      return orderStatus[a.status] - orderStatus[b.status];
+    });
+
+    res.json(orders);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.put('/orders/:orderID/status', async (req, res) => {
+  try {
+    const { orderID } = req.params;
+    const { status } = req.body;
+
+    if (!['accepted', 'rejected'].includes(status)) {
+      return res.status(400).json({ error: 'Invalid status' });
+    }
+
+    await db.collection('VenuesOrders').doc(orderID).update({ status });
+
+    res.json({ ok: true, orderID, status });
+  } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
