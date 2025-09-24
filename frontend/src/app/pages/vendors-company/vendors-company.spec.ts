@@ -185,4 +185,45 @@ describe('VendorsCompany (very simple)', () => {
     component.refreshServices();
     expect(true).toBeTrue();
   });
+
+    it('toggleServiceForm() when closing does NOT reset existing values', () => {
+    
+    component.toggleServiceForm();
+  
+    component.serviceForm.patchValue({ serviceName: 'X', description: 'Y' });
+  
+    component.toggleServiceForm();
+ 
+    const v = component.serviceForm.getRawValue();
+    expect(v.serviceName).toBe('X');
+    expect(v.description).toBe('Y');
+  });
+
+  it('ngOnDestroy() tolerates missing unsubscribers (undefined branches)', () => {
+ 
+    expect(() => component.ngOnDestroy()).not.toThrow();
+  });
+
+  it('getServiceName() updates after list changes (rebuild branch)', () => {
+    component.services = [
+      { id: 's1', serviceName: 'Photos', type: '', price: null, capacity: null, description: '', bookingNotes: '', status: 'pending', companyID: 'c', phonenumber: '' }
+    ];
+    (component as any).rebuildServiceNameMap();
+    expect(component.getServiceName('s1')).toBe('Photos');
+
+    component.services = [];
+    (component as any).rebuildServiceNameMap();
+    expect(component.getServiceName('s1')).toBe('—');
+  });
+
+  it('validPhone() rejects whitespace-only input (edge branch)', () => {
+    expect((component as any).validPhone('   \t  ')).toBeFalse();
+  });
+
+  it('refreshServices() with non-null companyId does not throw', () => {
+    
+    component.companyId = 'company-123';
+    expect(() => component.refreshServices()).not.toThrow();
+  });
+
 });

@@ -102,4 +102,40 @@ describe('VendorCouples (very simple)', () => {
     }
   });
 
+    it('clearFilters() calls loadAllVendors exactly once', async () => {
+    const spy = spyOn<any>(component, 'loadAllVendors').and.returnValue(Promise.resolve());
+  
+    component.selectedPriceRange = { label: 'R0–R999', min: 0, max: 999 };
+    component.selectedCapacityRange = { label: '0–49', min: 0, max: 49 };
+
+    component.clearFilters();
+    expect(spy).toHaveBeenCalledTimes(1);
+  });
+
+  it('priceRanges "Any" truly means unbounded', () => {
+    const any = component.priceRanges.find(r => r.label === 'Any')!;
+    expect(any.min).toBeNull();
+    expect(any.max).toBeNull();
+  });
+
+  it('capacityRanges "Any" truly means unbounded', () => {
+    const any = component.capacityRanges.find(r => r.label === 'Any')!;
+    expect(any.min).toBeNull();
+    expect(any.max).toBeNull();
+  });
+
+  it('toggle() is safe to call repeatedly on same type', () => {
+    const t = component.serviceTypes[0];
+    component.toggle(t);
+    component.toggle(t);
+    component.toggle(t);
+   
+    expect(typeof component.expanded[t]).toBe('boolean');
+  });
+
+  it('typeLabel() falls back to input for unknown labels (default branch)', () => {
+    expect(component.typeLabel('SomethingCompletelyNew')).toBe('SomethingCompletelyNew');
+  });
+
+
 });
