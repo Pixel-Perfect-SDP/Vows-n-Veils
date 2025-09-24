@@ -297,8 +297,7 @@ checkVenueOrder(): void {
 
   recommendedVenues: Venue[] = [];
 
-  getRecommendations(): void {
-    console.log('getRecommendations called'); // debug
+  async getRecommendations(): Promise<void> {
     this.loading = true;
 
     const user = auth.currentUser;
@@ -307,8 +306,15 @@ checkVenueOrder(): void {
       this.loading = false;
       return;
     }
+    const uid=user.uid;
+    //counting number of guests
+    const eventsRef = collection(db, 'Guests');
+    const q=query(eventsRef,where('EventID','==',uid));
+    let guestSnap=getDocs(q);
+    const numGuests=(await guestSnap).size;
 
-    const eventDocRef = doc(db, 'Events',user.uid);
+
+    const eventDocRef = doc(db, 'Events',uid);
     getDoc(eventDocRef)
     .then(eventSnap=>
     {
@@ -323,20 +329,16 @@ checkVenueOrder(): void {
       budget=budget?Number(budget):null;
       this.userBudget=budget;
 
-        console.log('Budget from Firestore:', budget); //debug
 
-        // Now fetch venues AFTER we have budget
+        // fetching venues that fit filters
         this.http.get<Venue[]>('https://site--vowsandveils--5dl8fyl4jyqm.code.run/venues')
           .subscribe({
             next: (data) => {
               const activeVenues = data.filter((venue:any) => venue.status === 'active');
-              console.log('Active venues count:', activeVenues.length);//debug
-
+              console.log('Counted guests',numGuests)
               this.recommendedVenues = budget
-                ? activeVenues.filter(venue => Number(venue.price) <= budget)
+                ? activeVenues.filter(venue => Number(venue.price) <= budget && Number(venue.capacity) >= numGuests)
                 : [];
-
-              console.log('Recommended venues count:', this.recommendedVenues.length); //debug
               this.loading = false;
             },
             error: (err) => {
