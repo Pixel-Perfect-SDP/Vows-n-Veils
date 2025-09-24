@@ -1,0 +1,41 @@
+<html>
+    <head class="hero">
+        <title>Admin Page</title>
+        <link rel="stylesheet" href="admin.css">
+
+    </head>
+
+    <body>
+        <span class="hero">
+            <img src="assets/logo.jpg" class="logo" />
+            <h1>Pending Approvals </h1>
+            <button (click)="logout()" class="logout-btn">Logout</button>
+        </span>
+        <h2>Venues</h2>
+        <span *ngIf="venues.length==0" class="noItems">
+            <p>There are no pending venues</p>
+        </span>
+        <section class="disp-container">
+
+            <span class="disp-box" *ngFor="let venue of venues">
+                <h3>{{venue.venuename}}</h3>
+                <p>{{venue.address}}</p>
+                <button  (click)="changeStatus('Venues',venue.id,'active')" class="disp-btn">Approve</button>
+                <button (click)="changeStatus('Venues',venue.id,'rejected')" class="disp-btn">Reject</button>
+            </span>
+        </section>
+        <h2>Vendors</h2>
+        <span *ngIf="vendors.length==0" class="noItems">
+            <p>There are no pending vendors</p>
+        </span>
+        <section class="disp-container">
+
+            <span class="disp-box" *ngFor="let vendor of vendors">
+                <h3>{{vendor.serviceName}}</h3>
+                <p>{{vendor.type}}</p>
+                <button (click)="changeStatus('Vendors',vendor.id,'active')" class="disp-btn">Approve</button>
+                <button (click)="changeStatus('Vendors',vendor.id,'rejected')" class="disp-btn">Reject</button>
+            </span>
+        </section>
+    </body>
+</html>

@@ -2,7 +2,9 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../core/auth';
-import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
+import { collection, getDocs, query, orderBy, limit, where } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
 
 @Component({
   selector: 'app-landing',
@@ -55,7 +57,45 @@ export class Landing {
       this.signInAndRedirect('/manageservices');
     }
 
-    onGoogleAdmin() {
-      this.signInAndRedirect('/landing');
+    async onGoogleAdmin()
+ {
+      try
+    {
+        await this.auth.signInWithGoogle();
+
+        const auth = getAuth();
+        const user = auth.currentUser;
+
+        if (!user?.email)
+        {
+          alert('No email found for logged-in user.');
+          alert('You are not authoirized as an admin.');
+          return;
+        }
+
+        const email = user.email.trim();
+        console.log('Logged-in user email:', email);
+
+        const db = this.auth.firestore();
+        const adminDoc= await getDoc(doc(db,'admins',user.uid));
+
+        if (adminDoc.exists())
+        {
+          console.log('Admin login successful');
+          this.router.navigateByUrl('/admin');
+        }
+        else
+        {
+          console.log('Admin login failed: Unauthorized user');
+          alert("You are not authoirized as an admin.");
+          await this.auth.signOut();
+        }
+
     }
+      catch(error)
+      {
+      console.error('Admin login failed', error);
+      }
+  }
+
 }
