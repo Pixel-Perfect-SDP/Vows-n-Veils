@@ -1,7 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { CommonModule } from '@angular/common';
 import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
+import { DataService } from '../../core/data.service';
 
 interface VenueOrder {
   id: string;
@@ -19,7 +22,7 @@ interface VenueOrder {
 @Component({
   selector: 'app-trackorders',
   standalone: true,
-  imports: [],
+  imports: [CommonModule, HttpClientModule ],
   templateUrl: './trackorders.html',
   styleUrls: ['./trackorders.css']
 })

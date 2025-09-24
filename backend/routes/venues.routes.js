@@ -443,7 +443,7 @@ router.post('/confirm-order', async (req, res) => {
   }
 });
 
-router.get('/company/:companyID/orders', async (req, res) => {
+router.get('/orders/company/:companyID', async (req, res) => {
   try {
     const companyID = req.params.companyID;
 
