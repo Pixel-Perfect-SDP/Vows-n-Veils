@@ -45,19 +45,30 @@ export class Venues implements OnInit {
   constructor(private http: HttpClient, private router: Router) { }
 
   ngOnInit(): void {
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        console.log('User is logged in:', user.uid);
-        this.getChosenVenue();
-        this.checkVenueOrder();
-        this.getRecommendations();
-      } else {
-        console.log('No user logged in yet');
-      }
-    });
+    const user = auth.currentUser;
+    if (user) {
+      console.log('User is logged in (immediate):', user.uid);
+      this.getChosenVenue();
+      this.checkVenueOrder();
+      this.getRecommendations();
+    } else {
 
-    this.getVenues()
+      // Listen for login if user not yet loaded
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          console.log('User logged in (later):', user.uid);
+          this.getChosenVenue();
+          this.checkVenueOrder();
+          this.getRecommendations();
+        } else {
+          console.log('No user logged in yet');
+        }
+      });
+    }
+
+    this.getVenues();
   }
+
 
 
   getVenues(): void {
@@ -286,6 +297,7 @@ checkVenueOrder(): void {
   recommendedVenues: Venue[] = [];
 
   getRecommendations(): void {
+    console.log('getRecommendations called'); // debug
     this.loading = true;
 
     const user = auth.currentUser;
