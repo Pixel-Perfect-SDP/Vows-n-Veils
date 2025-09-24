@@ -6,6 +6,7 @@ import { collection, query, where, getDocs, updateDoc, doc } from 'firebase/fire
 import { auth, db } from '../firebase/firebase-config';
 import { onAuthStateChanged } from 'firebase/auth';
 import { getDoc } from 'firebase/firestore';
+import { firstValueFrom } from 'rxjs';
 
 
 interface VenueImage {
@@ -23,6 +24,7 @@ interface Venue {
   email: string;
   phonenumber: string;
   price: number;
+  status?: string;
   image?: string;
   images?: VenueImage[];
 }
@@ -304,39 +306,42 @@ checkVenueOrder(): void {
       const user = auth.currentUser;
       if (!user) {
         this.recommendedVenues = [];
-        this.loading = false;
         return;
       }
 
       const uid = user.uid;
 
-      const eventsRef = collection(db, 'Guests');
-      const q = query(eventsRef, where('EventID', '==', uid));
-      const guestSnap = await getDocs(q);
-      const numGuests = guestSnap.size;
+      // Counting Guests
+      const guestSnap = await getDocs(query(collection(db, 'Guests'), where('EventID', '==', uid)));
+      const numGuests = guestSnap.size || 0;
 
       const eventSnap = await getDoc(doc(db, 'Events', uid));
       if (!eventSnap.exists()) {
         this.recommendedVenues = [];
-        this.loading = false;
         return;
       }
 
-      let budget = eventSnap.data()?.['budget'] ?? null;
-      budget = budget ? Number(budget) : null;
+      const budgetRaw = eventSnap.data()?.['budget'];
+      const budget = budgetRaw ? Number(budgetRaw) : null;
       this.userBudget = budget;
-
-      // fetching venues that fit filters
-      const data = await this.http.get<Venue[]>('https://site--vowsandveils--5dl8fyl4jyqm.code.run/venues').toPromise();
-      if (!data) {
+      if (!budget)
+      {
         this.recommendedVenues = [];
-        this.loading = false;
         return;
       }
-      const activeVenues = data.filter((venue: any) => venue.status === 'active');
+
+      // Fetch venues
+      const data = await firstValueFrom(this.http.get<Venue[]>('https://site--vowsandveils--5dl8fyl4jyqm.code.run/venues'));
+      if (!data)
+      {
+        this.recommendedVenues = [];
+        return;
+      }
+
+      const activeVenues = data.filter(v => v.status && v.status.toLowerCase() === 'active');
 
       this.recommendedVenues = activeVenues.filter(
-        venue => Number(venue.price) <= budget && Number(venue.capacity) >= numGuests
+        v => Number(v.price) <= budget && Number(v.capacity) >= numGuests
       );
 
     } catch (err: any) {
