@@ -24,8 +24,8 @@
         </section>
 
         <!-- recommended venues-->
+      <h2>Based on your budget, we recommend...</h2>
         <section  class='venue-list'*ngIf="!loading && recommendedVenues.length > 0">
-            <h2>Based on your budget, we recommend...</h2>
             <ul>
                 <li *ngFor="let venue of recommendedVenues">
                     <h3>{{ venue.venuename }}</h3>
