@@ -101,3 +101,23 @@ describe('App routing (navigation)', () => {
     expect(location.path()).toBe('/landing');
   }));
 });
+
+describe('App routes (lazy loaders run)', () => {
+  it('invokes every loadComponent promise (counts toward coverage)', async () => {
+    const lazy = appRoutes.filter(r => typeof (r as any).loadComponent === 'function');
+
+    // Execute all lazy imports
+    const comps = await Promise.all(
+      lazy.map(r => (r as any).loadComponent())
+    );
+
+    // Sanity-check the results (truthy and class-like)
+    comps.forEach(Cmp => {
+      expect(Cmp).toBeTruthy();
+      expect(typeof Cmp).toBe('function');
+      // Optional Ivy marker check (won’t instantiate DI):
+      // expect((Cmp as any).ɵcmp).toBeDefined();
+    });
+  }, 20000);
+});
+
