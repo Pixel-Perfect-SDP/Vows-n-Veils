@@ -13,10 +13,6 @@
         <button class="btn-homepage " (click)="backTohome()">Back to Homepage</button>
 
 
-        <!-- DEBUG LINE -->
-    <p>DEBUG: budget={{ userBudget }} | venues={{ venues.length }} | recommended={{ venueRecommended().length }}</p>
-
-
         <section class="chosen-venue">
             <p *ngIf="!chosenVenueName">No chosen venue yet</p>
             <p *ngIf="chosenVenueName">Chosen Venue: {{ chosenVenueName }}</p>
@@ -26,11 +22,12 @@
                 Confirm Venue
             </button>
         </section>
+
         <!-- recommended venues-->
-        <section *ngIf="!loading && userBudget !== null && venues.length > 0 && venueRecommended().length > 0">
+        <section *ngIf="!loading && userBudget !== null && venues.length > 0 && recommendedVenues.length > 0">
             <h2>The following venues are recommended for you </h2>
             <ul>
-                <li *ngFor="let venue of venueRecommended()">
+                <li *ngFor="let venue of recommendedVenues">
                     <h3>{{ venue.venuename }}</h3>
                     <section class="images">
                         <img *ngIf="venue.images?.length" [src]="venue.images?.[0]?.url" width="300" />
