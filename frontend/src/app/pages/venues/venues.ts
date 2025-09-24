@@ -300,60 +300,52 @@ checkVenueOrder(): void {
   async getRecommendations(): Promise<void> {
     this.loading = true;
 
-    const user = auth.currentUser;
-    if (!user) {
-      this.recommendedVenues = [];
-      this.loading = false;
-      return;
-    }
-    const uid=user.uid;
-    //counting number of guests
-    const eventsRef = collection(db, 'Guests');
-    const q=query(eventsRef,where('EventID','==',uid));
-    let guestSnap=getDocs(q);
-    const numGuests=(await guestSnap).size;
-
-
-    const eventDocRef = doc(db, 'Events',uid);
-    getDoc(eventDocRef)
-    .then(eventSnap=>
-    {
-      if(!eventSnap.exists()){
-        throw new Error('No event document found');
-        this.recommendedVenues= [];
-        this.loading = false;
-        return
-      }
-
-      let budget=eventSnap.data()?.['budget']??null;
-      budget=budget?Number(budget):null;
-      this.userBudget=budget;
-
-
-        // fetching venues that fit filters
-        this.http.get<Venue[]>('https://site--vowsandveils--5dl8fyl4jyqm.code.run/venues')
-          .subscribe({
-            next: (data) => {
-              const activeVenues = data.filter((venue:any) => venue.status === 'active');
-              console.log('Counted guests',numGuests)
-              this.recommendedVenues = budget
-                ? activeVenues.filter(venue => Number(venue.price) <= budget && Number(venue.capacity) >= numGuests)
-                : [];
-              this.loading = false;
-            },
-            error: (err) => {
-              this.error = 'Failed to load recommended venues: ' + err.message;
-              this.loading = false;
-            }
-          });
-      })
-
-      .catch(err => {
-        console.error(err);
+    try {
+      const user = auth.currentUser;
+      if (!user) {
         this.recommendedVenues = [];
         this.loading = false;
-      });
+        return;
+      }
 
+      const uid = user.uid;
+
+      const eventsRef = collection(db, 'Guests');
+      const q = query(eventsRef, where('EventID', '==', uid));
+      const guestSnap = await getDocs(q);
+      const numGuests = guestSnap.size;
+
+      const eventSnap = await getDoc(doc(db, 'Events', uid));
+      if (!eventSnap.exists()) {
+        this.recommendedVenues = [];
+        this.loading = false;
+        return;
+      }
+
+      let budget = eventSnap.data()?.['budget'] ?? null;
+      budget = budget ? Number(budget) : null;
+      this.userBudget = budget;
+
+      // fetching venues that fit filters
+      const data = await this.http.get<Venue[]>('https://site--vowsandveils--5dl8fyl4jyqm.code.run/venues').toPromise();
+      if (!data) {
+        this.recommendedVenues = [];
+        this.loading = false;
+        return;
+      }
+      const activeVenues = data.filter((venue: any) => venue.status === 'active');
+
+      this.recommendedVenues = activeVenues.filter(
+        venue => Number(venue.price) <= budget && Number(venue.capacity) >= numGuests
+      );
+
+    } catch (err: any) {
+      console.error(err);
+      this.recommendedVenues = [];
+      this.error = err.message || 'Failed to load recommended venues';
+    } finally {
+      this.loading = false;
+    }
   }
 
 
