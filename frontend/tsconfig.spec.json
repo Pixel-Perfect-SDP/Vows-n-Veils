@@ -4,9 +4,14 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "./out-tsc/spec",
-    "types": [
-      "jasmine"
-    ]
+    "types": ["jasmine"],
+    "noImplicitAny": false,
+    "skipLibCheck": true,
+    "paths": {
+      "firebase/app": ["src/testing/firebase-app.mock.ts"],
+      "firebase/auth": ["src/testing/firebase-auth.mock.ts"],
+      "firebase/firestore": ["src/testing/firebase-firestore.mock.ts"]
+    }
   },
   "include": [
     "src/**/*.ts"
