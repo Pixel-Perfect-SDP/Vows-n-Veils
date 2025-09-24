@@ -149,23 +149,26 @@ describe('DataService', () => {
   });
 
   it('downloadGuestsCsv -> GET + responseType: blob', () => {
-    svc.downloadGuestsCsv('E', { dietary: 'vegan', rsvp: false }).subscribe();
+    svc.downloadGuestsCsv('E', { allergy: 'nuts', dietary: 'vegan', rsvp: false }).subscribe();
 
     const req = http.expectOne(r => r.url === `${API}/events/E/guests/export.csv`);
     expect(req.request.method).toBe('GET');
     expect(req.request.responseType).toBe('blob');
+    expect(req.request.params.get('allergy')).toBe('nuts');
     expect(req.request.params.get('dietary')).toBe('vegan');
     expect(req.request.params.get('rsvp')).toBe('false');
     req.flush(new Blob(['csv']));
   });
 
   it('downloadGuestsPdf -> GET + responseType: blob', () => {
-    svc.downloadGuestsPdf('E', { allergy: 'nuts' }).subscribe();
+    svc.downloadGuestsPdf('E', { allergy: 'nuts', dietary: 'vegan', rsvp: false }).subscribe();
 
     const req = http.expectOne(r => r.url === `${API}/events/E/guests/export.pdf`);
     expect(req.request.method).toBe('GET');
     expect(req.request.responseType).toBe('blob');
     expect(req.request.params.get('allergy')).toBe('nuts');
+    expect(req.request.params.get('dietary')).toBe('vegan');
+    expect(req.request.params.get('rsvp')).toBe('false');
     req.flush(new Blob(['pdf']));
   });
 });
