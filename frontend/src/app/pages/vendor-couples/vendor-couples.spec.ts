@@ -1,10 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { Router } from '@angular/router';
 
 import { VendorCouples } from './vendor-couples';
-
-
 
 describe('VendorCouples (very simple)', () => {
   let fixture: ComponentFixture<VendorCouples>;
@@ -14,10 +13,11 @@ describe('VendorCouples (very simple)', () => {
     await TestBed.configureTestingModule({
       imports: [
         VendorCouples,
-        RouterTestingModule,      
-        HttpClientTestingModule,   
+        RouterTestingModule,
+        HttpClientTestingModule,
       ],
       providers: [
+        // keep auth inert
         { provide: (await import('../../core/auth')).AuthService, useValue: { user: () => null } },
       ],
     }).compileComponents();
@@ -59,7 +59,47 @@ describe('VendorCouples (very simple)', () => {
     component.clearFilters();
     expect(component.selectedPriceRange.label).toBe('Any');
     expect(component.selectedCapacityRange.label).toBe('Any');
-   
     (component as any).loadAllVendors = orig;
   });
+
+
+
+  it('priceRanges and capacityRanges contain an "Any" option', () => {
+    expect(component.priceRanges.some(r => r.label === 'Any')).toBeTrue();
+    expect(component.capacityRanges.some(r => r.label === 'Any')).toBeTrue();
+  });
+
+  it('toggleOrders() flips showOrders flag', () => {
+    const start = component.showOrders;
+    component.toggleOrders();
+    expect(component.showOrders).toBe(!start);
+    component.toggleOrders();
+    expect(component.showOrders).toBe(start);
+  });
+
+  it('closeOrder() hides the form and clears selected service', () => {
+    component.showOrder = true;
+    (component as any).selectedService = { id: 's1', serviceName: 'Test' };
+    component.closeOrder();
+    expect(component.showOrder).toBeFalse();
+    expect((component as any).selectedService).toBeNull();
+  });
+
+  it('backTohome() navigates to /homepage (no route resolution required)', () => {
+    const router = TestBed.inject(Router);
+    const nav = spyOn(router, 'navigate');
+    component.backTohome();
+    expect(nav).toHaveBeenCalledWith(['/homepage']);
+  });
+
+  it('expanded map toggles correctly regardless of initial value', () => {
+    for (const t of component.serviceTypes) {
+      const start = !!component.expanded[t];
+      component.toggle(t);
+      expect(!!component.expanded[t]).toBe(!start);
+      component.toggle(t);
+      expect(!!component.expanded[t]).toBe(start);
+    }
+  });
+
 });

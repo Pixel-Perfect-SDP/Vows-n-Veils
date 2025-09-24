@@ -4,7 +4,6 @@ import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 import { VendorsCompany } from './vendors-company';
 
-
 describe('VendorsCompany (very simple)', () => {
   let fixture: ComponentFixture<VendorsCompany>;
   let component: VendorsCompany;
@@ -14,7 +13,7 @@ describe('VendorsCompany (very simple)', () => {
       imports: [
         VendorsCompany,
         RouterTestingModule,
-        HttpClientTestingModule, 
+        HttpClientTestingModule,
       ],
     }).compileComponents();
 
@@ -33,6 +32,29 @@ describe('VendorsCompany (very simple)', () => {
     expect(component.showServiceForm).toBe(!start);
     component.toggleServiceForm();
     expect(component.showServiceForm).toBe(start);
+  });
+
+  it('toggleServiceForm() resets service form when opening', () => {
+    // prefill form with junk, then open
+    component.serviceForm.patchValue({
+      serviceName: 'x',
+      type: 'Photography',
+      price: 123,
+      capacity: 5,
+      description: 'd',
+      bookingNotes: 'b',
+      phonenumber: '+27 11 123 4567'
+    });
+    expect(component.showServiceForm).toBeFalse();
+    component.toggleServiceForm(); // open -> should reset
+    const v = component.serviceForm.getRawValue();
+    expect(v.serviceName).toBe('');
+    expect(v.type).toBe('');
+    expect(v.price).toBeNull();
+    expect(v.capacity).toBeNull();
+    expect(v.description).toBe('');
+    expect(v.bookingNotes).toBe('');
+    expect(v.phonenumber).toBe('');
   });
 
   it('trackById() returns stable ids', () => {
@@ -86,6 +108,8 @@ describe('VendorsCompany (very simple)', () => {
     expect(component.priceInput).toBeNull();
   });
 
+  
+
   it('begin/cancel edit capacity should set and reset editor state', () => {
     const row = {
       id: 'v3',
@@ -106,5 +130,59 @@ describe('VendorsCompany (very simple)', () => {
     component.cancelEditCapacity();
     expect(component.editCapacityId).toBeNull();
     expect(component.capacityInput).toBeNull();
+  });
+
+ 
+
+  it('validPhone() accepts common formats and rejects bad ones', () => {
+    const valid = ['0123456', '+27 11 555 1234', '(011) 555-1234', '011-555-1234'];
+    const invalid = ['', 'abc', '123', '!!!!', '123456789012345678901']; 
+
+    for (const p of valid) {
+      expect((component as any).validPhone(p)).toBeTrue();
+    }
+    for (const p of invalid) {
+      expect((component as any).validPhone(p)).toBeFalse();
+    }
+  });
+
+  it('getServiceName() returns mapped name or "—" if unknown', () => {
+    component.services = [
+      { id: 's1', serviceName: 'Photo', type: '', price: null, capacity: null, description: '', bookingNotes: '', status: 'pending', companyID: 'c', phonenumber: '' },
+      { id: 's2', serviceName: 'Cater', type: '', price: null, capacity: null, description: '', bookingNotes: '', status: 'pending', companyID: 'c', phonenumber: '' },
+    ];
+    (component as any).rebuildServiceNameMap();
+    expect(component.getServiceName('s1')).toBe('Photo');
+    expect(component.getServiceName('nope')).toBe('—');
+  });
+
+  it('canAct() only true for pending orders', () => {
+    expect(component.canAct({ status: 'pending' } as any)).toBeTrue();
+    expect(component.canAct({ status: 'accepted' } as any)).toBeFalse();
+    expect(component.canAct({ status: 'declined' } as any)).toBeFalse();
+    expect(component.canAct({ status: 'cancelled' } as any)).toBeFalse();
+  });
+
+  it('ngOnDestroy() unsubscribes live/order/auth listeners if present', () => {
+    const live = jasmine.createSpy('liveUnsub');
+    const ord = jasmine.createSpy('ordersUnsub');
+    const auth = jasmine.createSpy('authUnsub');
+
+    (component as any).liveUnsub = live;
+    (component as any).ordersUnsub = ord;
+    (component as any).authUnsub = auth;
+
+    component.ngOnDestroy();
+
+    expect(live).toHaveBeenCalled();
+    expect(ord).toHaveBeenCalled();
+    expect(auth).toHaveBeenCalled();
+  });
+
+  it('refreshServices() is safe when companyId is null', () => {
+    component.companyId = null;
+  
+    component.refreshServices();
+    expect(true).toBeTrue();
   });
 });
