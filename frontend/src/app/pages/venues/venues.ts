@@ -57,8 +57,6 @@ export class Venues implements OnInit {
     });
 
     this.getVenues()
-    
-
   }
 
 
@@ -311,17 +309,24 @@ checkVenueOrder(): void {
         }
 
         const eventDoc = snapshot.docs[0];
-        const budget = eventDoc.data()?.['budget'] ?? null;
-        this.userBudget=budget
+        let budget = eventDoc.data()?.['budget'] ?? null;
+        budget = budget ? Number(budget) : null;
+        this.userBudget = budget;
+
+        console.log('Budget from Firestore:', budget); //debug
 
         // Now fetch venues AFTER we have budget
         this.http.get<Venue[]>('https://site--vowsandveils--5dl8fyl4jyqm.code.run/venues')
           .subscribe({
             next: (data) => {
               const activeVenues = data.filter((venue:any) => venue.status === 'active');
+              console.log('Active venues count:', activeVenues.length);//debug
+
               this.recommendedVenues = budget
-                ? activeVenues.filter(venue => venue.price <= budget)
+                ? activeVenues.filter(venue => Number(venue.price) <= budget)
                 : [];
+
+              console.log('Recommended venues count:', this.recommendedVenues.length); //debug
               this.loading = false;
             },
             error: (err) => {
