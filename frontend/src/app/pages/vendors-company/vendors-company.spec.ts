@@ -108,6 +108,8 @@ describe('VendorsCompany (very simple)', () => {
     expect(component.priceInput).toBeNull();
   });
 
+  
+
   it('begin/cancel edit capacity should set and reset editor state', () => {
     const row = {
       id: 'v3',
