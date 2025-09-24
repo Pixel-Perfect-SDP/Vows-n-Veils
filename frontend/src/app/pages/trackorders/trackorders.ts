@@ -25,7 +25,7 @@ interface VenueOrder {
 })
 export class Trackorders implements OnInit {
   orders: VenueOrder[] = [];
-  private apiUrl = ''; // replace with backend
+ 
 
   constructor(private router: Router, private http: HttpClient) {}
 
@@ -47,7 +47,7 @@ export class Trackorders implements OnInit {
   }
 
   loadOrders(companyID: string): void {
-    this.http.get<VenueOrder[]>(`${this.apiUrl}/company/${companyID}/orders`)
+    this.http.get<VenueOrder[]>(`https://site--vowsandveils--5dl8fyl4jyqm.code.run/company/${companyID}/orders`)
       .subscribe({
         next: (res) => {
           this.orders = res.sort((a, b) => {
@@ -59,12 +59,10 @@ export class Trackorders implements OnInit {
       });
   }
 
-  // Accept or reject order
   updateStatus(orderID: string, status: 'accepted' | 'rejected'): void {
-    this.http.put(`${this.apiUrl}/orders/${orderID}/status`, { status })
+    this.http.put(`https://site--vowsandveils--5dl8fyl4jyqm.code.run/orders/${orderID}/status`, { status })
       .subscribe({
         next: () => {
-          // Reload using currently logged-in user's companyID
           const auth = getAuth();
           const user = auth.currentUser;
           if (user) this.loadOrders(user.uid);
