@@ -1,0 +1,91 @@
+.
+├── app
+│   ├── app.component.ts
+│   ├── app.config.ts
+│   ├── app.css
+│   ├── app.html
+│   ├── app.routes.ts
+│   ├── app.spec.ts
+│   ├── app.ts
+│   ├── core
+│   │   ├── auth.guard.ts
+│   │   ├── auth.ts
+│   │   └── data.service.ts
+│   └── pages
+│       ├── RSVP
+│       │   ├── rsvp.css
+│       │   ├── rsvp.html
+│       │   └── rsvp.ts
+│       ├── admin
+│       │   ├── admin.css
+│       │   ├── admin.html
+│       │   └── admin.ts
+│       ├── firebase
+│       │   └── firebase-config.ts
+│       ├── functions
+│       │   ├── lib
+│       │   └── node_modules
+│       ├── guest-list
+│       │   ├── guest-list.css
+│       │   ├── guest-list.html
+│       │   ├── guest-list.spec.ts
+│       │   └── guest-list.ts
+│       ├── homepage
+│       │   ├── homepage.css
+│       │   ├── homepage.html
+│       │   ├── homepage.spec.ts
+│       │   └── homepage.ts
+│       ├── invitations
+│       │   ├── invitations.css
+│       │   ├── invitations.html
+│       │   ├── invitations.spec.ts
+│       │   └── invitations.ts
+│       ├── landing
+│       │   ├── landing.css
+│       │   ├── landing.html
+│       │   ├── landing.spec.ts
+│       │   └── landing.ts
+│       ├── login
+│       │   ├── login.css
+│       │   ├── login.html
+│       │   ├── login.spec.ts
+│       │   └── login.ts
+│       ├── manageservices
+│       │   ├── manageservices.css
+│       │   ├── manageservices.html
+│       │   ├── manageservices.spec.ts
+│       │   └── manageservices.ts
+│       ├── support-page
+│       │   ├── support-page.css
+│       │   ├── support-page.html
+│       │   ├── support-page.spec.ts
+│       │   └── support-page.ts
+│       ├── vendor-couples
+│       │   ├── vendor-couples.css
+│       │   ├── vendor-couples.html
+│       │   ├── vendor-couples.spec.ts
+│       │   └── vendor-couples.ts
+│       ├── vendors-company
+│       │   ├── vendors-company.css
+│       │   ├── vendors-company.html
+│       │   ├── vendors-company.spec.ts
+│       │   └── vendors-company.ts
+│       ├── venues
+│       │   ├── venues.css
+│       │   ├── venues.html
+│       │   ├── venues.spec.ts
+│       │   └── venues.ts
+│       └── venues-couples
+│           ├── venues-couples.css
+│           ├── venues-couples.html
+│           ├── venues-couples.spec.ts
+│           └── venues-couples.ts
+├── environments
+│   ├── environment.prod.ts
+│   └── environment.ts
+├── index.html
+├── main.ts
+├── src_structure.txt
+└── styles.css
+
+22 directories, 67 files
