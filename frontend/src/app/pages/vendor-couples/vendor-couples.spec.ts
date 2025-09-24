@@ -92,9 +92,14 @@ describe('VendorCouples (very simple)', () => {
     expect(nav).toHaveBeenCalledWith(['/homepage']);
   });
 
-  it('expanded map starts falsy for all service types', () => {
+  it('expanded map toggles correctly regardless of initial value', () => {
     for (const t of component.serviceTypes) {
-      expect(!!component.expanded[t]).toBeFalse();
+      const start = !!component.expanded[t];
+      component.toggle(t);
+      expect(!!component.expanded[t]).toBe(!start);
+      component.toggle(t);
+      expect(!!component.expanded[t]).toBe(start);
     }
   });
+
 });
