@@ -443,6 +443,26 @@ router.post('/confirm-order', async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /orders/company/{companyID}:
+ *   get:
+ *     summary: Get all orders for a company
+ *     parameters:
+ *       - in: path
+ *         name: companyID
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: List of orders
+ *       404:
+ *         description: No orders found
+ *       500:
+ *         description: Server error
+ */
+
 router.get('/orders/company/:companyID', async (req, res) => {
   try {
     const companyID = req.params.companyID;
@@ -463,6 +483,35 @@ router.get('/orders/company/:companyID', async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /orders/{orderID}/status:
+ *   put:
+ *     summary: Update order status
+ *     parameters:
+ *       - in: path
+ *         name: orderID
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [accepted, rejected]
+ *     responses:
+ *       200:
+ *         description: Status updated
+ *       400:
+ *         description: Invalid status
+ *       500:
+ *         description: Server error
+ */
 router.put('/orders/:orderID/status', async (req, res) => {
   try {
     const { orderID } = req.params;

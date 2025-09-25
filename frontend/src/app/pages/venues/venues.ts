@@ -3,9 +3,9 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { collection, query, where, getDocs, updateDoc, doc } from 'firebase/firestore';
+import { getDoc } from 'firebase/firestore';
 import { auth, db } from '../firebase/firebase-config';
 import { onAuthStateChanged } from 'firebase/auth';
-import { getDoc } from 'firebase/firestore';
 import { firstValueFrom } from 'rxjs';
 
 
