@@ -7,9 +7,9 @@
     <body>
 
         <span *ngIf ="!eventIdEntered" class= "eventId">
-            <p>Enter your Event ID:</p>
-            <input type="text" [(ngModel)]="eventId" placeholder="Wedding Code">
-            <button  class="idSumbit" (click)="submitEventId()">Continue</button>
+            <p>Enter your Event code:</p>
+            <input type="text" [(ngModel)]="eventCode" placeholder="Wedding Code">
+            <button  class="idSumbit" (click)="submitEventCode()">Continue</button>
         </span>
 
     <span *ngIf= "eventIdEntered">
