@@ -770,6 +770,38 @@
   margin-top: 12px;
 }
 
+.copy-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px; /* space between icon and text */
+  font-size: 1.2rem; /* for icon */
+  padding: 4px 6px;
+  transition: transform 0.1s ease;
+}
+
+.copy-btn p {
+  margin: 0;
+  font-size: 0.7rem;
+  color: #000000b7; /* soft pink */
+  transition: color 0.3s ease, text-shadow 0.3s ease;
+}
+
+.copy-btn:hover,
+.copy-btn:focus {
+  transform: scale(1.1);
+}
+
+.copy-btn:hover p,
+.copy-btn:focus p {
+  color: #ff81a9; /* brighter pink on hover/focus */
+  text-shadow: 0 0 4px rgba(255, 105, 180, 0.5);
+}
+
+
 
 .form-grid input:focus,
 .form-grid select:focus {
