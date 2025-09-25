@@ -1,17 +1,30 @@
+<header class="topbar">
+  <section class="logo-area">
+    <img class="logo-img" src="assets/logo.jpg" alt="Vows & Veils logo" />
+    <h1 class="logo-text">Vows & Veils</h1>
+  </section>
+
+  <nav class="nav-links">
+    <a routerLink="/homepage">Home</a>
+  </nav>
+</header>
+
+
 <section class="venueCouples-section">
 
-    <section class="loading-overlay" *ngIf="loading">
-        <div class="loading-content">
-            <p>Loading...</p>
-        </div>
-    </section>
 
     <section class="header">
         <h1>Elegant venues to choose from</h1>
     </section>
-    <section *ngIf="!selectedVenue && venues.length > 0;" class="venue">
-        <button class="btn-homepage " (click)="backTohome()">Back to Homepage</button>
 
+     <section class="loading-overlay" *ngIf="loading">
+        <section class="loading-container">
+        <section class="Loading-1"></section>
+        <section class="Loading-2"></section>
+    </section>
+    </section>
+    <section *ngIf="!selectedVenue && venues.length > 0;" class="venue">
+        
 
         <section class="chosen-venue">
             <p *ngIf="!chosenVenueName">No chosen venue yet</p>
