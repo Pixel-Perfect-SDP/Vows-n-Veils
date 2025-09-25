@@ -37,6 +37,7 @@ export class Homepage
     totalGuests: number | null;
     confirmedRSVPs: number | null;
     selectedVendors: Array<{companyID: string, serviceName: string, orderDate?: any, status?: string}> | null;
+    rsvpCode:string|null;
   } = {
     weddingTitle: null,
     venueName: null,
@@ -44,7 +45,8 @@ export class Homepage
     budget: null,
     totalGuests: null,
     confirmedRSVPs: null,
-    selectedVendors: null
+    selectedVendors: null,
+    rsvpCode:null
   };
 
   public eventInfoLoading: boolean = false;
@@ -173,6 +175,28 @@ export class Homepage
       } else {
         console.log('No Budget found in event data, Budget field value:', eventData?.['budget']);
       }
+
+      //getting wedding code
+      try
+      {
+        const codeQuery = query(collection(db, "Events"), where('EventID', '==', eventId));
+        const codeSnap = await getDocs(codeQuery);
+
+        if (!codeSnap.empty)
+        {
+          this.eventDisplayInfo.rsvpCode = codeSnap.docs[0].data()?.['RSVPcode'];
+          console.log("RSVP Code found:", this.eventDisplayInfo.rsvpCode);
+        }
+        else{
+          console.log("No RSVP Code found for EventID:", eventId);
+        }
+      }
+      catch(error)
+      {
+        console.error("Error fetching RSVP Code:", error);
+      }
+
+
 
       // 5. Get Guest Statistics
       try {
@@ -343,6 +367,19 @@ export class Homepage
   }
 
   /*------------------------------End Event Data API--------------------------*/
+
+  //copy RSVP code to clipboard
+  copyToClipboard(code: string): void
+  {
+    navigator.clipboard.writeText(code).then(() =>
+    {
+      console.log('RSVP Code copied:', code);
+      // optional: show a toast or alert to user
+    }).catch(err =>
+      {
+      console.error('Failed to copy RSVP Code:', err);
+    });
+  }
 
   //check if user has an existing event
   async ngOnInit() {

@@ -208,6 +208,21 @@
                 ({{ (eventDisplayInfo.confirmedRSVPs / eventDisplayInfo.totalGuests * 100) | number:'1.0-0' }}% response rate)
               </p>
             </div>
+            <!--  RSVP code -->
+            <div class="info-card">
+              <div class="card-header">
+                <span class="card-icon">🔗</span>
+                <h3>Wedding Code</h3>
+              </div>
+              <div class="code-row">
+              <p class="card-value">{{ eventDisplayInfo.rsvpCode || 'No code available' }} </p>
+                <button class="copy-btn" (click)="copyToClipboard(eventDisplayInfo.rsvpCode || '')">
+                📋
+              </button>
+              </div>
+
+              <p class="card-subtitle">Share this code with guests in order to RSVP.</p>
+            </div>
 
             <!-- Selected Vendors -->
             <div class="info-card vendors-info" *ngIf="eventDisplayInfo.selectedVendors && eventDisplayInfo.selectedVendors.length > 0">
