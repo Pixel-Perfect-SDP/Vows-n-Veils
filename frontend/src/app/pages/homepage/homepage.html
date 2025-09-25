@@ -1,22 +1,59 @@
-<section class="homepage-section">
 
-  <section class="loading-container" *ngIf="hasEvent === null">
+ <header class="topbar">
+  <section class="logo-area">
+    <img class="logo-img" src="assets/logo.jpg" alt="Vows & Veils logo" />
+    <h1 class="logo-text">Vows & Veils</h1>
+  </section>
+
+  <nav class="nav-links">
+    <a routerLink="/landing" *ngIf="hasEvent === false">Back</a>
+    <a (click)="logout()" *ngIf="hasEvent === true">Log out</a>
+  </nav>
+</header>
+<!-- if user does NOT have an event: -->
+ <!-- show create event page -->
+<section class="create-event" *ngIf="hasEvent === false">
+
+  <h2 class="plan-wedd">Plan your wedding</h2>
+  <p class="plan-weddp">Fill in the details below to get started!</p>
+
+<section class="event-form">
+  <form [formGroup]="form" (ngSubmit)="createEvent()">
+    <label>Name of first partner:</label>
+    <input formControlName="name1" />
+
+    <label>Name of second partner:</label>
+    <input formControlName="name2" />
+
+    <label>Date of wedding:</label>
+    <input type="date" formControlName="date" />
+
+    <label>Time of wedding:</label>
+    <input type="time" formControlName="time" />
+
+    <label>Budget: </label>
+    <input type="number" formControlName="budget" placeholder="ZAR"/>
+
+    <button type="submit" [disabled]="form.invalid">Create our wedding</button>
+  </form>
+</section>
+</section>
+
+<section class="loading-container" *ngIf="hasEvent === null">
     <section class="Loading-1"></section>
     <section class="Loading-2"></section>
   </section>
 
+<section class="homepage-section" *ngIf="hasEvent === true">
+
+  
+
   <!-- If user DOES have an event -->
   <section class="has-event" *ngIf="hasEvent && eventData">
-
-    <!-- CSS-ONLY SIDEBAR TOGGLE (no TS needed) -->
     <input id="sb-toggle" type="checkbox" class="sb-toggle" aria-label="Toggle sidebar" />
 
     <!-- Sidebar -->
     <nav class="sidebar">
-      <section class="sidebar-header">
-        <img src="assets/logo.jpg" alt="Vows & Veils logo" class="logo" />
-        <h1>Vows & Veils</h1>
-      </section>
       <ul>
         <li>
           <a href="#" [class.active]="activeTab==='guests'" (click)="switchToGuests($event)">Guest List</a>
@@ -24,52 +61,46 @@
         <li><a routerLink="/invitations" routerLinkActive="active">Invitations</a></li>
         <li><a routerLink="/venues" routerLinkActive="active">Venues</a></li>
         <li><a routerLink="/vendors-couples" routerLinkActive="active">Vendors</a></li>
-        <li class="LogOut"><a (click)="logout()">Log out</a></li>
       </ul>
     </nav>
-
+    
     <!-- Main content column -->
-    <div class="main">
-      <!-- Header / event banner lives INSIDE the flow (no overlap) -->
+    <section class="main">
       <header class="event-header">
-        <!-- Hamburger -->
         <label for="sb-toggle" class="hamburger" title="Toggle sidebar" aria-label="Toggle sidebar">
           &#9776;
         </label>
 
-        <div class="event-hero">
+        <section class="event-hero">
           <p class="names">Welcome, {{ eventData.Name1 }} and {{ eventData.Name2 }}</p>
-        </div>
+        </section>
       </header>
 
-      <!-- Weather Bar (full-width, under header) -->
+      <!-- Weather Bar -->
       <section class="weather-bar" *ngIf="eventData?.VenueID">
         <!-- Loading -->
         <ng-container *ngIf="weatherLoading">
-          <div class="wb-row">
-            <div class="wb-icon-skel"></div>
-            <div class="wb-text-skel"></div>
-            <div class="wb-text-skel short"></div>
-          </div>
+          <section class="wb-row">
+            <section class="wb-icon-skel"></section>
+            <section class="wb-text-skel"></section>
+            <section class="wb-text-skel short"></section>
+            </section>
         </ng-container>
 
         <!-- Error -->
         <ng-container *ngIf="weatherError && !weatherLoading">
-          <div class="wb-row wb-error">
+          <section class="wb-row wb-error">
             <span>{{ weatherError }}</span>
-          </div>
+          </section>
         </ng-container>
 
-        <!-- Data -->
-        <!-- Data -->
         <ng-container *ngIf="weather && !weatherLoading && !weatherError">
-          <div class="wb-row">
-            <!-- ICON (auto picks class based on conditions/probability) -->
-            <div class="wb-icon" [ngClass]="getWeatherIconClass(weather.days[0])" aria-hidden="true"></div>
+          <section class="wb-row">
+            <section class="wb-icon" [ngClass]="getWeatherIconClass(weather.days[0])" aria-hidden="true"></section>
 
-            <div class="wb-col">
-              <div class="wb-title">Wedding Weather</div>
-              <div class="wb-sub">
+            <section class="wb-col">
+              <section class="wb-title">Wedding Weather</section>
+              <section class="wb-sub">
                 <strong>{{ weather.resolvedAddress || weather.address }}</strong>
                 • {{ weather.days[0].datetime }}
                 <ng-container *ngIf="weather.days[0].description">
@@ -78,37 +109,38 @@
                 <ng-container *ngIf="!weather.days[0].description">
                   • {{ getConditionLabel(weather.days[0]) }}
                 </ng-container>
-              </div>
-            </div>
+              </section>
+            </section>
 
-            <div class="wb-metrics">
-              <div class="wb-chip">
+            <section class="wb-metrics">
+              <section class="wb-chip">
                 🌡️ {{ (((weather.days[0].temp - 32) * 5) / 9) | number:'1.0-0' }}°C
-              </div>
-              <div class="wb-chip" *ngIf="weather.days[0].humidity !== undefined">
+              </section>
+              <section class="wb-chip" *ngIf="weather.days[0].humidity !== undefined">
                 💧 {{ weather.days[0].humidity }}%
-              </div>
-              <div class="wb-chip" *ngIf="getPrecipPercent(weather.days[0]) !== null">
+              </section>
+              <section class="wb-chip" *ngIf="getPrecipPercent(weather.days[0]) !== null">
                 ☔ {{ getPrecipPercent(weather.days[0]) }}%
-              </div>
-            </div>
-          </div>
+              </section>
+            </section>
+          </section>
         </ng-container>
       </section>
 
       <!-- If no venue yet -->
       <section class="weather-bar wb-empty" *ngIf="!eventData?.VenueID">
-        <div class="wb-row">
-          <div class="wb-icon" aria-hidden="true">⛅</div>
-          <div class="wb-col">
-            <div class="wb-title">Add a venue to see your wedding weather</div>
-            <div class="wb-sub">We’ll pull the forecast for your exact location & date.</div>
-          </div>
-        </div>
+        <section class="wb-row">
+          <section class="wb-icon" aria-hidden="true">⛅</section>
+          <section class="wb-col">
+            <section class="wb-title">Add a venue to see your wedding weather</section>
+            <section class="wb-sub">We’ll pull the forecast for your exact location & date.</section>
+            </section>
+            </section>
       </section>
 
 
-      <body>
+
+      <section class="countdown-section">
         <h2 class=countHead>Time until we tie the knot.....</h2>
       <!-- Countdown -->
       <section class="countdown">
@@ -137,112 +169,114 @@
         </span>
 
       </section>
-    </body>
+    </section>
 
       <!-- Event Information Panel -->
       <section class="event-info-panel" *ngIf="hasEvent && eventData">
         <!-- Loading State -->
-        <div class="event-info-loading" *ngIf="eventInfoLoading">
-          <div class="loading-spinner"></div>
+        <section class="event-info-loading" *ngIf="eventInfoLoading">
+          <section class="loading-spinner"></section>
           <p>Loading event details...</p>
-        </div>
+        </section>
 
         <!-- Error State -->
-        <div class="event-info-error" *ngIf="eventInfoError && !eventInfoLoading">
+        <section class="event-info-error" *ngIf="eventInfoError && !eventInfoLoading">
           <p class="error-message">{{ eventInfoError }}</p>
-        </div>
+        </section>
 
         <!-- Event Data Display -->
-        <div class="event-info-content" *ngIf="!eventInfoLoading && !eventInfoError">
-          <div class="event-info-grid">
+        <section class="event-info-content" *ngIf="!eventInfoLoading && !eventInfoError">
+          <section class="event-info-grid">
 
             <!-- Wedding Title -->
-            <div class="info-card wedding-title" *ngIf="eventDisplayInfo.weddingTitle">
+            <section class="info-card wedding-title" *ngIf="eventDisplayInfo.weddingTitle">
               <h2 class="card-title">{{ eventDisplayInfo.weddingTitle }}</h2>
-            </div>
+            </section>
 
             <!-- Venue Information -->
-            <div class="info-card venue-info" *ngIf="eventDisplayInfo.venueName">
-              <div class="card-header">
+            <section class="info-card venue-info" *ngIf="eventDisplayInfo.venueName">
+              <section class="card-header">
                 <span class="card-icon">📍</span>
                 <h3>Venue</h3>
-              </div>
+              </section>
               <p class="card-value">{{ eventDisplayInfo.venueName }}</p>
-            </div>
+              </section>
 
             <!-- Wedding Time -->
-            <div class="info-card time-info" *ngIf="eventDisplayInfo.weddingTime">
-              <div class="card-header">
+            <section class="info-card time-info" *ngIf="eventDisplayInfo.weddingTime">
+              <section class="card-header">
                 <span class="card-icon">⏰</span>
                 <h3>Time of Wedding</h3>
-              </div>
+              </section>
               <p class="card-value">{{ eventDisplayInfo.weddingTime }}</p>
-            </div>
+            </section>
 
             <!-- Budget -->
-            <div class="info-card budget-info" *ngIf="eventDisplayInfo.budget">
-              <div class="card-header">
+            <section class="info-card budget-info" *ngIf="eventDisplayInfo.budget">
+              <section class="card-header">
                 <span class="card-icon">💰</span>
                 <h3>Budget</h3>
-              </div>
+              </section>
               <p class="card-value">R{{ eventDisplayInfo.budget | number:'1.2-2' }}</p>
-            </div>
+            </section>
 
             <!-- Total Guests -->
-            <div class="info-card guests-info" *ngIf="eventDisplayInfo.totalGuests !== null">
-              <div class="card-header">
+            <section class="info-card guests-info" *ngIf="eventDisplayInfo.totalGuests !== null">
+              <section class="card-header">
                 <span class="card-icon">👥</span>
                 <h3>Total Guests</h3>
-              </div>
+              </section>
               <p class="card-value">{{ eventDisplayInfo.totalGuests }}</p>
-            </div>
+            </section>
 
             <!-- Confirmed RSVPs -->
-            <div class="info-card rsvp-info" *ngIf="eventDisplayInfo.confirmedRSVPs !== null">
-              <div class="card-header">
+            <section class="info-card rsvp-info" *ngIf="eventDisplayInfo.confirmedRSVPs !== null">
+              <section class="card-header">
                 <span class="card-icon">✅</span>
                 <h3>Confirmed RSVPs</h3>
-              </div>
+              </section>
               <p class="card-value">{{ eventDisplayInfo.confirmedRSVPs }}</p>
               <p class="card-subtitle" *ngIf="eventDisplayInfo.totalGuests">
                 ({{ (eventDisplayInfo.confirmedRSVPs / eventDisplayInfo.totalGuests * 100) | number:'1.0-0' }}% response rate)
               </p>
-            </div>
+            </section>
+
             <!--  RSVP code -->
-            <div class="info-card">
-              <div class="card-header">
-                <span class="card-icon">🔗</span>
+            <section class="info-card">
+              <section class="card-header">
+                <section class="card-icon">🔗</section>
                 <h3>Wedding Code</h3>
-              </div>
-              <div class="code-row">
+              </section>
+              <section class="code-row">
               <p class="card-value">{{ eventDisplayInfo.rsvpCode || 'No code available' }} </p>
                 <button class="copy-btn" (click)="copyToClipboard(eventDisplayInfo.rsvpCode || '')">
-                📋
+                📋<p>copy</p>
               </button>
-              </div>
+
+              </section>
 
               <p class="card-subtitle">Share this code with guests in order to RSVP.</p>
-            </div>
+            </section>
 
             <!-- Selected Vendors -->
-            <div class="info-card vendors-info" *ngIf="eventDisplayInfo.selectedVendors && eventDisplayInfo.selectedVendors.length > 0">
-              <div class="card-header">
+            <section class="info-card vendors-info" *ngIf="eventDisplayInfo.selectedVendors && eventDisplayInfo.selectedVendors.length > 0">
+              <section class="card-header">
                 <span class="card-icon">🏪</span>
                 <h3>Selected Vendors</h3>
-              </div>
-              <div class="vendors-list">
-                <div class="vendor-item" *ngFor="let vendor of eventDisplayInfo.selectedVendors">
-                  <div class="vendor-name">{{ vendor.serviceName }}</div>
-                  <div class="vendor-date" *ngIf="vendor.orderDate">
+              </section>
+              <section class="vendors-list">
+                <section class="vendor-item" *ngFor="let vendor of eventDisplayInfo.selectedVendors">
+                  <section class="vendor-name">{{ vendor.serviceName }}</section>
+                  <section class="vendor-date" *ngIf="vendor.orderDate">
                     Ordered: {{ vendor.orderDate | date:'MMM d, y' }}
-                  </div>
-                </div>
-              </div>
+                  </section>
+                  </section>
+                </section>
               <p class="card-subtitle">{{ eventDisplayInfo.selectedVendors.length }} vendor(s) selected</p>
-            </div>
+              </section>
 
-          </div>
-        </div>
+            </section>
+          </section>
       </section>
 
 
@@ -257,36 +291,36 @@
         <h2 class="sr-only">Guest List</h2>
 
         <!-- your filters row stays above -->
-        <div class="filters-row">
-          <div class = "filter-group">
-            <div class="filter">
+        <section class="filters-row">
+          <section class = "filter-group">
+            <section class="filter">
               <label>Dietary</label>
               <select [(ngModel)]="selectedDietary" (change)="onFiltersChange()">
                 <option [ngValue]="null">All</option>
                 <option *ngFor="let d of dietaryOptions" [value]="d">{{ d }}</option>
               </select>
-            </div>
+            </section>
 
-            <div class="filter">
+            <section class="filter">
               <label>Allergies</label>
               <select [(ngModel)]="selectedAllergy" (change)="onFiltersChange()">
                 <option [ngValue]="null">All</option>
                 <option *ngFor="let a of allergyOptions" [value]="a">{{ a }}</option>
               </select>
-            </div>
+            </section>
 
-            <div class="filter">
+            <section class="filter">
               <label>RSVP</label>
               <select [(ngModel)]="selectedRsvp" (change)="onFiltersChange()">
                 <option value="all">All</option>
                 <option value="true">Attending</option>
                 <option value="false">Not Attending</option>
               </select>
-            </div>
+            </section>
 
-          </div>
+          </section>
 
-          <div class="addGuest">
+          <section class="addGuest">
             <button type="button" class="btn" (click)="toggleAddGuest()">
               {{ showAddGuest ? 'Close' : 'Add Guest' }}
             </button>
@@ -294,15 +328,15 @@
             <button type="button" class="btn" (click)="toggleExport()">
             {{ showExport ? 'Close' : 'Export' }}
             </button>
-          </div>
-        </div>
+          </section>
+        </section>
 
         <!-- Actions row -->
 
         <!-- Add Guest Card -->
-        <div class="add-card" *ngIf="showAddGuest">
+        <section class="add-card" *ngIf="showAddGuest">
           <form [formGroup]="addGuestForm" (ngSubmit)="submitAddGuest()">
-            <div class="form-grid">
+            <section class="form-grid">
               <label>
                 <span>Name *</span>
                 <input formControlName="Name" placeholder="Full name" />
@@ -335,45 +369,45 @@
                 <span>Song request</span>
                 <input formControlName="Song" placeholder="Favorite song" />
               </label>
-            </div>
+            </section>
 
-            <div class="add-card-actions">
+            <section class="add-card-actions">
               <button type="button" class="btn btn-secondary" (click)="toggleAddGuest()">Cancel</button>
               <button type="submit" class="btn btn-primary" [disabled]="addGuestForm.invalid || guestsLoading">
                 Save Guest
               </button>
-            </div>
+            </section>
           </form>
-        </div>
+        </section>
 
         <!-- Add download options -->
-        <div class="add-card" *ngIf="showExport">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <section class="add-card" *ngIf="showExport">
+          <section style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
             <strong>Export Guest List</strong>
             <small style="color:#666;">Applies current filters</small>
-          </div>
+          </section>
 
-          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <section style="display:flex; gap:10px; flex-wrap:wrap;">
             <button type="button" class="btn btn-primary" (click)="exportCsv()">
               Download CSV
             </button>
             <button type="button" class="btn btn-primary" (click)="exportPdf()">
               Download PDF
             </button>
-          </div>
-        </div>
+          </section>
+        </section>
 
 
         <!-- Card -->
-        <div class="table-card">
-          <div class="table-header">
-            <div class="table-title">Guests</div>
+        <section class="table-card">
+          <section class="table-header">
+            <section class="table-title">Guests</section>
             <!-- space for future actions (export, add guest, etc.) -->
-            <div></div>
-          </div>
+            <section></section>
+            </section>
 
           <!-- Loading -->
-          <div *ngIf="guestsLoading" class="table-container">
+          <section *ngIf="guestsLoading" class="table-container">
             <table class="guest-table" aria-busy="true" aria-live="polite">
               <thead>
                 <tr>
@@ -384,15 +418,15 @@
                 <tr class="loading-row" *ngFor="let s of [1,2,3,4,5]"><td colspan="6"></td></tr>
               </tbody>
             </table>
-          </div>
+          </section>
 
           <!-- Error -->
-          <div *ngIf="guestsError && !guestsLoading" class="empty-state">
+          <section *ngIf="guestsError && !guestsLoading" class="empty-state">
             {{ guestsError }}
-          </div>
+          </section>
 
           <!-- Table -->
-          <div *ngIf="!guestsLoading && !guestsError" class="table-container">
+          <section *ngIf="!guestsLoading && !guestsError" class="table-container">
             <table *ngIf="guests?.length; else emptyGuests" class="guest-table">
               <thead>
                 <tr>
@@ -442,46 +476,14 @@
             </table>
 
             <ng-template #emptyGuests>
-              <div class="empty-state">No guests match the selected filters.</div>
+              <section class="empty-state">No guests match the selected filters.</section>
             </ng-template>
-          </div>
-        </div>
+          </section>
+          </section>
       </section>
 
 
-    </div><!-- /.main -->
+    </section><!-- /.main -->
   </section><!-- /.has-event -->
 </section>
 
-
-
-<!-- if user doesnt have an event: -->
- <!-- show create event page -->
-<section class="create-event" *ngIf="hasEvent === false">
-  <section class="event-card">
-  <img src="assets/logo.jpg" alt="Vows & Veils logo" class="logo" />
-  <h2>Plan your wedding</h2>
-  <p>Fill in the details below to get started!</p>
-  </section>
-
-<section class="event-form">
-  <form [formGroup]="form" (ngSubmit)="createEvent()">
-    <label>Name of first partner:</label>
-    <input formControlName="name1" />
-
-    <label>Name of second partner:</label>
-    <input formControlName="name2" />
-
-    <label>Date of wedding:</label>
-    <input type="date" formControlName="date" />
-
-    <label>Time of wedding:</label>
-    <input type="time" formControlName="time" />
-
-    <label>Budget:</label>
-    <input type="number" formControlName="budget" />
-
-    <button type="submit" [disabled]="form.invalid">Create our wedding</button>
-  </form>
-</section>
-</section>
