@@ -179,12 +179,11 @@ export class Homepage
       //getting wedding code
       try
       {
-        const codeQuery = query(collection(db, "Events"), where('EventID', '==', eventId));
-        const codeSnap = await getDocs(codeQuery);
+        const codeDoc=await getDoc(doc(db,'Events',eventId));
 
-        if (!codeSnap.empty)
+        if (codeDoc.exists())
         {
-          this.eventDisplayInfo.rsvpCode = codeSnap.docs[0].data()?.['RSVPcode'];
+          this.eventDisplayInfo.rsvpCode = codeDoc.data()?.['RSVPcode']||null;
           console.log("RSVP Code found:", this.eventDisplayInfo.rsvpCode);
         }
         else{
