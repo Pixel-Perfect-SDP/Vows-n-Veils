@@ -89,7 +89,7 @@ export class Homepage
   }
 
   /*------------------------------Event Data API--------------------------*/
-  
+
   /**
    * Comprehensive Event Data API that retrieves all event information for display
    * Fetches: Wedding title, venue, time, budget, total guests, and confirmed RSVPs
@@ -97,7 +97,7 @@ export class Homepage
   async getEventDataForDisplay(): Promise<void> {
     this.eventInfoLoading = true;
     this.eventInfoError = null;
-    
+
     try {
       const user = await this.waitForUser();
       if (!user) {
@@ -112,7 +112,7 @@ export class Homepage
       // Get Event Data
       const eventDocRef = doc(db, 'Events', eventId);
       const eventDocSnap = await getDoc(eventDocRef);
-      
+
       if (!eventDocSnap.exists()) {
         this.hasEvent = false;
         this.eventInfoLoading = false;
@@ -167,11 +167,11 @@ export class Homepage
       }
 
       // 4. Get Budget
-      if (eventData?.['Budget']) {
-        console.log('Budget found:', eventData['Budget']);
-        this.eventDisplayInfo.budget = Number(eventData['Budget']);
+      if (eventData?.['budget']) {
+        console.log('Budget found:', eventData['budget']);
+        this.eventDisplayInfo.budget = Number(eventData['budget']);
       } else {
-        console.log('No Budget found in event data, Budget field value:', eventData?.['Budget']);
+        console.log('No Budget found in event data, Budget field value:', eventData?.['budget']);
       }
 
       // 5. Get Guest Statistics
@@ -179,9 +179,9 @@ export class Homepage
         console.log('Looking for guests with EventID:', eventId);
         const guestsQuery = query(collection(db, 'Guests'), where('EventID', '==', eventId));
         const guestsSnapshot = await getDocs(guestsQuery);
-        
+
         console.log('Guests query result - number of docs:', guestsSnapshot.size);
-        
+
         let totalGuests = 0;
         let confirmedRSVPs = 0;
 
@@ -207,13 +207,13 @@ export class Homepage
       // 6. Get Selected Vendors from Orders and Companies
       try {
         console.log('Looking for orders with eventID:', eventId);
-        
+
         // Check if user has permission to access orders collection
         const ordersQuery = query(collection(db, 'Orders'), where('eventID', '==', eventId));
         const ordersSnapshot = await getDocs(ordersQuery);
-        
+
         console.log('Orders query result - number of docs:', ordersSnapshot.size);
-        
+
         const selectedVendors: Array<{companyID: string, serviceName: string, orderDate?: any, status?: string}> = [];
 
         // Get all company IDs from orders, excluding declined orders
@@ -223,16 +223,16 @@ export class Homepage
         ordersSnapshot.forEach((doc) => {
           const orderData = doc.data();
           console.log('Order data:', orderData);
-          
+
           const companyID = orderData?.['companyID'];
           const status = orderData?.['status'];
-          
+
           // Skip declined orders completely
           if (status === 'declined') {
             console.log(`Skipping declined order for company: ${companyID}`);
             return;
           }
-          
+
           if (companyID) {
             companyIds.add(companyID);
             orderDetails[companyID] = {
@@ -251,26 +251,26 @@ export class Homepage
             // Query vendors collection by companyID field, not document ID
             const vendorsQuery = query(collection(db, 'Vendors'), where('companyID', '==', companyID));
             const vendorsSnapshot = await getDocs(vendorsQuery);
-            
+
             if (!vendorsSnapshot.empty) {
               // Get the first matching vendor document
               const vendorDoc = vendorsSnapshot.docs[0];
               const vendorData = vendorDoc.data();
               console.log(`Vendor data for companyID ${companyID}:`, vendorData);
-              
-              let serviceName = vendorData?.['serviceName'] || 
-                               vendorData?.['service_name'] || 
-                               vendorData?.['name'] || 
+
+              let serviceName = vendorData?.['serviceName'] ||
+                               vendorData?.['service_name'] ||
+                               vendorData?.['name'] ||
                                `Service ${companyID}`;
-              
+
               const orderStatus = orderDetails[companyID]?.status;
-              
+
               // Format service name based on status
               if (orderStatus === 'pending') {
                 serviceName = `${serviceName} (pending)`;
               }
               // If status is 'accepted' or other, show without brackets
-              
+
               selectedVendors.push({
                 companyID: companyID,
                 serviceName: serviceName,
@@ -280,12 +280,12 @@ export class Homepage
             } else {
               console.log(`No vendor found with companyID: ${companyID}`);
               const orderStatus = orderDetails[companyID]?.status;
-              
+
               let serviceName = `Unknown Service (${companyID})`;
               if (orderStatus === 'pending') {
                 serviceName = `Unknown Service (${companyID}) (pending)`;
               }
-              
+
               selectedVendors.push({
                 companyID: companyID,
                 serviceName: serviceName,
@@ -296,12 +296,12 @@ export class Homepage
           } catch (vendorError) {
             console.error(`Error fetching vendor with companyID ${companyID}:`, vendorError);
             const orderStatus = orderDetails[companyID]?.status;
-            
+
             let serviceName = `Error loading service (${companyID})`;
             if (orderStatus === 'pending') {
               serviceName = `Error loading service (${companyID}) (pending)`;
             }
-            
+
             selectedVendors.push({
               companyID: companyID,
               serviceName: serviceName,
@@ -357,10 +357,10 @@ export class Homepage
       if (docSnap.exists()) {
         this.hasEvent = true;
         this.eventData = docSnap.data();
-        
+
         // Get comprehensive event display data
         await this.getEventDataForDisplay();
-        
+
         //countdown
         this.updateCountdown();
         this.countDownInerval = setInterval(() => this.updateCountdown(), 60000);
@@ -731,16 +731,28 @@ export class Homepage
     const docRef = doc(db, 'Events', user.uid);
     const dateTime = new Date(`${date}T${time}`);
 
+    //generating a code for RSVP
+    let num=0;
+    let strNum;
+    let temp='';
+    for (let i =0;i<3;i++)
+    {
+      num=Math.floor(Math.random() * 9) + 1;
+      strNum=String(num);
+      temp+=strNum;
+    }
+    const RSVPCode = (name1 && name2) ? name1.substring(0, 3).toUpperCase() + name2.substring(0, 3).toUpperCase()+temp: '';
+
     try {
         await setDoc(docRef, {
         Name1: this.form.value.name1,
         Name2: this.form.value.name2,
         Date_Time: dateTime,
         EventID: user.uid,
-        RSVPcode: null,
+        RSVPcode: RSVPCode,
         VendorID: null,
         VenueID: null,
-        Budget: this.form.value.budget,
+        budget: this.form.value.budget,
       });
 
       this.hasEvent = true;
