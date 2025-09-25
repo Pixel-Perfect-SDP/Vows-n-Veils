@@ -241,6 +241,22 @@
               </p>
             </section>
 
+            <!--  RSVP code -->
+            <section class="info-card">
+              <section class="card-header">
+                <section class="card-icon">🔗</section>
+                <h3>Wedding Code</h3>
+              </section>
+              <section class="code-row">
+              <p class="card-value">{{ eventDisplayInfo.rsvpCode || 'No code available' }} </p>
+                <button class="copy-btn" (click)="copyToClipboard(eventDisplayInfo.rsvpCode || '')">
+                📋
+              </button>
+              </section>
+
+              <p class="card-subtitle">Share this code with guests in order to RSVP.</p>
+            </section>
+
             <!-- Selected Vendors -->
             <section class="info-card vendors-info" *ngIf="eventDisplayInfo.selectedVendors && eventDisplayInfo.selectedVendors.length > 0">
               <section class="card-header">
