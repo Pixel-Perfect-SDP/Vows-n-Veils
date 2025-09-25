@@ -155,7 +155,7 @@
         <!-- Event Data Display -->
         <div class="event-info-content" *ngIf="!eventInfoLoading && !eventInfoError">
           <div class="event-info-grid">
-            
+
             <!-- Wedding Title -->
             <div class="info-card wedding-title" *ngIf="eventDisplayInfo.weddingTitle">
               <h2 class="card-title">{{ eventDisplayInfo.weddingTitle }}</h2>
@@ -185,7 +185,7 @@
                 <span class="card-icon">💰</span>
                 <h3>Budget</h3>
               </div>
-              <p class="card-value">${{ eventDisplayInfo.budget | number:'1.2-2' }}</p>
+              <p class="card-value">R{{ eventDisplayInfo.budget | number:'1.2-2' }}</p>
             </div>
 
             <!-- Total Guests -->
@@ -207,6 +207,21 @@
               <p class="card-subtitle" *ngIf="eventDisplayInfo.totalGuests">
                 ({{ (eventDisplayInfo.confirmedRSVPs / eventDisplayInfo.totalGuests * 100) | number:'1.0-0' }}% response rate)
               </p>
+            </div>
+            <!--  RSVP code -->
+            <div class="info-card">
+              <div class="card-header">
+                <span class="card-icon">🔗</span>
+                <h3>Wedding Code</h3>
+              </div>
+              <div class="code-row">
+              <p class="card-value">{{ eventDisplayInfo.rsvpCode || 'No code available' }} </p>
+                <button class="copy-btn" (click)="copyToClipboard(eventDisplayInfo.rsvpCode || '')">
+                📋
+              </button>
+              </div>
+
+              <p class="card-subtitle">Share this code with guests in order to RSVP.</p>
             </div>
 
             <!-- Selected Vendors -->
