@@ -195,7 +195,7 @@
 .chosen-venue p {
   font-size: 2rem;
   font-weight: 700;
-  color: #e75480;
+  color: #000000;
   margin-bottom: 1rem;
   font-family: "Brush Script MT", cursive; 
   letter-spacing: 0.5px;
@@ -311,7 +311,7 @@
 .venue-list h3 {
   font-family: "Georgia", serif;
   font-size: 1.4rem;
-  color: #e75480;
+  color: #000000;
   margin-bottom: 0.8rem;
   text-align: center;
   position: relative; 

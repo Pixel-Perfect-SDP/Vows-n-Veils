@@ -221,7 +221,7 @@
   font-family: "Georgia", serif;
   font-size: 1.8rem;
   font-weight: 700;
-  color: #c84c61; 
+  color: #000000; 
   margin: 0 0 0.5rem 0;
   padding-bottom: 0.4rem;
   border-bottom: 2px solid rgba(212, 175, 55, 0.4); 
@@ -334,7 +334,7 @@
 .result-group-header h2 {
   font-size: 1.8rem;
   font-weight: 700;
-  color: #c84c61; 
+  color: #000000; 
   font-family: "Georgia", serif;
   flex: 1;
 }
@@ -389,7 +389,7 @@
 .vc-card h3 {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #c84c61;
+  color: #000000;
   font-family: "Georgia", serif;
 }
 
