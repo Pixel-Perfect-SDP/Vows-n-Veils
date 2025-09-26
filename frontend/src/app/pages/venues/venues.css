@@ -1,6 +1,4 @@
-
 /*TOPBAR*/
-
 .topbar {
   width: 100%;
   display: flex;
@@ -111,7 +109,7 @@
 
 
 
-
+/*MAIN SECTION*/
 .venueCouples-section {
   padding: 3rem 2rem;
   background: linear-gradient(135deg, #fff8fa, #fdebed);
@@ -122,7 +120,7 @@
 .header {
   position: relative;
   width: 100%;
-  height: 100px; /* adjust height as needed */
+  height: 100px; 
   display: flex;
   justify-content: center;
   align-items: center;
@@ -133,7 +131,6 @@
   margin-top: -1rem;
 }
 
-/* background image */
 .header::before {
   content: "";
   position: absolute;
@@ -145,12 +142,11 @@
   z-index: 0;
 }
 
-/* soft white veil overlay */
 .header::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: rgba(255, 255, 255, 0.25); /* gives a dreamy glow */
+  background: rgba(255, 255, 255, 0.25); 
   z-index: 1;
 }
 
@@ -166,23 +162,22 @@
   padding: 0.5rem 1rem;
   border-radius: 12px;
   text-shadow: 
-    0 0 6px rgba(255, 192, 203, 0.8),   /* soft pink core */
-    0 0 12px rgba(255, 182, 193, 0.6),  /* slightly darker pink */
+    0 0 6px rgba(255, 192, 203, 0.8),  
+    0 0 12px rgba(255, 182, 193, 0.6),  
     0 0 20px rgba(255, 182, 193, 0.4),
-    0 0 30px rgba(255, 182, 193, 0.2);  /* gentle outer pink glow */
+    0 0 30px rgba(255, 182, 193, 0.2);  
 }
 
 .venue {
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
-  background: rgba(255, 255, 255, 0.85); /* soft white contrast */
+  background: rgba(255, 255, 255, 0.85); 
   border-radius: 18px;
   box-shadow: 0 8px 22px rgba(0,0,0,0.08);
 }
 
 
-/* Container relative so hearts can float behind */
 .chosen-venue {
   position: relative;
   text-align: center;
@@ -192,7 +187,7 @@
   border-radius: 18px;
   box-shadow: 0 8px 20px rgba(231, 84, 128, 0.25);
   border: 2px solid #f8dfe6;
-  overflow: hidden; /* hide overflowing hearts */
+  overflow: hidden; 
   animation: pulseGlow 2.5s infinite alternate;
 }
 
@@ -202,14 +197,14 @@
   font-weight: 700;
   color: #e75480;
   margin-bottom: 1rem;
-  font-family: "Brush Script MT", cursive; /* elegant script fallback */
+  font-family: "Brush Script MT", cursive; 
   letter-spacing: 0.5px;
-  text-shadow: 0 1px 4px rgba(0,0,0,0.1); /* soft lift */
+  text-shadow: 0 1px 4px rgba(0,0,0,0.1);
 }
 
 
 
-/* Confirm button */
+/*confirm button*/
 .btn-confirm {
   padding: 0.8rem 2rem;
   font-weight: 700;
@@ -231,7 +226,7 @@
 
 
 
-/* === HEADINGS === */
+/*venue headings*/
 .venue h2 {
   font-size: 1.2rem;
   font-family: "Georgia", serif;
@@ -240,29 +235,29 @@
   margin: 2rem 0 1rem;
   text-align: center;
   text-shadow: 0 1px 4px rgba(0,0,0,0.1);
-  position: relative; /* needed for ::before and ::after */
+  position: relative; 
 }
 
-/* Gold line */
+/*gold line*/
 .venue h2::before {
   content: "";
   position: absolute;
-  top: -12px; /* space above the heading */
+  top: -12px; 
   left: 50%;
   transform: translateX(-50%);
-  width: 50rem; /* line length */
-  height: 3px; /* thickness */
+  width: 50rem; 
+  height: 3px; 
   background: linear-gradient(90deg, #d4af37, #f5e6a0);
   border-radius: 2px;
   z-index: 0;
 }
 
-/* Heart with bottom on the line */
+/*heart on line*/
 .venue h2::after {
   content: "❤";
   position: absolute;
   left: 50%;
-  bottom: calc(100% - 1.5px); /* place bottom on top of line (line is 3px thick) */
+  bottom: calc(100% - 1.5px); 
   transform: translateX(-50%);
   font-size: 1.4rem;
   color: #e75480;
@@ -270,7 +265,6 @@
   animation: heartbeat 1.6s infinite;
 }
 
-/* Heartbeat animation */
 @keyframes heartbeat {
   0%, 100% {
     transform: translateX(-50%) scale(1);
@@ -288,7 +282,7 @@
 
 
 
-/* === VENUE LIST === */
+/*venue list*/
 .venue-list ul {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -320,19 +314,19 @@
   color: #e75480;
   margin-bottom: 0.8rem;
   text-align: center;
-  position: relative; /* needed for pseudo-element */
+  position: relative; 
 }
 
-/* Small line under the h3 */
+/*line under the heading*/
 .venue-list h3::after {
   content: "";
   position: absolute;
-  bottom: -6px; /* distance from text */
+  bottom: -6px; 
   left: 50%;
   transform: translateX(-50%);
-  width: 40px; /* length of the line */
-  height: 2px; /* thickness */
-  background: linear-gradient(90deg, #d4af37, #f5e6a0); /* gold gradient */
+  width: 40px; 
+  height: 2px; 
+  background: linear-gradient(90deg, #d4af37, #f5e6a0); 
   border-radius: 1px;
 }
 
@@ -373,7 +367,7 @@
               0 0 25px rgba(255,182,193,0.3);
 }
 
-/* === SELECTED VENUE DETAILS === */
+/*details of selected venue*/
 .venue-option {
   max-width: 800px;
   margin: 2rem auto;
@@ -401,3 +395,4 @@
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
+}
