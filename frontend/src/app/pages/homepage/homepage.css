@@ -1,4 +1,3 @@
-
 /*Loading icon is a heart*/
 .loading-container{
     display: flex;
@@ -42,6 +41,7 @@
 
 
 
+/*-----------------------------------------------------------------------*/
 /*create an event if new account*/
 .create-event {
   min-height: 100vh; 
@@ -187,7 +187,7 @@
     width: 100%; 
   }
 }
-
+/*-----------------------------------------------------------------------*/
 
 .topbar {
   position: fixed;
@@ -255,10 +255,10 @@
     flex-wrap: wrap; 
   }
 }
+/*-----------------------------------------------------------------------*/
 
 
-
-
+/*-----------------------------------------------------------------------*/
 /*already created an event*/
 .homepage-section{
   display: flex;
@@ -272,13 +272,13 @@
 
 
 
-/* Sidebar */
+/*sidebar*/
 .sidebar {
-  position: fixed;       /* keep sidebar in place */
-  top: 64px;             /* offset below the fixed topbar */
+  position: fixed;       
+  top: 64px;           
   left: 0;
   width: 250px;
-  height: calc(100vh - 64px);  /* full height minus topbar */
+  height: calc(100vh - 64px);  
   background: linear-gradient(135deg, #fffafc, #ffffff);
 
   border-right: 2px solid #e75480;
@@ -287,10 +287,9 @@
   flex-direction: column;
   gap: 1rem;
   box-sizing: border-box;
-  z-index: 10;           /* make sure it’s above main content if needed */
+  z-index: 10;           
 }
 
-/* Sidebar links */
 .sidebar ul {
   list-style: none;
   padding: 0;
@@ -304,7 +303,7 @@
   color: #d46a6a;
   font-weight: 600;
   border-radius: 8px;
-  position: relative;           /* needed for the underline */
+  position: relative;           
    transition: color 0.3s ease, text-shadow 0.3s ease;
 }
 
@@ -312,27 +311,25 @@
   content: "";
   position: absolute;
   left: 0;
-  bottom: 4px;                  /* distance from text */
+  bottom: 4px;                  
   width: 0%;
-  height: 2px;                   /* thickness of underline */
-  background-color: #e75480;     /* underline color */
+  height: 2px;                   
+  background-color: #e75480;   
   transition: width 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* Hover and active effect */
 .sidebar ul li a:hover,
 .sidebar ul li a.active {
   color: #e75480;
-  text-shadow: 0 0 6px rgba(231, 84, 128, 0.5); /* subtle glow */
+  text-shadow: 0 0 6px rgba(231, 84, 128, 0.5); 
 }
 
 .sidebar ul li a:hover::after,
 .sidebar ul li a.active::after {
-  width: 100%;                   /* expand underline */
-  box-shadow: 0 0 6px rgba(231, 84, 128, 0.5); /* glow on underline */
+  width: 100%;                   
+  box-shadow: 0 0 6px rgba(231, 84, 128, 0.5); 
 }
 
-/* Responsive adjustments */
 @media (max-width: 768px) {
   .sidebar {
     width: 200px;
@@ -343,7 +340,7 @@
 }
 
 .has-event {
-  display: block;                 /* stack children */
+  display: block;                
   min-height: 100vh;
   background: var(--beige-100);
   position: relative;
@@ -352,7 +349,7 @@
 .main {
   flex: 1;
   padding: 2rem;
-  margin-left: 250px; /* <-- offset so it's not behind the sidebar */
+  margin-left: 250px; 
   box-sizing: border-box;
 }
 
@@ -370,7 +367,7 @@
   transform: scale(1.1);
 }
 
-/*WELCOME BANNER*/
+/*welcome banner with couple names*/
 .event-header {
   display: flex;
   align-items: center;
@@ -390,9 +387,9 @@
   position: relative;
   overflow: hidden;
   
-  display: flex;              /* added flexbox */
-  justify-content: center;    /* horizontal centering */
-  align-items: center;        /* vertical centering */
+  display: flex;              
+  justify-content: center;   
+  align-items: center;        
   text-align: center; 
 }
 
@@ -401,25 +398,18 @@
   position: relative;
   font-size: 3rem;
   font-weight: 700;
-
-  /* Elegant system cursive/serif fonts */
   font-family: "Brush Script MT", cursive;
-
-  /* Solid black text */
   color: #000;
-
-  /* Soft golden glow behind text */
   text-shadow: 
-    0 0 8px rgba(212, 175, 55, 0.6), /* gold glow */
-    0 2px 6px rgba(0, 0, 0, 0.2);     /* depth shadow */
+    0 0 8px rgba(212, 175, 55, 0.6), 
+    0 2px 6px rgba(0, 0, 0, 0.2);    
 
   margin: 0;
   z-index: 1;
-  text-align: center; /* center multiline names */
+  text-align: center; 
   transition: text-shadow 0.3s ease;
 }
 
-/* Optional gentle pulsing glow animation */
 @keyframes glow {
   0% { text-shadow: 0 0 6px rgba(212,175,55,0.4), 0 2px 6px rgba(0,0,0,0.2); }
   50% { text-shadow: 0 0 12px rgba(212,175,55,0.6), 0 2px 6px rgba(0,0,0,0.2); }
@@ -430,17 +420,11 @@
   animation: glow 2.5s ease-in-out infinite;
 }
 
-
-
-/* Responsive adjustments */
 @media (max-width: 768px) {
   .event-hero .names {
     font-size: 1.6rem;
   }
 }
-
-
-/* Responsive adjustments */
 @media (max-width: 768px) {
   .event-hero {
     padding: 12px 16px;
@@ -469,7 +453,7 @@
 }
 
 
-.sb-toggle {                      /* hidden checkbox toggle */
+.sb-toggle {                      
   position: absolute;
   opacity: 0;
   pointer-events: none;
@@ -485,13 +469,10 @@
 .error { color: #b00020; }
 .sidebar a.active { font-weight: 600; text-decoration: underline; }
 
-
-/* Content area spacing */
 .content {
   padding: 16px;
 }
 
-/* Collapse behavior (CSS-only): when checkbox is checked, hide sidebar and expand main */
 .sb-toggle:checked ~ .sidebar {
   transform: translateX(-100%);
 }
@@ -500,7 +481,6 @@
   margin-left: 0;
 }
 
-/* Small screens: start with sidebar hidden, user opens with hamburger */
 @media (max-width: 900px) {
   .sidebar {
     transform: translateX(-100%);
@@ -508,7 +488,8 @@
   .main {
     margin-left: 0;
   }
-  /* When user toggles ON (checked), show the sidebar OVER the main */
+ 
+
   .sb-toggle:checked ~ .sidebar {
     transform: translateX(0);
     box-shadow: 2px 0 18px rgba(0,0,0,0.15);
@@ -517,8 +498,8 @@
 
 .filters-row {
   display: flex;
-  justify-content: space-between; /* push button to the right */
-  align-items: flex-end; /* optional: align button with selects */
+  justify-content: space-between; 
+  align-items: flex-end; 
   flex-wrap: wrap;
   margin-bottom: 1rem;
 }
@@ -547,17 +528,20 @@
   border-radius: 8px;
   background: #fff;
   transition: all 0.3s ease;
-  outline: none; /* remove default focus outline */
+  outline: none; 
 }
 
-/* When the user selects or focuses */
+
+
 .filter select:focus {
-  border-color: #e75480; /* pink border */
-  box-shadow: 0 0 6px rgba(231, 84, 128, 0.4); /* soft pink glow */
+  border-color: #e75480; 
+  box-shadow: 0 0 6px rgba(231, 84, 128, 0.4);
 }
 
 
-/* ======= Guest List Table: Container + Card ======= */
+
+/*-----------------------------------------------------------------------*/
+/*GUESTS LIST TABLE*/
 .table-card {
   background: #ffffff;
   border: 1px solid var(--line);
@@ -582,14 +566,12 @@
 }
 
 
-/* Wrap the table for scrolling on small screens */
 .table-container {
   width: 100%;
   overflow: auto;
   -webkit-overflow-scrolling: touch;
 }
 
-/* ======= Table Base ======= */
 .guest-table {
   width: 100%;
   border-collapse: separate;
@@ -602,7 +584,6 @@
   top: 0;
   z-index: 1;
   background: #fff;
-  /* subtle frosted effect on supported browsers */
   backdrop-filter: saturate(120%) blur(6px);
   -webkit-backdrop-filter: saturate(120%) blur(6px);
   text-align: left;
@@ -628,13 +609,12 @@
   background: #f7efe9;
 }
 
-/* First/last column rounding look (visual nicety when scrolling) */
 .guest-table thead th:first-child,
 .guest-table tbody td:first-child { padding-left: 20px; }
 .guest-table thead th:last-child,
 .guest-table tbody td:last-child  { padding-right: 20px; }
 
-/* ======= “Chip” badges for RSVP/Dietary/Allergy ======= */
+
 .chip {
   display: inline-block;
   padding: 4px 10px;
@@ -644,11 +624,10 @@
   background: #fff;
 }
 
-.chip--ok   { background: #e9f9ef; color: #137a3a; border-color: #bfead0; } /* Attending */
-.chip--no   { background: #fdeeee; color: #a11a1a; border-color: #f5c7c7; } /* Not attending */
+.chip--ok   { background: #e9f9ef; color: #137a3a; border-color: #bfead0; } 
+.chip--no   { background: #fdeeee; color: #a11a1a; border-color: #f5c7c7; } 
 .chip--muted{ background: #f3f1ef; color: #5f5a57; }
 
-/* dietary & allergies as subtle tags */
 .tag {
   display: inline-block;
   padding: 4px 10px;
@@ -680,12 +659,10 @@
   background: #fdeeee;
 }
 .addGuest {
-  gap: 12px; /* adds spacing between all children */
+  gap: 12px; 
 }
 
 
-
-/* ======= Util: truncate long text (emails) ======= */
 .td-clip {
   max-width: 260px;
   white-space: nowrap;
@@ -693,7 +670,7 @@
   text-overflow: ellipsis;
 }
 
-/* ======= Empty & loading ======= */
+
 .empty-state {
   padding: 24px;
   text-align: center;
@@ -713,7 +690,6 @@
   100% { background-position: 0 0; }
 }
 
-/* ======= Compact on small screens ======= */
 @media (max-width: 720px) {
   .table-header { padding: 12px; }
   .guest-table thead th, .guest-table tbody td { padding: 10px 12px; }
@@ -777,8 +753,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1px; /* space between icon and text */
-  font-size: 1.2rem; /* for icon */
+  gap: 1px; 
+  font-size: 1.2rem; 
   padding: 4px 6px;
   transition: transform 0.1s ease;
 }
@@ -786,7 +762,7 @@
 .copy-btn p {
   margin: 0;
   font-size: 0.7rem;
-  color: #000000b7; /* soft pink */
+  color: #000000b7; 
   transition: color 0.3s ease, text-shadow 0.3s ease;
 }
 
@@ -797,7 +773,7 @@
 
 .copy-btn:hover p,
 .copy-btn:focus p {
-  color: #ff81a9; /* brighter pink on hover/focus */
+  color: #ff81a9; 
   text-shadow: 0 0 4px rgba(255, 105, 180, 0.5);
 }
 
@@ -805,10 +781,10 @@
 
 .form-grid input:focus,
 .form-grid select:focus {
-  border-color: #e75480; /* pink border */
-  box-shadow: 0 0 6px rgba(231, 84, 128, 0.4); /* soft pink glow */
-  outline: none; /* remove default focus outline */
-  transition: all 0.3s ease; /* smooth animation */
+  border-color: #e75480;
+  box-shadow: 0 0 6px rgba(231, 84, 128, 0.4); 
+  outline: none;
+  transition: all 0.3s ease; 
 }
 
 @media (max-width: 720px) {
@@ -817,14 +793,12 @@
 }
 
 
-/* Wrap the table for scrolling on small screens */
 .table-container {
   width: 100%;
   overflow: auto;
   -webkit-overflow-scrolling: touch;
 }
 
-/* ======= Table Base ======= */
 .guest-table {
   width: 100%;
   border-collapse: separate;
@@ -837,7 +811,6 @@
   top: 0;
   z-index: 1;
   background: #fff;
-  /* subtle frosted effect on supported browsers */
   backdrop-filter: saturate(120%) blur(6px);
   -webkit-backdrop-filter: saturate(120%) blur(6px);
   text-align: left;
@@ -863,13 +836,11 @@
   background: #f7efe9;
 }
 
-/* First/last column rounding look (visual nicety when scrolling) */
 .guest-table thead th:first-child,
 .guest-table tbody td:first-child { padding-left: 20px; }
 .guest-table thead th:last-child,
 .guest-table tbody td:last-child  { padding-right: 20px; }
 
-/* ======= “Chip” badges for RSVP/Dietary/Allergy ======= */
 .chip {
   display: inline-block;
   padding: 4px 10px;
@@ -879,11 +850,10 @@
   background: #fff;
 }
 
-.chip--ok   { background: #e9f9ef; color: #137a3a; border-color: #bfead0; } /* Attending */
-.chip--no   { background: #fdeeee; color: #a11a1a; border-color: #f5c7c7; } /* Not attending */
+.chip--ok   { background: #e9f9ef; color: #137a3a; border-color: #bfead0; }
+.chip--no   { background: #fdeeee; color: #a11a1a; border-color: #f5c7c7; } 
 .chip--muted{ background: #f3f1ef; color: #5f5a57; }
 
-/* dietary & allergies as subtle tags */
 .tag {
   display: inline-block;
   padding: 4px 10px;
@@ -894,7 +864,6 @@
   border: 1px solid #e6d7cf;
 }
 
-/* ======= Util: truncate long text (emails) ======= */
 .td-clip {
   max-width: 260px;
   white-space: nowrap;
@@ -902,7 +871,6 @@
   text-overflow: ellipsis;
 }
 
-/* ======= Empty & loading ======= */
 .empty-state {
   padding: 24px;
   text-align: center;
@@ -922,7 +890,6 @@
   100% { background-position: 0 0; }
 }
 
-/* ======= Compact on small screens ======= */
 @media (max-width: 720px) {
   .table-header { padding: 12px; }
   .guest-table thead th, .guest-table tbody td { padding: 10px 12px; }
@@ -989,7 +956,7 @@
 .countdown-section {
   text-align: center;
   padding: 3rem 1rem;
-  background: linear-gradient(135deg, #fff8fa, #fdebed); /* soft wedding tones */
+  background: linear-gradient(135deg, #fff8fa, #fdebed); 
 }
 .countdown
 {
@@ -1003,22 +970,17 @@
   font-size: 1.5rem;
   font-weight: 700;
   font-family: Georgia, "Palatino Linotype", "Book Antiqua", cursive;
-  color: #000; /* solid black text */
+  color: #000; 
   margin-bottom: 1rem;
   margin-top: 0rem;
   text-align: center;
   position: relative;
-
-  /* Soft pink glow behind the text */
   text-shadow: 0 0 6px rgba(255, 105, 180, 0.5),
                0 0 12px rgba(255, 105, 180, 0.4),
                0 0 18px rgba(255, 105, 180, 0.3);
-
-  /* Smooth pulsing animation */
   animation: pinkGlow 2s ease-in-out infinite alternate;
 }
 
-/* Smooth glow pulse */
 @keyframes pinkGlow {
   0% {
     text-shadow: 0 0 4px rgba(255, 105, 180, 0.3),
@@ -1085,7 +1047,6 @@
   margin: 0;
 }
 
-/* Responsive adjustments */
 @media (max-width: 768px) {
   .countdown {
     gap: 1rem;
@@ -1113,9 +1074,9 @@
   }
 }
 
-/* ===== Weather Bar ===== */
+/*WEATHER*/
 .weather-bar {
-  margin: 8px 16px 0 16px;        /* inside .main content flow */
+  margin: 8px 16px 0 16px;       
   border-radius: 14px;
   border: 1px solid var(--line);
   background: linear-gradient(180deg, #fff, #faf7f4);
@@ -1134,12 +1095,12 @@
   place-items: center;
   width: 40px;
   height: 40px;
-  color: #A76858;                 /* close to your accent family */
+  color: #A76858;                 
 }
 
 .weather-bar .wb-col {
   flex: 1;
-  min-width: 0;                   /* so text can truncate */
+  min-width: 0;                   
 }
 
 .weather-bar .wb-title {
@@ -1175,13 +1136,12 @@
   font-size: 0.85rem;
 }
 
-/* Empty state look */
 .weather-bar.wb-empty {
   background: #f9e8e89d;
   border-style: dashed;
 }
 
-/* Loading skeleton */
+
 .wb-icon-skel {
   width: 28px; height: 28px; border-radius: 50%;
   background: linear-gradient(90deg, #f7f1ec 25%, #f0e8e2 37%, #f7f1ec 63%);
@@ -1198,12 +1158,11 @@
 
 .wb-error { color: #a11a1a; }
 
-/* ===== Icon (SVG masks so they inherit color) ===== */
 .wb-icon {
   width: 36px;
   height: 36px;
   flex: 0 0 auto;
-  color: #A76858;                /* matches your accent family */
+  color: #A76858;               
   background: currentColor;
   border-radius: 10px;
   opacity: 0.95;
@@ -1218,7 +1177,7 @@
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 1.2rem; /* make icon bigger */
+  font-size: 1.2rem; 
   transition: transform 0.1s ease;
 }
 
@@ -1227,7 +1186,7 @@
 }
 
 
-/* Clear (sun) */
+/*clear sun*/
 .wb-icon.icon-clear {
   -webkit-mask: url('data:image/svg+xml;utf8,\
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">\
@@ -1239,7 +1198,7 @@
   </svg>') center / 24px 24px no-repeat;
 }
 
-/* Overcast (cloud) */
+/*overcast cloud*/
 .wb-icon.icon-overcast {
   -webkit-mask: url('data:image/svg+xml;utf8,\
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">\
@@ -1275,11 +1234,9 @@
   </svg>') center / 24px 24px no-repeat;
 }
 
-/* Optional: tint the whole bar subtly when rainy (keeps theme) */
 .weather-bar .icon-rain ~ .wb-col .wb-title,
 .weather-bar .icon-rain ~ .wb-col .wb-sub { color: #6a4a44; }
 
-/* Responsive: stack on small screens */
 @media (max-width: 720px) {
   .weather-bar .wb-row {
     align-items: flex-start;
@@ -1292,14 +1249,12 @@
 }
 
 
-/*==============================
-  EVENT INFORMATION PANEL (Whiter)
-===============================*/
+/*event ingo panel*/
 .event-info-panel {
   padding: 3rem 1rem;
-  background: #ffffff; /* mostly white */
+  background: #ffffff; 
   border-radius: 20px;
-  box-shadow: 0 6px 18px rgba(231, 84, 128, 0.08); /* very soft pink shadow */
+  box-shadow: 0 6px 18px rgba(231, 84, 128, 0.08); 
   max-width: 1200px;
   margin: 2rem auto;
   box-sizing: border-box;
@@ -1308,7 +1263,6 @@
   gap: 2rem;
 }
 
-/* Loading & Error States */
 .event-info-loading,
 .event-info-error {
   display: flex;
@@ -1318,7 +1272,7 @@
   gap: 1rem;
   min-height: 150px;
   font-weight: 600;
-  color: #ed0047; /* soft pink */
+  color: #ed0047;
 }
 
 .loading-spinner {
@@ -1334,7 +1288,7 @@
 
 .error-message { color: #d32f2f; font-weight: 500; margin: 0; }
 
-/* Event Grid */
+/*event grid*/
 .event-info-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -1342,17 +1296,15 @@
   align-items: start;
 }
 
-/* Info Cards */
 .info-card {
-  background: #fff; /* clean white */
+  background: #fff; 
   border-radius: 16px;
   padding: 1.5rem;
-  box-shadow: 0 4px 12px rgba(231,84,128,0.05); /* very subtle pink shadow */
+  box-shadow: 0 4px 12px rgba(231,84,128,0.05);
   transition: all 0.3s ease;
 }
 
 
-/* Card Header */
 .card-header {
   display: flex;
   align-items: center;
@@ -1362,7 +1314,7 @@
 
 .card-icon { font-size: 1.2rem; }
 
-/* Titles & Values */
+/*titles and values*/
 .card-title { 
   font-size: 1.3rem; 
   font-weight: 700; 
@@ -1373,11 +1325,10 @@
 .card-value { font-size: 1rem; color: #444; margin: 0.2rem 0; }
 .card-subtitle { font-size: 0.85rem; color: #888; margin-top: 0.5rem; }
 
-/* Wedding Title */
 .wedding-title {
   grid-column: 1 / -1;
   text-align: center;
-  background: #fef6f6; /* almost white with pink tint */
+  background: #fef6f6; 
   color: #000000;
   border-radius: 16px;
   padding: 1rem 0;
@@ -1393,7 +1344,7 @@
   text-shadow: 0 1px 3px rgba(200,76,97,0.2);
 }
 
-/* Vendors */
+
 .vendors-list {
   display: flex;
   flex-direction: column;
@@ -1402,7 +1353,7 @@
 }
 
 .vendor-item {
-  background: #fffafc; /* light pink-white */
+  background: #fffafc; 
   border: 1px solid rgba(231,84,128,0.15);
   border-radius: 12px;
   padding: 12px 16px;
@@ -1427,7 +1378,7 @@
 .vendors-info { grid-column: span 2; }
 .vendors-info .card-value { margin-bottom: 16px; }
 
-/* Icon Colors */
+/*icon colours*/
 .venue-info .card-icon { color: #E57373; }
 .time-info .card-icon { color: #64B5F6; }
 .budget-info .card-icon { color: #81C784; }
@@ -1435,7 +1386,7 @@
 .rsvp-info .card-icon { color: #A5D6A7; }
 .vendors-info .card-icon { color: #BA68C8; }
 
-/* Responsive */
+
 @media (max-width: 768px) {
   .event-info-panel { padding: 2rem 1rem; margin: 16px 0; }
   .event-info-grid { grid-template-columns: 1fr; gap: 1.2rem; }
