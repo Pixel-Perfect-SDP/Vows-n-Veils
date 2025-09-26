@@ -255,3 +255,20 @@
     transform: translateX(-50%);
   }
 }
+
+
+@media(max-width: 480px) {
+  .auth-header h2 { font-size: 1.5rem; }
+}
+
+@media(max-width: 768px) {
+  .auth-media {
+    flex-wrap: wrap;
+    gap: 0.8rem;
+  }
+  .media { max-width: 100%; flex: 1 1 100%; }
+  .media img { height: auto; }
+}
+@media(max-width: 480px) {
+  .divider-heart { font-size: 28px; top: -25px; }
+}
