@@ -668,3 +668,25 @@ html, body {
   from { opacity: 0; transform: translateY(30px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+
+@media(max-width: 480px) {
+  .splash-text h1 { font-size: 2.5rem; }
+  .intro h2 { font-size: 2rem; }
+  .nextHeading-pw { font-size: 2rem; }
+}
+
+@media (max-width: 768px) {
+  .intro h2 { font-size: 2.5rem; }
+  .cards, .offer-cards { gap: 1rem; }
+  .card, .offer-card { max-width: 90%; flex: 1 1 90%; }
+  .rings-animation { width: 150px; height: 90px; }
+}
+
+@media (max-width: 480px) {
+  .splash-text h1 { font-size: 2.5rem; }
+  .splash-text p { font-size: 1rem; }
+  .topBar h1 { font-size: 1.3rem; }
+  .hero-btn, .btnNext, .cardBtn { width: 100%; max-width: 240px; }
+  .heart-outline { width: 80vw; height: auto; }
+}
