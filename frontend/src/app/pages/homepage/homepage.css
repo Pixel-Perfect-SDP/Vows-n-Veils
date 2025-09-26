@@ -1403,3 +1403,61 @@
   .vendors-list { gap: 10px; }
 }
 
+
+@media (max-width: 480px) {
+  .guest-table thead { display: none; }
+  .guest-table tbody td { display: block; width: 100%; }
+  .guest-table tbody td::before { 
+    content: attr(data-label); 
+    font-weight: 600; 
+    display: inline-block; 
+    width: 100px;
+  }
+}
+
+@media (max-width: 480px) {
+  .event-form input, .event-form select {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .event-info-panel {
+    padding: 1rem;
+  }
+  .event-info-grid {
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .event-form button, .btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 900px) {
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+    display: flex;
+    justify-content: space-around;
+    padding: 0.5rem 0;
+  }
+
+  .sidebar ul {
+    display: flex;
+    flex-direction: row;
+    margin: 0;
+  }
+
+  .sidebar ul li a {
+    padding: 0.5rem 1rem;
+  }
+
+  .content {
+    margin-left: 0;
+    padding-top: 0.5rem;
+  }
+}

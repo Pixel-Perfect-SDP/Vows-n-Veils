@@ -447,3 +447,12 @@ button.btnSelectVenue:disabled {
   margin-top: 1.5rem;     
 }
 
+
+
+@media (max-width: 480px) {
+  .venue h2::before { width: 90%; }
+  .venue-option { width: 90%; padding: 1rem; }
+  .btn-confirm, .btnSelectVenue, .btnbackToList { padding: 0.5rem 1rem; font-size: 0.9rem; }
+  .Loading-1 { width: 80px; }
+  .Loading-2 { font-size: 24px; margin-left: 20px; }
+}

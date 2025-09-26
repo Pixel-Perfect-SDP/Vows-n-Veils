@@ -702,3 +702,30 @@
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+
+@media(max-width: 480px){
+  .logo-img { height: 32px; }
+  .logo-text { font-size: 1.1rem; }
+}
+
+@media(max-width: 360px){
+  .venue-list { gap: 15px; }
+  .venue-list .card { padding: 12px 14px; }
+  .venue-list h3 { font-size: 1.2rem; }
+}
+
+@media(max-width: 768px){
+  .map-display { flex-direction: column; gap: 15px; }
+  .leaflet-map-container { height: 300px; }
+}
+
+@media(max-width: 480px){
+  .update-form, .venue-company-form { padding: 20px; }
+  .update-form h2, .venue-company-card h2 { font-size: 1.5rem; }
+}
+
+@media(max-width: 360px){
+  .button-container { gap: 8px; }
+  .button-container button { padding: 8px 12px; font-size: 0.9rem; }
+}

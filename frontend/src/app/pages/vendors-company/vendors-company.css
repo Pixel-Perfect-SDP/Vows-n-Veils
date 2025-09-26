@@ -722,3 +722,29 @@
   margin-top: 4px;
   font-size: 0.8rem;
 }
+
+
+@media (max-width: 480px) {
+  .nav-links {
+    flex-direction: column;
+    width: 100%;
+  }
+  .nav-links a {
+    width: 100%;
+    text-align: left;
+  }
+}
+@media (max-width: 768px) {
+  .create-vendor-company {
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px;
+  }
+
+  .vendor-company-card,
+  .vendor-company-form {
+    width: 100%;
+  }
+}
+
+

@@ -76,7 +76,7 @@
 .heading{  
    position: relative;
   width: 100%;
-  height: 100px; 
+  min-height: 100px; 
   display: flex;
   justify-content: center;
   align-items: center;
@@ -504,5 +504,29 @@ form textarea:focus {
   transform: translateY(-3px);
   box-shadow: 0 8px 18px rgba(0, 0, 0, 0.15);
   background-color: #b06a5d; 
+}
+
+
+@media (max-width: 480px) {
+  .nav-links a {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .button-group button {
+    padding: 0.5rem 1.2rem;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .my-orders .order-summary {
+    width: 90%;
+    padding: 1rem;
+  }
+}
+@media (max-width: 480px) {
+  .Loading-1 { width: 80px; }
 }
 
