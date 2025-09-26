@@ -284,3 +284,24 @@
   cursor: not-allowed;
 }
 
+@media (max-width: 480px) {
+  .logo-text {
+    font-size: 1.1rem;
+  }
+  .logo-img {
+    height: 36px;
+  }
+}
+
+@media (max-width: 360px) {
+  .eventId {
+    padding: 1.5rem 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .sub-container button {
+    width: 100%;
+  }
+}
+
