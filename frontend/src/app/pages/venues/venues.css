@@ -396,3 +396,54 @@
   justify-content: center;
   flex-wrap: wrap;
 }
+
+
+button.btnbackToList,
+button.btnSelectVenue {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+button.btnbackToList {
+  background: #f7eaea; 
+  color: #6b6b6b;
+  border: 1px solid rgba(212, 175, 55, 0.25); 
+}
+
+button.btnbackToList:hover {
+  background: #f0dede;
+  color: #3f3a34;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+}
+
+button.btnSelectVenue {
+  background: linear-gradient(135deg, #e75480, #c84c61); 
+  color: #fff;
+}
+
+button.btnSelectVenue:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(231, 84, 128, 0.3);
+  filter: brightness(1.05);
+}
+
+button.btnSelectVenue:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+  box-shadow: none;
+}
+
+.btnGroup{
+  display: flex;
+  justify-content: center; 
+  gap: 1rem;              
+  margin-top: 1.5rem;     
+}
+
