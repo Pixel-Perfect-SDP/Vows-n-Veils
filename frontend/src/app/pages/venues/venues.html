@@ -73,11 +73,13 @@
 
 
     <section class="venue-option" *ngIf="selectedVenue">
+        <section class="btnGroup">
         <button class="btnbackToList" (click)="backToList()">← Back to all Venues</button>
         <button class="btnSelectVenue" (click)="selectVenue(selectedVenue!.id)"
             [style.opacity]="hasExistingOrder ? '0.3' : '1'" [disabled]="hasExistingOrder">
             Choose Venue
         </button>
+        </section>
 
         <h2>{{ selectedVenue.venuename }}</h2>
         <p class="viewAddress">{{ selectedVenue.address }}</p>
