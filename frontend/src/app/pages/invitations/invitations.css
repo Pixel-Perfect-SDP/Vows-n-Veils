@@ -352,3 +352,56 @@
 .hint { font-size: .85rem; color: #666; }
 
 
+
+@media (max-width: 480px) {
+  .nav-links {
+    gap: 0.5rem;
+  }
+  .nav-links a {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .header h1 {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .picker {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1rem;
+  }
+}
+
+
+@media (max-width: 900px) {
+  .editor {
+    grid-template-columns: 1fr;
+  }
+  .controls {
+    width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .canvas {
+    width: 100%;
+    height: auto;
+  }
+}
+@media (max-width: 480px) {
+  .text.bride { font-size: 1.5rem; }
+  .text.amp { font-size: 1.2rem; }
+  .text.groom { font-size: 1.5rem; }
+  .text.date, .text.venue, .text.message, .text.website { font-size: 0.9rem; }
+}
+
+@media (max-width: 600px) {
+  .canvas {
+    width: 100%;
+    height: auto; /* maintain aspect ratio if possible */
+  }
+}
+
