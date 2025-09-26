@@ -1,12 +1,21 @@
+<header class="topbar">
+  <section class="logo-area">
+    <img class="logo-img" src="assets/logo.jpg" alt="Vows & Veils logo" />
+    <h1 class="logo-text">Vows & Veils</h1>
+  </section>
+
+  <nav class="nav-links">
+    <a routerLink="/homepage">Home</a>
+  </nav>
+</header>
+
 <section class="vendorCouples-section">
 
   <section class="initial">
     <section class="heading">
       <h1>Find your perfect vendors</h1>
-      <p>Browse all available services from our vendor community.</p>
     </section>
     <section class="button-group">
-      <button class="home-btn" (click)="backTohome()">Back to Home</button>
       <button (click)="loadAllVendors()" [disabled]="loading">
         {{ loading ? 'Loading…' : (loaded ? 'Refresh list' : 'Show all vendors') }}
       </button>
@@ -45,7 +54,7 @@
   <section class="my-orders" *ngIf="showOrders">
     <section class="order-summary" *ngIf="orders?.length">
       <h3>Showing {{ orders.length }} order(s)</h3>
-    </section>
+    
     <section class="orders-list" *ngIf="orders?.length; else noOrders">
       <section class="order-card" *ngFor="let o of orders">
         <section class="row2">
@@ -69,6 +78,7 @@
           }"
         >{{ o.status }}</p>
       </section>
+    </section>
     </section>
 
     <ng-template #noOrders>
@@ -99,7 +109,7 @@
             <ul class="meta">
               <li *ngIf="s.phonenumber">Contact Number: {{ s.phonenumber }}</li>
               <li *ngIf="s.capacity != null">Capacity: {{ s.capacity }}</li>
-              <li *ngIf="s.status">Status: <span class="status">{{ s.status }}</span></li>
+              <!--  <li *ngIf="s.status">Status: <span class="status">{{ s.status }}</span></li>  -->
             </ul>
 
             <p class="desc" *ngIf="s.description">{{ s.description }}</p>
