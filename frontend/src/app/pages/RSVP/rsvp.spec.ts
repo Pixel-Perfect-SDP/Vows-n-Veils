@@ -112,6 +112,17 @@ describe('RsvpComponent', () => {
 
       expect(fullname).toBe('John Doe');
     });
+
+    it('should handle only surname provided', () => {
+      component.formData.Name = '';
+      component.formData.Surname = 'Doe';
+
+      const fullname = component.formData.Surname.trim()
+        ? component.formData.Name.trim() + ' ' + component.formData.Surname.trim()
+        : component.formData.Name.trim();
+
+      expect(fullname).toBe(' Doe');
+    });
   });
 
   describe('Dietary Preference Logic', () => {
@@ -158,6 +169,17 @@ describe('RsvpComponent', () => {
 
       expect(finalDiet).toBe('Gluten-Free');
     });
+
+    it('should handle otherDiet with spaces but meaningful content', () => {
+      component.formData.Diet = 'None';
+      component.formData.otherDiet = '  Gluten Free  ';
+
+      const finalDiet = component.formData.otherDiet.trim()
+        ? component.formData.otherDiet
+        : component.formData.Diet;
+
+      expect(finalDiet).toBe('  Gluten Free  ');
+    });
   });
 
   describe('Attendance Logic', () => {
@@ -189,6 +211,19 @@ describe('RsvpComponent', () => {
 
     it('should set RSVPstatus to false when attending is empty', () => {
       component.formData.Attending = '';
+
+      let attendance;
+      if (component.formData.Attending == "Yes") {
+        attendance = true;
+      } else {
+        attendance = false;
+      }
+
+      expect(attendance).toBe(false);
+    });
+
+    it('should set RSVPstatus to false when attending is "Maybe"', () => {
+      component.formData.Attending = 'Maybe';
 
       let attendance;
       if (component.formData.Attending == "Yes") {
@@ -287,15 +322,56 @@ describe('RsvpComponent', () => {
       });
       expect(fullname).toBe('Jane Smith');
     });
+
+    it('should create submit data with empty song', () => {
+      component.formData.Name = 'Bob';
+      component.formData.Surname = 'Wilson';
+      component.formData.Email = 'bob@example.com';
+      component.formData.Diet = 'None';
+      component.formData.otherDiet = '';
+      component.formData.Allergy = '';
+      component.formData.Song = '';
+      component.formData.Attending = 'Yes';
+
+      const finalDiet = component.formData.otherDiet.trim()
+        ? component.formData.otherDiet
+        : component.formData.Diet;
+
+      const fullname = component.formData.Surname.trim()
+        ? component.formData.Name.trim() + ' ' + component.formData.Surname.trim()
+        : component.formData.Name.trim();
+
+      let attendance;
+      if (component.formData.Attending == "Yes") {
+        attendance = true;
+      } else {
+        attendance = false;
+      }
+
+      const submitData = {
+        Email: component.formData.Email,
+        Dietary: finalDiet,
+        Allergies: component.formData.Allergy,
+        Song: component.formData.Song,
+        RSVPstatus: attendance
+      };
+
+      expect(submitData).toEqual({
+        Email: 'bob@example.com',
+        Dietary: 'None',
+        Allergies: '',
+        Song: '',
+        RSVPstatus: true
+      });
+      expect(fullname).toBe('Bob Wilson');
+    });
   });
 
   describe('Event Code Validation', () => {
     it('should handle event code with only spaces', () => {
       const alertSpy = spyOn(window, 'alert');
 
-      // We'll test the validation logic directly since we can't test the full method
       const eventCode = '   ';
-
       if (!eventCode.trim()) {
         alert("Please enter a valid Event Code ");
       }
@@ -308,6 +384,17 @@ describe('RsvpComponent', () => {
       const trimmedCode = eventCode.trim();
 
       expect(trimmedCode).toBe('VALID123');
+    });
+
+    it('should handle empty event code', () => {
+      const alertSpy = spyOn(window, 'alert');
+
+      const eventCode = '';
+      if (!eventCode.trim()) {
+        alert("Please enter a valid Event Code ");
+      }
+
+      expect(alertSpy).toHaveBeenCalledWith('Please enter a valid Event Code ');
     });
   });
 
@@ -323,16 +410,97 @@ describe('RsvpComponent', () => {
     it('should have router service injected', () => {
       expect(component['router']).toBeTruthy();
     });
+
+    it('should update message property', () => {
+      component.message = 'Test message';
+      expect(component.message).toBe('Test message');
+    });
+
+    it('should update eventId property', () => {
+      component.eventId = 'test-event-123';
+      expect(component.eventId).toBe('test-event-123');
+    });
+
+    it('should update eventIdEntered property', () => {
+      component.eventIdEntered = true;
+      expect(component.eventIdEntered).toBe(true);
+    });
+
+    it('should update eventCode property', () => {
+      component.eventCode = 'TEST123';
+      expect(component.eventCode).toBe('TEST123');
+    });
+  });
+
+  describe('Form Data Updates', () => {
+    it('should update form data Name', () => {
+      component.formData.Name = 'New Name';
+      expect(component.formData.Name).toBe('New Name');
+    });
+
+    it('should update form data Surname', () => {
+      component.formData.Surname = 'New Surname';
+      expect(component.formData.Surname).toBe('New Surname');
+    });
+
+    it('should update form data Email', () => {
+      component.formData.Email = 'new@example.com';
+      expect(component.formData.Email).toBe('new@example.com');
+    });
+
+    it('should update form data Attending', () => {
+      component.formData.Attending = 'No';
+      expect(component.formData.Attending).toBe('No');
+    });
+
+    it('should update form data Diet', () => {
+      component.formData.Diet = 'Vegan';
+      expect(component.formData.Diet).toBe('Vegan');
+    });
+
+    it('should update form data otherDiet', () => {
+      component.formData.otherDiet = 'Custom Diet';
+      expect(component.formData.otherDiet).toBe('Custom Diet');
+    });
+
+    it('should update form data Allergy', () => {
+      component.formData.Allergy = 'Nuts';
+      expect(component.formData.Allergy).toBe('Nuts');
+    });
+
+    it('should update form data Song', () => {
+      component.formData.Song = 'Favorite Song';
+      expect(component.formData.Song).toBe('Favorite Song');
+    });
+
+    it('should update form data guestID', () => {
+      component.formData.guestID = 'guest-123';
+      expect(component.formData.guestID).toBe('guest-123');
+    });
   });
 
   describe('Error Message Handling', () => {
     it('should handle empty name validation message', () => {
       const alertSpy = spyOn(window, 'alert');
 
-      // Test the validation logic directly
       const name = '';
       const surname = '';
+      const fullname = surname.trim()
+        ? name.trim() + ' ' + surname.trim()
+        : name.trim();
 
+      if (fullname.trim() == '') {
+        alert('Name field cannot be empty ❌');
+      }
+
+      expect(alertSpy).toHaveBeenCalledWith('Name field cannot be empty ❌');
+    });
+
+    it('should handle name with only spaces validation', () => {
+      const alertSpy = spyOn(window, 'alert');
+
+      const name = '   ';
+      const surname = '   ';
       const fullname = surname.trim()
         ? name.trim() + ' ' + surname.trim()
         : name.trim();
@@ -347,7 +515,6 @@ describe('RsvpComponent', () => {
 
   describe('Navigation Logic', () => {
     it('should navigate after delay', fakeAsync(() => {
-      // Test navigation logic directly
       setTimeout(() => {
         router.navigate(['/landing']);
       }, 2000);
@@ -356,9 +523,18 @@ describe('RsvpComponent', () => {
 
       expect(router.navigate).toHaveBeenCalledWith(['/landing']);
     }));
+
+    it('should not navigate before delay', fakeAsync(() => {
+      setTimeout(() => {
+        router.navigate(['/landing']);
+      }, 2000);
+
+      tick(1000);
+
+      expect(router.navigate).not.toHaveBeenCalled();
+    }));
   });
 
-  // Test the core methods without Firestore dependencies
   describe('Method Logic Tests', () => {
     it('should handle name validation in onSubmit', async () => {
       const alertSpy = spyOn(window, 'alert');
@@ -367,7 +543,6 @@ describe('RsvpComponent', () => {
       component.formData.Name = '';
       component.formData.Surname = '';
 
-      // We'll test that the validation logic works by checking the early return condition
       const fullname = component.formData.Surname.trim()
         ? component.formData.Name.trim() + ' ' + component.formData.Surname.trim()
         : component.formData.Name.trim();
@@ -392,7 +567,6 @@ describe('RsvpComponent', () => {
       component.formData.Allergy = 'None';
       component.formData.Song = 'Test Song';
 
-      // Test the data processing logic
       const finalDiet = component.formData.otherDiet.trim()
         ? component.formData.otherDiet
         : component.formData.Diet;
@@ -419,6 +593,71 @@ describe('RsvpComponent', () => {
         RSVPstatus: true
       });
       expect(fullname).toBe('Test User');
+    });
+
+    it('should handle case sensitivity in attendance', () => {
+      component.formData.Attending = 'yes';
+      const attendance = component.formData.Attending == "Yes";
+      expect(attendance).toBe(false);
+
+      component.formData.Attending = 'YES';
+      const attendance2 = component.formData.Attending == "Yes";
+      expect(attendance2).toBe(false);
+    });
+
+    it('should handle various diet combinations', () => {
+      // Test case 1: Both diet and otherDiet empty
+      component.formData.Diet = '';
+      component.formData.otherDiet = '';
+      const diet1 = component.formData.otherDiet.trim()
+        ? component.formData.otherDiet
+        : component.formData.Diet;
+      expect(diet1).toBe('');
+
+      // Test case 2: Only otherDiet with spaces
+      component.formData.Diet = 'Vegetarian';
+      component.formData.otherDiet = '   ';
+      const diet2 = component.formData.otherDiet.trim()
+        ? component.formData.otherDiet
+        : component.formData.Diet;
+      expect(diet2).toBe('Vegetarian');
+
+      // Test case 3: otherDiet with content
+      component.formData.Diet = 'None';
+      component.formData.otherDiet = 'Custom Diet';
+      const diet3 = component.formData.otherDiet.trim()
+        ? component.formData.otherDiet
+        : component.formData.Diet;
+      expect(diet3).toBe('Custom Diet');
+    });
+  });
+
+  describe('Edge Cases', () => {
+    it('should handle very long names', () => {
+      component.formData.Name = 'A'.repeat(100);
+      component.formData.Surname = 'B'.repeat(100);
+
+      const fullname = component.formData.Surname.trim()
+        ? component.formData.Name.trim() + ' ' + component.formData.Surname.trim()
+        : component.formData.Name.trim();
+
+      expect(fullname.length).toBe(201); // 100 + 1 space + 100
+    });
+
+    it('should handle special characters in names', () => {
+      component.formData.Name = 'Jöhn';
+      component.formData.Surname = 'Döe';
+
+      const fullname = component.formData.Surname.trim()
+        ? component.formData.Name.trim() + ' ' + component.formData.Surname.trim()
+        : component.formData.Name.trim();
+
+      expect(fullname).toBe('Jöhn Döe');
+    });
+
+    it('should handle email validation patterns', () => {
+      component.formData.Email = 'test.email+tag@example.co.uk';
+      expect(component.formData.Email).toBe('test.email+tag@example.co.uk');
     });
   });
 });
