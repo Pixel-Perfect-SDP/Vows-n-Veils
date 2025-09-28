@@ -117,15 +117,89 @@
 
             <section class="actions">
               <button class="primary" (click)="openOrder(s)">Order</button>
-              <button class="secondary" disabled>View details</button>
+              <!--<button class="secondary" disabled>View details</button>-->
             </section>
+
+
+<section class="order-form"  *ngIf="selectedService === s">
+    <section class="orders">
+      <h3>Request booking</h3>
+
+      <section class="vendor-summary" *ngIf="selectedService">
+        <section class="left">
+          <section class="name">Service name: {{ selectedService.serviceName }}</section>
+          <section class="company" *ngIf="selectedService.companyName">Company: {{ selectedService.companyName }}</section>
+          <ul class="meta" *ngIf="selectedService.phonenumber">
+            <li>Contact Number: {{ selectedService.phonenumber }}</li>
+          </ul>
+        </section>
+        <section class="price" *ngIf="selectedService.price != null">
+          Price: R{{ selectedService.price | number:'1.0-2' }}
+        </section>
+      </section>
+
+      <form [formGroup]="orderForm" (ngSubmit)="submitOrder()">
+        <section class="event-row" *ngIf="myEventId">
+          <label>Wedding of </label>
+          <section class="event-chip"><strong>{{ myEventTitle }}</strong></section>
+        </section>
+        <section class="eventDate">
+          <label>Date: </label>
+          <input type="date" formControlName="date" />
+        </section>
+
+        <section class="row">
+          <section class="col">
+            <label>Start time: </label>
+            <input type="time" formControlName="startTime" />
           </section>
+          <section class="col">
+            <label>End time: </label>
+            <input type="time" formControlName="endTime" />
+          </section>
+        </section>
+
+        <section class="guests">
+          <label>Number of guests: </label>
+          <input type="number" min="1" formControlName="guestsNum" placeholder="e.g. 120" />
+        </section>
+
+        <section class="vendorNotes">
+          <label>Notes for the vendor: </label>
+          <textarea rows="3" formControlName="note" placeholder="Anything the vendor should know?"></textarea>
+        </section>
+
+        <section class="actions">
+          <button type="button" class="secondary" (click)="closeOrder()" [disabled]="ordering">Cancel</button>
+          <button type="submit" [disabled]="orderForm.invalid || ordering">
+            {{ ordering ? 'Sending…' : 'Send request' }}
+          </button>
+        </section>
+
+        <p class="error" *ngIf="orderError">{{ orderError }}</p>
+        <p class="success" *ngIf="orderSuccess">{{ orderSuccess }}</p>
+      </form>
+    </section>
+  </section>
+
+
+
+          
+          </section>
+
+
+          
+
+           
+
         </section>
       </section>
     </ng-container>
 
     <p class="empty" *ngIf="!totalCount">No services yet.</p>
   </section>
+
+
 
   <section class="order-form" *ngIf="showOrder">
     <section class="orders">
@@ -187,5 +261,6 @@
       </form>
     </section>
   </section>
+ 
 
 </section>
