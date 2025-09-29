@@ -44,6 +44,33 @@ function isValidPhone(p) {
   return typeof p === 'string' && /^[0-9+()\-\s]{7,20}$/.test(p.trim());
 }
 
+/**
+ * @swagger
+ * tags:
+ *   name: Vendors
+ *   description: API endpoints for managing vendors and their data
+ */
+
+/**
+ * @swagger
+ * /vendors/company/{companyID}:
+ *   get:
+ *     summary: Get vendors by company ID
+ *     tags: [Vendors]
+ *     parameters:
+ *       - in: path
+ *         name: companyID
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The company ID to filter vendors by
+ *     responses:
+ *       200:
+ *         description: List of vendors for the given company
+ *       500:
+ *         description: Error fetching vendors
+ */
+
 router.get('/company/:companyID', async (req, res) => {
   try {
     const companyID = req.params.companyID;
@@ -62,6 +89,20 @@ router.get('/company/:companyID', async (req, res) => {
   }
 });
 
+
+/**
+ * @swagger
+ * /vendors:
+ *   get:
+ *     summary: Get all vendors
+ *     tags: [Vendors]
+ *     responses:
+ *       200:
+ *         description: List of all vendors
+ *       500:
+ *         description: Error fetching vendors
+ */
+
 router.get('/', async (_req, res) => {
   try {
     const snap = await db.collection('Vendors').get();
@@ -78,6 +119,27 @@ router.get('/', async (_req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /vendors/{id}:
+ *   get:
+ *     summary: Get a vendor by ID
+ *     tags: [Vendors]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Vendor document ID
+ *     responses:
+ *       200:
+ *         description: Vendor found
+ *       404:
+ *         description: Vendor not found
+ *       500:
+ *         description: Error fetching vendor
+ */
 router.get('/:id', async (req, res) => {
   try {
     const ref = db.collection('Vendors').doc(req.params.id);
@@ -90,6 +152,61 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /vendors:
+ *   post:
+ *     summary: Create a new vendor
+ *     tags: [Vendors]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [name, type, companyID, email, phonenumber]
+ *             properties:
+ *               name:
+ *                 type: string
+ *               serviceName:
+ *                 type: string
+ *               type:
+ *                 type: string
+ *               companyID:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               phonenumber:
+ *                 type: string
+ *               price:
+ *                 type: number
+ *               capacity:
+ *                 type: integer
+ *               description:
+ *                 type: string
+ *               bookingNotes:
+ *                 type: string
+ *               status:
+ *                 type: string
+ *             example:
+ *               name: "DJ Mike"
+ *               type: "Entertainment"
+ *               companyID: "12345"
+ *               email: "dj@example.com"
+ *               phonenumber: "+27111234567"
+ *               price: 5000
+ *               capacity: 200
+ *               description: "DJ for weddings and events"
+ *               bookingNotes: "Requires 2 hours setup"
+ *               status: "active"
+ *     responses:
+ *       201:
+ *         description: Vendor created successfully
+ *       400:
+ *         description: Missing required fields or invalid phone number
+ *       500:
+ *         description: Error creating vendor
+ */
 router.post('/', async (req, res) => {
   try {
     const v = req.body;
@@ -121,6 +238,33 @@ router.post('/', async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /vendors/{id}:
+ *   put:
+ *     summary: Update an existing vendor
+ *     tags: [Vendors]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Vendor ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       200:
+ *         description: Vendor updated successfully
+ *       400:
+ *         description: Invalid phone number format
+ *       500:
+ *         description: Error updating vendor
+ */
 router.put('/:id', async (req, res) => {
   try {
     const updates = { ...req.body };
@@ -137,6 +281,40 @@ router.put('/:id', async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /vendors/{id}/phone:
+ *   patch:
+ *     summary: Update vendor phone number by ID
+ *     tags: [Vendors]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Vendor ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               phonenumber:
+ *                 type: string
+ *             example:
+ *               phonenumber: "+27117654321"
+ *     responses:
+ *       200:
+ *         description: Phone number updated successfully
+ *       400:
+ *         description: Invalid phone number format
+ *       404:
+ *         description: Vendor not found
+ *       500:
+ *         description: Error updating phone number
+ */
 router.patch('/:id/phone', async (req, res) => {
   try {
     const { phonenumber } = req.body || {};
@@ -153,6 +331,38 @@ router.patch('/:id/phone', async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /vendors/company/{companyID}/phone:
+ *   patch:
+ *     summary: Bulk update vendor phone numbers by company ID
+ *     tags: [Vendors]
+ *     parameters:
+ *       - in: path
+ *         name: companyID
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Company ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               phonenumber:
+ *                 type: string
+ *             example:
+ *               phonenumber: "+27119876543"
+ *     responses:
+ *       200:
+ *         description: Phone numbers updated for all vendors in the company
+ *       400:
+ *         description: Invalid phone number format
+ *       500:
+ *         description: Error updating phone numbers
+ */
 router.patch('/company/:companyID/phone', async (req, res) => {
   try {
     const { phonenumber } = req.body || {};
@@ -173,6 +383,27 @@ router.patch('/company/:companyID/phone', async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /vendors/{id}:
+ *   delete:
+ *     summary: Delete a vendor
+ *     tags: [Vendors]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Vendor ID
+ *     responses:
+ *       200:
+ *         description: Vendor deleted successfully
+ *       404:
+ *         description: Vendor not found
+ *       500:
+ *         description: Error deleting vendor
+ */
 router.delete('/:id', async (req, res) => {
   try {
     const ref = db.collection('Vendors').doc(req.params.id);
