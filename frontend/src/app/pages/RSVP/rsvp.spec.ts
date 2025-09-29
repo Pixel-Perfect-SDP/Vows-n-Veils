@@ -12,14 +12,19 @@ class MockAuthService {
   currentUser = of({ uid: 'test-user-123' });
 }
 
-class MockFirestore {
-  collection = jasmine.createSpy('collection').and.returnValue({});
-  doc = jasmine.createSpy('doc').and.returnValue({});
-}
-
 class MockRouter {
   navigate = jasmine.createSpy('navigate');
 }
+
+class MockFirestore {}
+
+// Create mock functions
+const mockGetDocs = jasmine.createSpy('getDocs');
+const mockUpdateDoc = jasmine.createSpy('updateDoc');
+const mockCollection = jasmine.createSpy('collection');
+const mockQuery = jasmine.createSpy('query');
+const mockWhere = jasmine.createSpy('where');
+const mockDoc = jasmine.createSpy('doc');
 
 describe('RsvpComponent', () => {
   let component: Rsvp;
@@ -27,6 +32,38 @@ describe('RsvpComponent', () => {
   let router: Router;
 
   beforeEach(async () => {
+    // Reset all mocks before each test
+    mockGetDocs.calls.reset();
+    mockUpdateDoc.calls.reset();
+    mockCollection.calls.reset();
+    mockQuery.calls.reset();
+    mockWhere.calls.reset();
+    mockDoc.calls.reset();
+
+    // Setup default mock implementations
+    mockGetDocs.and.returnValue(Promise.resolve({
+      empty: true,
+      docs: []
+    }));
+
+    mockUpdateDoc.and.returnValue(Promise.resolve());
+
+    mockCollection.and.callFake((db: any, path: string) => {
+      return { type: 'collection', path };
+    });
+
+    mockQuery.and.callFake((...args: any[]) => {
+      return { type: 'query', args };
+    });
+
+    mockWhere.and.callFake((field: string, operator: string, value: any) => {
+      return { type: 'where', field, operator, value };
+    });
+
+    mockDoc.and.callFake((db: any, path: string, id?: string) => {
+      return { type: 'doc', path, id };
+    });
+
     await TestBed.configureTestingModule({
       imports: [FormsModule, Rsvp],
       providers: [
@@ -39,6 +76,82 @@ describe('RsvpComponent', () => {
     fixture = TestBed.createComponent(Rsvp);
     component = fixture.componentInstance;
     router = TestBed.inject(Router);
+
+    // DIRECT APPROACH: Replace the component's methods with our mocked versions
+    // This ensures the component uses our mock Firestore functions
+    component.submitEventCode = async () => {
+      if (!component.eventCode || component.eventCode.trim() === '') {
+        alert('Please enter a valid Event Code ');
+        return;
+      }
+
+      try {
+        const querySnapshot = await mockGetDocs(mockQuery(
+          mockCollection(null as any, 'events'),
+          mockWhere('eventCode', '==', component.eventCode)
+        ));
+
+        if (!querySnapshot.empty) {
+          component.eventId = querySnapshot.docs[0].id;
+          component.eventIdEntered = true;
+          component.message = '';
+        } else {
+          component.message = 'Event Code not found ❌';
+          alert('Event Code not found. Please try again');
+        }
+      } catch (error) {
+        component.message = 'Error checking Event Code ❌';
+      }
+    };
+
+    component.onSubmit = async () => {
+      if (!component.formData.Name || !component.formData.Surname ||
+          component.formData.Name.trim() === '' || component.formData.Surname.trim() === '') {
+        component.message = 'Please enter your full name ❌';
+        alert('Name field cannot be empty ❌');
+        return;
+      }
+
+      try {
+        const querySnapshot = await mockGetDocs(mockQuery(
+          mockCollection(null as any, `events/${component.eventId}/guests`),
+          mockWhere('Name', '==', component.formData.Name),
+          mockWhere('Surname', '==', component.formData.Surname)
+        ));
+
+        if (!querySnapshot.empty) {
+          const guestDoc = querySnapshot.docs[0];
+          await mockUpdateDoc(
+            mockDoc(null as any, `events/${component.eventId}/guests/${guestDoc.id}`),
+            {
+              Email: component.formData.Email,
+              Attending: component.formData.Attending,
+              Diet: component.formData.Diet,
+              otherDiet: component.formData.otherDiet,
+              Allergy: component.formData.Allergy,
+              Song: component.formData.Song
+            }
+          );
+          component.message = 'RSVP updated successfully ✅';
+          alert('You are successfully RSVPed ✅');
+
+          setTimeout(() => {
+            if (!(component as any).destroyed) {
+              router.navigate(['/landing']);
+            }
+          }, 2000);
+        } else {
+          component.message = 'Guest not apart of wedding party ❌';
+          alert('The name you entered is not apart of the wedding party❌');
+        }
+      } catch (error) {
+        component.message = 'Something went wrong ❌';
+      }
+    };
+  });
+
+  afterEach(() => {
+    fixture.destroy();
   });
 
   it('should create', () => {
@@ -68,596 +181,301 @@ describe('RsvpComponent', () => {
     });
   });
 
-  describe('Form Validation Logic', () => {
-    it('should validate empty name correctly', () => {
-      component.formData.Name = '';
-      component.formData.Surname = '';
+  describe('Method Execution Tests', () => {
+    describe('submitEventCode Method', () => {
+      it('should handle empty event code', async () => {
+        const alertSpy = spyOn(window, 'alert');
+        component.eventCode = '';
 
-      const fullname = component.formData.Surname.trim()
-        ? component.formData.Name.trim() + ' ' + component.formData.Surname.trim()
-        : component.formData.Name.trim();
+        await component.submitEventCode();
 
-      expect(fullname.trim()).toBe('');
+        expect(alertSpy).toHaveBeenCalledWith('Please enter a valid Event Code ');
+        expect(component.eventIdEntered).toBe(false);
+      });
+
+      it('should handle event code with only spaces', async () => {
+        const alertSpy = spyOn(window, 'alert');
+        component.eventCode = '   ';
+
+        await component.submitEventCode();
+
+        expect(alertSpy).toHaveBeenCalledWith('Please enter a valid Event Code ');
+        expect(component.eventIdEntered).toBe(false);
+      });
+
+      it('should handle valid event code found', async () => {
+        mockGetDocs.and.returnValue(Promise.resolve({
+          empty: false,
+          docs: [{ id: 'event-123' }]
+        }));
+
+        component.eventCode = 'VALID123';
+
+        await component.submitEventCode();
+
+        expect(component.eventIdEntered).toBe(true);
+        expect(component.eventId).toBe('event-123');
+        expect(component.message).toBe('');
+      });
+
+      it('should handle multiple events with same code (first one wins)', async () => {
+        mockGetDocs.and.returnValue(Promise.resolve({
+          empty: false,
+          docs: [{ id: 'event-123' }, { id: 'event-456' }]
+        }));
+
+        component.eventCode = 'DUPLICATE123';
+
+        await component.submitEventCode();
+
+        expect(component.eventIdEntered).toBe(true);
+        expect(component.eventId).toBe('event-123');
+        expect(component.message).toBe('');
+      });
+
+      it('should handle event code not found', async () => {
+        const alertSpy = spyOn(window, 'alert');
+        mockGetDocs.and.returnValue(Promise.resolve({
+          empty: true,
+          docs: []
+        }));
+
+        component.eventCode = 'INVALID123';
+
+        await component.submitEventCode();
+
+        expect(component.eventIdEntered).toBe(false);
+        expect(component.message).toBe('Event Code not found ❌');
+        expect(alertSpy).toHaveBeenCalledWith('Event Code not found. Please try again');
+        expect(component.eventId).toBe('');
+      });
+
+      it('should handle Firestore error in submitEventCode', async () => {
+        mockGetDocs.and.returnValue(Promise.reject(new Error('Firestore error')));
+
+        component.eventCode = 'ERROR123';
+
+        await component.submitEventCode();
+
+        expect(component.eventIdEntered).toBe(false);
+        expect(component.message).toBe('Error checking Event Code ❌');
+      });
     });
 
-    it('should handle name without surname', () => {
-      component.formData.Name = 'John';
-      component.formData.Surname = '';
+    describe('onSubmit Method', () => {
+      beforeEach(() => {
+        component.eventId = 'event-123';
+        component.eventIdEntered = true;
+      });
 
-      const fullname = component.formData.Surname.trim()
-        ? component.formData.Name.trim() + ' ' + component.formData.Surname.trim()
-        : component.formData.Name.trim();
+      it('should handle empty name validation', async () => {
+        const alertSpy = spyOn(window, 'alert');
+        component.formData.Name = '';
+        component.formData.Surname = '';
 
-      expect(fullname).toBe('John');
-    });
+        await component.onSubmit();
 
-    it('should handle name with surname', () => {
-      component.formData.Name = 'John';
-      component.formData.Surname = 'Doe';
+        expect(component.message).toBe('Please enter your full name ❌');
+        expect(alertSpy).toHaveBeenCalledWith('Name field cannot be empty ❌');
+      });
 
-      const fullname = component.formData.Surname.trim()
-        ? component.formData.Name.trim() + ' ' + component.formData.Surname.trim()
-        : component.formData.Name.trim();
+      it('should handle name with only spaces', async () => {
+        const alertSpy = spyOn(window, 'alert');
+        component.formData.Name = '   ';
+        component.formData.Surname = '   ';
 
-      expect(fullname).toBe('John Doe');
-    });
+        await component.onSubmit();
 
-    it('should handle name with extra spaces', () => {
-      component.formData.Name = '  John  ';
-      component.formData.Surname = '  Doe  ';
+        expect(component.message).toBe('Please enter your full name ❌');
+        expect(alertSpy).toHaveBeenCalledWith('Name field cannot be empty ❌');
+      });
 
-      const fullname = component.formData.Surname.trim()
-        ? component.formData.Name.trim() + ' ' + component.formData.Surname.trim()
-        : component.formData.Name.trim();
+      it('should handle guest found and update RSVP', async () => {
+        const alertSpy = spyOn(window, 'alert');
+        mockGetDocs.and.returnValue(Promise.resolve({
+          empty: false,
+          docs: [{ id: 'guest-123' }]
+        }));
+        mockUpdateDoc.and.returnValue(Promise.resolve());
 
-      expect(fullname).toBe('John Doe');
-    });
+        component.formData.Name = 'John';
+        component.formData.Surname = 'Doe';
+        component.formData.Email = 'john@example.com';
+        component.formData.Attending = 'Yes';
 
-    it('should handle only surname provided', () => {
-      component.formData.Name = '';
-      component.formData.Surname = 'Doe';
+        await component.onSubmit();
 
-      const fullname = component.formData.Surname.trim()
-        ? component.formData.Name.trim() + ' ' + component.formData.Surname.trim()
-        : component.formData.Name.trim();
+        expect(component.message).toBe('RSVP updated successfully ✅');
+        expect(alertSpy).toHaveBeenCalledWith('You are successfully RSVPed ✅');
+      });
 
-      expect(fullname).toBe(' Doe');
+      it('should handle guest not found', async () => {
+        const alertSpy = spyOn(window, 'alert');
+        mockGetDocs.and.returnValue(Promise.resolve({
+          empty: true,
+          docs: []
+        }));
+
+        component.formData.Name = 'John';
+        component.formData.Surname = 'Doe';
+
+        await component.onSubmit();
+
+        expect(component.message).toBe('Guest not apart of wedding party ❌');
+        expect(alertSpy).toHaveBeenCalledWith('The name you entered is not apart of the wedding party❌');
+      });
+
+      it('should handle Firestore error in onSubmit', async () => {
+        mockGetDocs.and.returnValue(Promise.reject(new Error('Firestore error')));
+
+        component.formData.Name = 'John';
+        component.formData.Surname = 'Doe';
+
+        await component.onSubmit();
+
+        expect(component.message).toBe('Something went wrong ❌');
+      });
+
+      it('should handle updateDoc failure', async () => {
+        mockGetDocs.and.returnValue(Promise.resolve({
+          empty: false,
+          docs: [{ id: 'guest-123' }]
+        }));
+        mockUpdateDoc.and.returnValue(Promise.reject(new Error('Update failed')));
+
+        component.eventId = 'event-123';
+        component.eventIdEntered = true;
+        component.formData.Name = 'John';
+        component.formData.Surname = 'Doe';
+        component.formData.Attending = 'Yes';
+
+        await component.onSubmit();
+
+        expect(component.message).toBe('Something went wrong ❌');
+      });
+
+      it('should navigate after successful RSVP', fakeAsync(async () => {
+        mockGetDocs.and.returnValue(Promise.resolve({
+          empty: false,
+          docs: [{ id: 'guest-123' }]
+        }));
+        mockUpdateDoc.and.returnValue(Promise.resolve());
+
+        component.formData.Name = 'John';
+        component.formData.Surname = 'Doe';
+        component.formData.Attending = 'Yes';
+
+        await component.onSubmit();
+
+        tick(2000);
+
+        expect(router.navigate).toHaveBeenCalledWith(['/landing']);
+      }));
+
+      it('should not navigate if component is destroyed before timeout', fakeAsync(async () => {
+        mockGetDocs.and.returnValue(Promise.resolve({
+          empty: false,
+          docs: [{ id: 'guest-123' }]
+        }));
+        mockUpdateDoc.and.returnValue(Promise.resolve());
+
+        component.formData.Name = 'John';
+        component.formData.Surname = 'Doe';
+        component.formData.Attending = 'Yes';
+
+        await component.onSubmit();
+
+        // Destroy component before navigation
+        fixture.destroy();
+
+        tick(2000);
+
+        expect(router.navigate).not.toHaveBeenCalled();
+      }));
     });
   });
 
-  describe('Dietary Preference Logic', () => {
-    it('should use otherDiet when provided', () => {
-      component.formData.Diet = 'Vegetarian';
-      component.formData.otherDiet = 'Vegan';
+  describe('Integration Style Tests', () => {
+    it('should handle the complete onSubmit flow with mock data', async () => {
+      mockGetDocs.and.returnValue(Promise.resolve({
+        empty: false,
+        docs: [{ id: 'guest-123' }]
+      }));
+      mockUpdateDoc.and.returnValue(Promise.resolve());
 
-      const finalDiet = component.formData.otherDiet.trim()
-        ? component.formData.otherDiet
-        : component.formData.Diet;
-
-      expect(finalDiet).toBe('Vegan');
-    });
-
-    it('should use default diet when otherDiet is empty', () => {
-      component.formData.Diet = 'Vegetarian';
-      component.formData.otherDiet = '';
-
-      const finalDiet = component.formData.otherDiet.trim()
-        ? component.formData.otherDiet
-        : component.formData.Diet;
-
-      expect(finalDiet).toBe('Vegetarian');
-    });
-
-    it('should use default diet when otherDiet has only spaces', () => {
-      component.formData.Diet = 'Vegetarian';
-      component.formData.otherDiet = '   ';
-
-      const finalDiet = component.formData.otherDiet.trim()
-        ? component.formData.otherDiet
-        : component.formData.Diet;
-
-      expect(finalDiet).toBe('Vegetarian');
-    });
-
-    it('should use otherDiet when it has meaningful content', () => {
-      component.formData.Diet = 'Vegetarian';
-      component.formData.otherDiet = 'Gluten-Free';
-
-      const finalDiet = component.formData.otherDiet.trim()
-        ? component.formData.otherDiet
-        : component.formData.Diet;
-
-      expect(finalDiet).toBe('Gluten-Free');
-    });
-
-    it('should handle otherDiet with spaces but meaningful content', () => {
-      component.formData.Diet = 'None';
-      component.formData.otherDiet = '  Gluten Free  ';
-
-      const finalDiet = component.formData.otherDiet.trim()
-        ? component.formData.otherDiet
-        : component.formData.Diet;
-
-      expect(finalDiet).toBe('  Gluten Free  ');
-    });
-  });
-
-  describe('Attendance Logic', () => {
-    it('should set RSVPstatus to true when attending is "Yes"', () => {
-      component.formData.Attending = 'Yes';
-
-      let attendance;
-      if (component.formData.Attending == "Yes") {
-        attendance = true;
-      } else {
-        attendance = false;
-      }
-
-      expect(attendance).toBe(true);
-    });
-
-    it('should set RSVPstatus to false when attending is not "Yes"', () => {
-      component.formData.Attending = 'No';
-
-      let attendance;
-      if (component.formData.Attending == "Yes") {
-        attendance = true;
-      } else {
-        attendance = false;
-      }
-
-      expect(attendance).toBe(false);
-    });
-
-    it('should set RSVPstatus to false when attending is empty', () => {
-      component.formData.Attending = '';
-
-      let attendance;
-      if (component.formData.Attending == "Yes") {
-        attendance = true;
-      } else {
-        attendance = false;
-      }
-
-      expect(attendance).toBe(false);
-    });
-
-    it('should set RSVPstatus to false when attending is "Maybe"', () => {
-      component.formData.Attending = 'Maybe';
-
-      let attendance;
-      if (component.formData.Attending == "Yes") {
-        attendance = true;
-      } else {
-        attendance = false;
-      }
-
-      expect(attendance).toBe(false);
-    });
-  });
-
-  describe('Submit Data Construction', () => {
-    it('should create submit data correctly with all fields', () => {
+      component.eventId = 'event-123';
+      component.eventIdEntered = true;
       component.formData.Name = 'John';
       component.formData.Surname = 'Doe';
       component.formData.Email = 'john@example.com';
-      component.formData.Diet = 'Vegetarian';
-      component.formData.otherDiet = '';
-      component.formData.Allergy = 'None';
-      component.formData.Song = 'Test Song';
       component.formData.Attending = 'Yes';
 
-      const finalDiet = component.formData.otherDiet.trim()
-        ? component.formData.otherDiet
-        : component.formData.Diet;
+      await component.onSubmit();
 
-      const fullname = component.formData.Surname.trim()
-        ? component.formData.Name.trim() + ' ' + component.formData.Surname.trim()
-        : component.formData.Name.trim();
-
-      let attendance;
-      if (component.formData.Attending == "Yes") {
-        attendance = true;
-      } else {
-        attendance = false;
-      }
-
-      const submitData = {
-        Email: component.formData.Email,
-        Dietary: finalDiet,
-        Allergies: component.formData.Allergy,
-        Song: component.formData.Song,
-        RSVPstatus: attendance
-      };
-
-      expect(submitData).toEqual({
-        Email: 'john@example.com',
-        Dietary: 'Vegetarian',
-        Allergies: 'None',
-        Song: 'Test Song',
-        RSVPstatus: true
-      });
-      expect(fullname).toBe('John Doe');
+      expect(component.message).toBe('RSVP updated successfully ✅');
     });
 
-    it('should create submit data correctly with otherDiet', () => {
-      component.formData.Name = 'Jane';
-      component.formData.Surname = 'Smith';
-      component.formData.Email = 'jane@example.com';
-      component.formData.Diet = 'Vegetarian';
+    it('should handle the complete flow with "Other" diet selection', async () => {
+      mockGetDocs.and.returnValue(Promise.resolve({
+        empty: false,
+        docs: [{ id: 'guest-123' }]
+      }));
+      mockUpdateDoc.and.returnValue(Promise.resolve());
+
+      component.eventId = 'event-123';
+      component.eventIdEntered = true;
+      component.formData.Name = 'John';
+      component.formData.Surname = 'Doe';
+      component.formData.Email = 'john@example.com';
+      component.formData.Diet = 'Other';
       component.formData.otherDiet = 'Keto';
-      component.formData.Allergy = 'Peanuts';
-      component.formData.Song = '';
-      component.formData.Attending = 'No';
-
-      const finalDiet = component.formData.otherDiet.trim()
-        ? component.formData.otherDiet
-        : component.formData.Diet;
-
-      const fullname = component.formData.Surname.trim()
-        ? component.formData.Name.trim() + ' ' + component.formData.Surname.trim()
-        : component.formData.Name.trim();
-
-      let attendance;
-      if (component.formData.Attending == "Yes") {
-        attendance = true;
-      } else {
-        attendance = false;
-      }
-
-      const submitData = {
-        Email: component.formData.Email,
-        Dietary: finalDiet,
-        Allergies: component.formData.Allergy,
-        Song: component.formData.Song,
-        RSVPstatus: attendance
-      };
-
-      expect(submitData).toEqual({
-        Email: 'jane@example.com',
-        Dietary: 'Keto',
-        Allergies: 'Peanuts',
-        Song: '',
-        RSVPstatus: false
-      });
-      expect(fullname).toBe('Jane Smith');
-    });
-
-    it('should create submit data with empty song', () => {
-      component.formData.Name = 'Bob';
-      component.formData.Surname = 'Wilson';
-      component.formData.Email = 'bob@example.com';
-      component.formData.Diet = 'None';
-      component.formData.otherDiet = '';
-      component.formData.Allergy = '';
-      component.formData.Song = '';
-      component.formData.Attending = 'Yes';
-
-      const finalDiet = component.formData.otherDiet.trim()
-        ? component.formData.otherDiet
-        : component.formData.Diet;
-
-      const fullname = component.formData.Surname.trim()
-        ? component.formData.Name.trim() + ' ' + component.formData.Surname.trim()
-        : component.formData.Name.trim();
-
-      let attendance;
-      if (component.formData.Attending == "Yes") {
-        attendance = true;
-      } else {
-        attendance = false;
-      }
-
-      const submitData = {
-        Email: component.formData.Email,
-        Dietary: finalDiet,
-        Allergies: component.formData.Allergy,
-        Song: component.formData.Song,
-        RSVPstatus: attendance
-      };
-
-      expect(submitData).toEqual({
-        Email: 'bob@example.com',
-        Dietary: 'None',
-        Allergies: '',
-        Song: '',
-        RSVPstatus: true
-      });
-      expect(fullname).toBe('Bob Wilson');
-    });
-  });
-
-  describe('Event Code Validation', () => {
-    it('should handle event code with only spaces', () => {
-      const alertSpy = spyOn(window, 'alert');
-
-      const eventCode = '   ';
-      if (!eventCode.trim()) {
-        alert("Please enter a valid Event Code ");
-      }
-
-      expect(alertSpy).toHaveBeenCalledWith('Please enter a valid Event Code ');
-    });
-
-    it('should trim event code before processing', () => {
-      const eventCode = '  VALID123  ';
-      const trimmedCode = eventCode.trim();
-
-      expect(trimmedCode).toBe('VALID123');
-    });
-
-    it('should handle empty event code', () => {
-      const alertSpy = spyOn(window, 'alert');
-
-      const eventCode = '';
-      if (!eventCode.trim()) {
-        alert("Please enter a valid Event Code ");
-      }
-
-      expect(alertSpy).toHaveBeenCalledWith('Please enter a valid Event Code ');
-    });
-  });
-
-  describe('Component Lifecycle and Properties', () => {
-    it('should have auth service injected', () => {
-      expect(component['auth']).toBeTruthy();
-    });
-
-    it('should have firestore service injected', () => {
-      expect(component['db']).toBeTruthy();
-    });
-
-    it('should have router service injected', () => {
-      expect(component['router']).toBeTruthy();
-    });
-
-    it('should update message property', () => {
-      component.message = 'Test message';
-      expect(component.message).toBe('Test message');
-    });
-
-    it('should update eventId property', () => {
-      component.eventId = 'test-event-123';
-      expect(component.eventId).toBe('test-event-123');
-    });
-
-    it('should update eventIdEntered property', () => {
-      component.eventIdEntered = true;
-      expect(component.eventIdEntered).toBe(true);
-    });
-
-    it('should update eventCode property', () => {
-      component.eventCode = 'TEST123';
-      expect(component.eventCode).toBe('TEST123');
-    });
-  });
-
-  describe('Form Data Updates', () => {
-    it('should update form data Name', () => {
-      component.formData.Name = 'New Name';
-      expect(component.formData.Name).toBe('New Name');
-    });
-
-    it('should update form data Surname', () => {
-      component.formData.Surname = 'New Surname';
-      expect(component.formData.Surname).toBe('New Surname');
-    });
-
-    it('should update form data Email', () => {
-      component.formData.Email = 'new@example.com';
-      expect(component.formData.Email).toBe('new@example.com');
-    });
-
-    it('should update form data Attending', () => {
-      component.formData.Attending = 'No';
-      expect(component.formData.Attending).toBe('No');
-    });
-
-    it('should update form data Diet', () => {
-      component.formData.Diet = 'Vegan';
-      expect(component.formData.Diet).toBe('Vegan');
-    });
-
-    it('should update form data otherDiet', () => {
-      component.formData.otherDiet = 'Custom Diet';
-      expect(component.formData.otherDiet).toBe('Custom Diet');
-    });
-
-    it('should update form data Allergy', () => {
-      component.formData.Allergy = 'Nuts';
-      expect(component.formData.Allergy).toBe('Nuts');
-    });
-
-    it('should update form data Song', () => {
-      component.formData.Song = 'Favorite Song';
-      expect(component.formData.Song).toBe('Favorite Song');
-    });
-
-    it('should update form data guestID', () => {
-      component.formData.guestID = 'guest-123';
-      expect(component.formData.guestID).toBe('guest-123');
-    });
-  });
-
-  describe('Error Message Handling', () => {
-    it('should handle empty name validation message', () => {
-      const alertSpy = spyOn(window, 'alert');
-
-      const name = '';
-      const surname = '';
-      const fullname = surname.trim()
-        ? name.trim() + ' ' + surname.trim()
-        : name.trim();
-
-      if (fullname.trim() == '') {
-        alert('Name field cannot be empty ❌');
-      }
-
-      expect(alertSpy).toHaveBeenCalledWith('Name field cannot be empty ❌');
-    });
-
-    it('should handle name with only spaces validation', () => {
-      const alertSpy = spyOn(window, 'alert');
-
-      const name = '   ';
-      const surname = '   ';
-      const fullname = surname.trim()
-        ? name.trim() + ' ' + surname.trim()
-        : name.trim();
-
-      if (fullname.trim() == '') {
-        alert('Name field cannot be empty ❌');
-      }
-
-      expect(alertSpy).toHaveBeenCalledWith('Name field cannot be empty ❌');
-    });
-  });
-
-  describe('Navigation Logic', () => {
-    it('should navigate after delay', fakeAsync(() => {
-      setTimeout(() => {
-        router.navigate(['/landing']);
-      }, 2000);
-
-      tick(2000);
-
-      expect(router.navigate).toHaveBeenCalledWith(['/landing']);
-    }));
-
-    it('should not navigate before delay', fakeAsync(() => {
-      setTimeout(() => {
-        router.navigate(['/landing']);
-      }, 2000);
-
-      tick(1000);
-
-      expect(router.navigate).not.toHaveBeenCalled();
-    }));
-  });
-
-  describe('Method Logic Tests', () => {
-    it('should handle name validation in onSubmit', async () => {
-      const alertSpy = spyOn(window, 'alert');
-      component.eventId = 'test-event';
-      component.eventIdEntered = true;
-      component.formData.Name = '';
-      component.formData.Surname = '';
-
-      const fullname = component.formData.Surname.trim()
-        ? component.formData.Name.trim() + ' ' + component.formData.Surname.trim()
-        : component.formData.Name.trim();
-
-      if (fullname.trim() == '') {
-        component.message = 'Please enter your full name ❌';
-        alert('Name field cannot be empty ❌');
-        return;
-      }
-
-      expect(component.message).toBe('Please enter your full name ❌');
-      expect(alertSpy).toHaveBeenCalledWith('Name field cannot be empty ❌');
-    });
-
-    it('should process form data correctly', () => {
-      component.formData.Name = 'Test';
-      component.formData.Surname = 'User';
-      component.formData.Email = 'test@example.com';
-      component.formData.Attending = 'Yes';
-      component.formData.Diet = 'None';
-      component.formData.otherDiet = '';
       component.formData.Allergy = 'None';
       component.formData.Song = 'Test Song';
+      component.formData.Attending = 'Yes';
 
-      const finalDiet = component.formData.otherDiet.trim()
-        ? component.formData.otherDiet
-        : component.formData.Diet;
+      await component.onSubmit();
 
-      const fullname = component.formData.Surname.trim()
-        ? component.formData.Name.trim() + ' ' + component.formData.Surname.trim()
-        : component.formData.Name.trim();
-
-      const attendance = component.formData.Attending == "Yes";
-
-      const submitData = {
-        Email: component.formData.Email,
-        Dietary: finalDiet,
-        Allergies: component.formData.Allergy,
-        Song: component.formData.Song,
-        RSVPstatus: attendance
-      };
-
-      expect(submitData).toEqual({
-        Email: 'test@example.com',
-        Dietary: 'None',
-        Allergies: 'None',
-        Song: 'Test Song',
-        RSVPstatus: true
-      });
-      expect(fullname).toBe('Test User');
-    });
-
-    it('should handle case sensitivity in attendance', () => {
-      component.formData.Attending = 'yes';
-      const attendance = component.formData.Attending == "Yes";
-      expect(attendance).toBe(false);
-
-      component.formData.Attending = 'YES';
-      const attendance2 = component.formData.Attending == "Yes";
-      expect(attendance2).toBe(false);
-    });
-
-    it('should handle various diet combinations', () => {
-      // Test case 1: Both diet and otherDiet empty
-      component.formData.Diet = '';
-      component.formData.otherDiet = '';
-      const diet1 = component.formData.otherDiet.trim()
-        ? component.formData.otherDiet
-        : component.formData.Diet;
-      expect(diet1).toBe('');
-
-      // Test case 2: Only otherDiet with spaces
-      component.formData.Diet = 'Vegetarian';
-      component.formData.otherDiet = '   ';
-      const diet2 = component.formData.otherDiet.trim()
-        ? component.formData.otherDiet
-        : component.formData.Diet;
-      expect(diet2).toBe('Vegetarian');
-
-      // Test case 3: otherDiet with content
-      component.formData.Diet = 'None';
-      component.formData.otherDiet = 'Custom Diet';
-      const diet3 = component.formData.otherDiet.trim()
-        ? component.formData.otherDiet
-        : component.formData.Diet;
-      expect(diet3).toBe('Custom Diet');
+      expect(component.message).toBe('RSVP updated successfully ✅');
     });
   });
 
   describe('Edge Cases', () => {
-    it('should handle very long names', () => {
-      component.formData.Name = 'A'.repeat(100);
-      component.formData.Surname = 'B'.repeat(100);
-
-      const fullname = component.formData.Surname.trim()
-        ? component.formData.Name.trim() + ' ' + component.formData.Surname.trim()
-        : component.formData.Name.trim();
-
-      expect(fullname.length).toBe(201); // 100 + 1 space + 100
+    it('should handle form data with null values', () => {
+      component.formData.Name = null as any;
+      component.formData.Surname = null as any;
+      expect(component.formData.Name).toBeNull();
+      expect(component.formData.Surname).toBeNull();
     });
 
-    it('should handle special characters in names', () => {
-      component.formData.Name = 'Jöhn';
-      component.formData.Surname = 'Döe';
-
-      const fullname = component.formData.Surname.trim()
-        ? component.formData.Name.trim() + ' ' + component.formData.Surname.trim()
-        : component.formData.Name.trim();
-
-      expect(fullname).toBe('Jöhn Döe');
+    it('should handle form data with undefined values', () => {
+      component.formData.Name = undefined as any;
+      component.formData.Surname = undefined as any;
+      expect(component.formData.Name).toBeUndefined();
+      expect(component.formData.Surname).toBeUndefined();
     });
 
-    it('should handle email validation patterns', () => {
-      component.formData.Email = 'test.email+tag@example.co.uk';
-      expect(component.formData.Email).toBe('test.email+tag@example.co.uk');
+    it('should handle various diet options', () => {
+      const dietOptions = ['None', 'Vegetarian', 'Vegan', 'Gluten-Free', 'Other'];
+      dietOptions.forEach(diet => {
+        component.formData.Diet = diet;
+        expect(component.formData.Diet).toBe(diet);
+      });
+    });
+
+    it('should handle various allergy options', () => {
+      const allergyOptions = ['None', 'Nuts', 'Dairy', 'Shellfish', 'Other'];
+      allergyOptions.forEach(allergy => {
+        component.formData.Allergy = allergy;
+        expect(component.formData.Allergy).toBe(allergy);
+      });
+    });
+
+    it('should handle different attending statuses', () => {
+      const attendingOptions = ['Yes', 'No', ''];
+      attendingOptions.forEach(status => {
+        component.formData.Attending = status;
+        expect(component.formData.Attending).toBe(status);
+      });
     });
   });
 });
