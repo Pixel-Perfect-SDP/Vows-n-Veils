@@ -6,7 +6,7 @@ const app = express();
 
 const allowedOrigins = [
   'http://localhost:4200', // for local dev
-  'https://mango-mushroom-00c4ce01e.2.azurestaticapps.net' // production frontend
+  'https://mango-mushroom-00c4ce01e.2.azurestaticapps.net', // production frontend
   'https://event-flow-6514.onrender.com' // external API
 ];
 
