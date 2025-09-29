@@ -21,6 +21,14 @@ const bucket = admin.storage().bucket();
 
 /**
  * @swagger
+ * tags:
+ *   name: Venues
+ *   description: API endpoints for managing venues
+ */
+
+
+/**
+ * @swagger
  * /venues:
  *   get:
  *     summary: Get all venues
