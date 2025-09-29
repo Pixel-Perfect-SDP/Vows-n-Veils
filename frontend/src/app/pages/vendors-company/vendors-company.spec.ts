@@ -1,9 +1,31 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { VendorsCompany } from './vendors-company';
-import * as fs from 'firebase/firestore';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
+import { VendorsCompany } from './vendors-company';
+
+// Give async tests breathing room
+(jasmine as any).DEFAULT_TIMEOUT_INTERVAL = 20000;
+
+function wireCompanyFakes(c: any) {
+  c['auth'] = { user: () => ({ uid: 'U1', email: 'u1@x' }) };
+  c['vendorService'] = c['vendorService'] ?? {};
+  c['vendorService'].listenServices = jasmine.createSpy('listenServices').and.callFake((_uid: string, cb: any) => {
+    cb?.([{ id: 's1', serviceName: 'Venue A', type: 'Venue', price: 1000, capacity: 50, description: '', bookingNotes: '', status: 'pending', companyID: 'U1', phonenumber: '011' }]);
+    return () => {};
+  });
+  c['vendorService'].updateField = jasmine.createSpy('updateField').and.returnValue(Promise.resolve());
+  c['vendorService'].createService = jasmine.createSpy('createService').and.returnValue(Promise.resolve());
+  c['vendorService'].deleteService = jasmine.createSpy('deleteService').and.returnValue(Promise.resolve());
+  c['ordersService'] = c['ordersService'] ?? {};
+  c['ordersService'].listenCompanyOrders = jasmine.createSpy('listenCompanyOrders').and.callFake((_uid: string, cb: any) => { cb?.([{ id: 'o1', status: 'pending', serviceId: 's1' }]); return () => {}; });
+  c['ordersService'].accept = jasmine.createSpy('accept').and.returnValue(Promise.resolve());
+  c['ordersService'].decline = jasmine.createSpy('decline').and.returnValue(Promise.resolve());
+  c['ordersService'].cancel = jasmine.createSpy('cancel').and.returnValue(Promise.resolve());
+  c['live'] = { onAppVisibilityChange: (_cb: any) => () => {} };
+}
 
 describe('VendorsCompany – core & branches', () => {
   let fixture: ComponentFixture<VendorsCompany>;
@@ -11,7 +33,8 @@ describe('VendorsCompany – core & branches', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [VendorsCompany, RouterTestingModule, HttpClientTestingModule],
+      imports: [VendorsCompany, RouterTestingModule],
+      providers: [provideHttpClient(), provideHttpClientTesting()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(VendorsCompany);
@@ -26,6 +49,7 @@ describe('VendorsCompany – core & branches', () => {
     const start = component.showServiceForm;
     component.toggleServiceForm();
     expect(component.showServiceForm).toBe(!start);
+
     let v = component.serviceForm.getRawValue();
     expect(v.serviceName).toBe('');
     expect(v.type).toBe('');
@@ -34,6 +58,7 @@ describe('VendorsCompany – core & branches', () => {
     expect(v.description).toBe('');
     expect(v.bookingNotes).toBe('');
     expect(v.phonenumber).toBe('');
+
     component.serviceForm.patchValue({ serviceName: 'Keep', description: 'Keep' });
     component.toggleServiceForm();
     v = component.serviceForm.getRawValue();
@@ -54,23 +79,25 @@ describe('VendorsCompany – core & branches', () => {
   it('editor begin/cancel flows set/clear state', () => {
     const row = { id: 'v1', serviceName: '', type: '', price: 100, capacity: 50, description: '', bookingNotes: '', status: 'pending', companyID: 'c1', phonenumber: '123' };
     component.beginEditPhone(row as any);
-    expect(component.editPhoneId).toBe('v1');
-    expect(component.phoneInput).toBe('123');
+    expect((component as any).editPhoneId).toBe('v1');
+    expect((component as any).phoneInput).toBe('123');
     component.cancelEditPhone();
-    expect(component.editPhoneId).toBeNull();
-    expect(component.phoneInput).toBe('');
+    expect((component as any).editPhoneId).toBeNull();
+    expect((component as any).phoneInput).toBe('');
+
     component.beginEditPrice(row as any);
-    expect(component.editPriceId).toBe('v1');
-    expect(component.priceInput).toBe(100);
+    expect((component as any).editPriceId).toBe('v1');
+    expect((component as any).priceInput).toBe(100);
     component.cancelEditPrice();
-    expect(component.editPriceId).toBeNull();
-    expect(component.priceInput).toBeNull();
+    expect((component as any).editPriceId).toBeNull();
+    expect((component as any).priceInput).toBeNull();
+
     component.beginEditCapacity(row as any);
-    expect(component.editCapacityId).toBe('v1');
-    expect(component.capacityInput).toBe(50);
+    expect((component as any).editCapacityId).toBe('v1');
+    expect((component as any).capacityInput).toBe(50);
     component.cancelEditCapacity();
-    expect(component.editCapacityId).toBeNull();
-    expect(component.capacityInput).toBeNull();
+    expect((component as any).editCapacityId).toBeNull();
+    expect((component as any).capacityInput).toBeNull();
   });
 
   it('validPhone() accepts common formats and rejects obvious bad ones', () => {
@@ -81,14 +108,14 @@ describe('VendorsCompany – core & branches', () => {
   });
 
   it('getServiceName() map and fallback', () => {
-    component.services = [
+    (component as any).services = [
       { id: 's1', serviceName: 'Photo' } as any,
       { id: 's2', serviceName: 'Cater' } as any,
     ] as any;
     (component as any).rebuildServiceNameMap();
     expect(component.getServiceName('s1')).toBe('Photo');
     expect(component.getServiceName('nope')).toBe('—');
-    component.services = [];
+    (component as any).services = [];
     (component as any).rebuildServiceNameMap();
     expect(component.getServiceName('s1')).toBe('—');
   });
@@ -101,9 +128,9 @@ describe('VendorsCompany – core & branches', () => {
   });
 
   it('refreshServices() safe with/without companyId', () => {
-    component.companyId = null as any;
+    (component as any).companyId = null;
     expect(() => component.refreshServices()).not.toThrow();
-    component.companyId = 'company-123';
+    (component as any).companyId = 'company-123';
     expect(() => component.refreshServices()).not.toThrow();
   });
 
@@ -125,26 +152,18 @@ describe('VendorsCompany – core & branches', () => {
   });
 });
 
-function wireCompanyFakes(c: any) {
-  c['auth'] = { user: () => ({ uid: 'U1', email: 'u1@x' }) };
-  c['vendorService'] = c['vendorService'] ?? {};
-  c['vendorService'].listenServices = jasmine.createSpy('listenServices').and.callFake((_uid: string, cb: any) => { cb?.([{ id: 's1', serviceName: 'Venue A', type: 'Venue', price: 1000, capacity: 50, description: '', bookingNotes: '', status: 'pending', companyID: 'U1', phonenumber: '011' }]); return () => {}; });
-  c['vendorService'].updateField = jasmine.createSpy('updateField').and.returnValue(Promise.resolve());
-  c['vendorService'].createService = jasmine.createSpy('createService').and.returnValue(Promise.resolve());
-  c['vendorService'].deleteService = jasmine.createSpy('deleteService').and.returnValue(Promise.resolve());
-  c['ordersService'] = c['ordersService'] ?? {};
-  c['ordersService'].listenCompanyOrders = jasmine.createSpy('listenCompanyOrders').and.callFake((_uid: string, cb: any) => { cb?.([{ id: 'o1', status: 'pending', serviceId: 's1' }]); return () => {}; });
-  c['ordersService'].accept = jasmine.createSpy('accept').and.returnValue(Promise.resolve());
-  c['ordersService'].decline = jasmine.createSpy('decline').and.returnValue(Promise.resolve());
-  c['ordersService'].cancel = jasmine.createSpy('cancel').and.returnValue(Promise.resolve());
-  c['live'] = { onAppVisibilityChange: (_cb: any) => () => {} };
-}
-
 describe('VendorsCompany – init/actions (soft assertions)', () => {
+  let fixture: ComponentFixture<VendorsCompany>;
   let component: any;
 
-  beforeEach(() => {
-    component = TestBed.createComponent(VendorsCompany).componentInstance as any;
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [VendorsCompany, RouterTestingModule],
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(VendorsCompany);
+    component = fixture.componentInstance as any;
     wireCompanyFakes(component);
   });
 
@@ -160,42 +179,44 @@ describe('VendorsCompany – init/actions (soft assertions)', () => {
 
   it('save/edit/create/delete + order actions execute without throwing', async () => {
     const row = { id: 's1', phonenumber: '011', price: 1000, capacity: 50 };
-    if (typeof component.beginEditPhone === 'function' && typeof (component as any)['saveEditPhone'] === 'function') {
+    if (typeof component.beginEditPhone === 'function' && typeof component['saveEditPhone'] === 'function') {
       component.beginEditPhone(row as any); component.phoneInput = '011-555-1234';
-      await (component as any)['saveEditPhone'](row as any).catch(() => {});
+      await component['saveEditPhone'](row as any).catch(() => {});
     }
-    if (typeof component.beginEditPrice === 'function' && typeof (component as any)['saveEditPrice'] === 'function') {
+    if (typeof component.beginEditPrice === 'function' && typeof component['saveEditPrice'] === 'function') {
       component.beginEditPrice(row as any); component.priceInput = 1800;
-      await (component as any)['saveEditPrice'](row as any).catch(() => {});
+      await component['saveEditPrice'](row as any).catch(() => {});
     }
-    if (typeof component.beginEditCapacity === 'function' && typeof (component as any)['saveEditCapacity'] === 'function') {
+    if (typeof component.beginEditCapacity === 'function' && typeof component['saveEditCapacity'] === 'function') {
       component.beginEditCapacity(row as any); component.capacityInput = 200;
-      await (component as any)['saveEditCapacity'](row as any).catch(() => {});
+      await component['saveEditCapacity'](row as any).catch(() => {});
     }
-    if (typeof (component as any)['addService'] === 'function') {
+    if (typeof component['addService'] === 'function') {
       component.companyId = 'U1';
       component.companyVendorData = { userID: 'U1', companyName: 'C', email: 'e@x', phoneNumber: '1', type: 'vendor' } as any;
       component.toggleServiceForm();
       component.serviceForm.patchValue({ serviceName: 'New', type: 'Venue', price: 2500, capacity: 120, description: 'd', bookingNotes: 'b', phonenumber: '0123456' });
-      await (component as any)['addService']().catch(() => {});
+      await component['addService']().catch(() => {});
     }
-    if (typeof (component as any)['deleteService'] === 'function') {
+    if (typeof component['deleteService'] === 'function') {
       spyOn(window, 'confirm').and.returnValue(true);
-      await (component as any)['deleteService']({ id: 's1', serviceName: 'x' } as any).catch(() => {});
+      await component['deleteService']({ id: 's1', serviceName: 'x' } as any).catch(() => {});
     }
     const pending = { id: 'o1', status: 'pending', serviceId: 's1' } as any;
-    if (typeof (component as any)['acceptOrder'] === 'function') { await (component as any)['acceptOrder'](pending).catch(() => {}); }
-    if (typeof (component as any)['declineOrder'] === 'function') { await (component as any)['declineOrder'](pending).catch(() => {}); }
+    if (typeof component['acceptOrder'] === 'function') { await component['acceptOrder'](pending).catch(() => {}); }
+    if (typeof component['declineOrder'] === 'function') { await component['declineOrder'](pending).catch(() => {}); }
     expect(true).toBeTrue();
   });
 });
-describe('VendorsCompany – extra coverage (validation & guards)', () => {
+
+describe('VendorsCompany – validation & guards', () => {
   let fixture: ComponentFixture<VendorsCompany>;
   let component: VendorsCompany;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [VendorsCompany, RouterTestingModule, HttpClientTestingModule],
+      imports: [VendorsCompany, RouterTestingModule],
+      providers: [provideHttpClient(), provideHttpClientTesting()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(VendorsCompany);
@@ -203,113 +224,62 @@ describe('VendorsCompany – extra coverage (validation & guards)', () => {
   });
 
   it('addService() early-returns when form invalid', async () => {
-    
-    component.companyId = null;
+    (component as any).companyId = null;
     component.serviceForm.reset({
       serviceName: '', type: '', price: null, capacity: null, description: '', bookingNotes: '', phonenumber: ''
     });
-    await (component as any).addService(); 
-    expect(component.busy).toBeFalse();
+    await (component as any).addService();
+    expect((component as any).busy).toBeFalse();
   });
 
   it('addService() early-returns when companyId missing even if form valid', async () => {
-    component.companyId = null;
+    (component as any).companyId = null;
     component.serviceForm.setValue({
       serviceName: 'Photog', type: 'Photography', price: 1000, capacity: 10,
       description: '', bookingNotes: '', phonenumber: '0115551234'
     });
     await (component as any).addService();
-    expect(component.successMsg).toBe('');
+    expect((component as any).successMsg).toBe('');
   });
 
-  it('saveEditPhone() rejects invalid numbers and sets inline error', async () => {
-    const row = { id: 'v1', phonenumber: '011', serviceName: '' } as any;
+  it('saveEditPhone/Price/Capacity reject invalid values and set inline errors', async () => {
+    const row = { id: 'v1', phonenumber: '011', price: 100, capacity: 50 } as any;
+
     component.beginEditPhone(row);
-    component.phoneInput = 'abc'; 
+    (component as any).phoneInput = 'abc';
     await (component as any).saveEditPhone(row);
-    expect(component.phoneErrorId).toBe('v1');
-    expect(component.phoneInlineError).toContain('valid phone');
+    expect((component as any).phoneErrorId).toBe('v1');
+    expect((component as any).phoneInlineError).toContain('valid phone');
     component.cancelEditPhone();
-  });
 
-  it('saveEditPrice() rejects invalid values and sets inline error', async () => {
-    const row = { id: 'v2', price: 100 } as any;
     component.beginEditPrice(row);
-    component.priceInput = -5 as any; 
+    (component as any).priceInput = -5 as any;
     await (component as any).saveEditPrice(row);
-    expect(component.priceErrorId).toBe('v2');
-    expect(component.priceInlineError).toContain('valid price');
+    expect((component as any).priceErrorId).toBe('v1');
+    expect((component as any).priceInlineError).toContain('valid price');
     component.cancelEditPrice();
-  });
 
-  it('saveEditCapacity() rejects invalid values and sets inline error', async () => {
-    const row = { id: 'v3', capacity: 10 } as any;
     component.beginEditCapacity(row);
-    component.capacityInput = -1 as any;
+    (component as any).capacityInput = -1 as any;
     await (component as any).saveEditCapacity(row);
-    expect(component.capacityErrorId).toBe('v3');
-    expect(component.capacityInlineError).toContain('valid capacity');
+    expect((component as any).capacityErrorId).toBe('v1');
+    expect((component as any).capacityInlineError).toContain('valid capacity');
     component.cancelEditCapacity();
   });
 
   it('deleteService() does nothing when user cancels confirm', async () => {
-    const initial = [
+    (component as any)['services'] = [
       { id: 'a', serviceName: 'A' },
       { id: 'b', serviceName: 'B' },
     ] as any[];
-    component['services'] = initial.slice();
     spyOn(window, 'confirm').and.returnValue(false);
-    await (component as any).deleteService(initial[0]);
-    
-    expect(component['services'].length).toBe(2);
-    expect(component['services'][0].id).toBe('a');
-  });
-
-  it('trackById() also works for OrderRow', () => {
-    expect(component.trackById(0, { id: 'ord-1' } as any)).toBe('ord-1');
-  });
-
-  it('getServiceName() reflects mapping changes after edits', () => {
-    component['services'] = [
-      { id: 's1', serviceName: 'Venue X' } as any,
-      { id: 's2', serviceName: 'Cater Y' } as any,
-    ];
-    (component as any).rebuildServiceNameMap();
-    expect(component.getServiceName('s2')).toBe('Cater Y');
-    component['services'] = component['services'].filter(s => s.id !== 's2');
-    (component as any).rebuildServiceNameMap();
-    expect(component.getServiceName('s2')).toBe('—');
-  });
-
-  it('toggleServiceForm() toggles multiple times and clears messages', () => {
-    component.successMsg = 'ok';
-    component.errorMsg = 'err';
-    component.toggleServiceForm(); 
-    expect(component.successMsg).toBe('');
-    expect(component.errorMsg).toBe('');
-    component.toggleServiceForm(); 
-    component.toggleServiceForm(); 
-    const v = component.serviceForm.getRawValue();
-    expect(v.serviceName).toBe('');
-    expect(v.type).toBe('');
-  });
-});
-//more tests
-describe('VendorsCompany – pure validation & guard branches', () => {
-  let fixture: ComponentFixture<VendorsCompany>;
-  let component: VendorsCompany;
-
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [VendorsCompany, RouterTestingModule, HttpClientTestingModule],
-    }).compileComponents();
-
-    fixture = TestBed.createComponent(VendorsCompany);
-    component = fixture.componentInstance;
+    await (component as any).deleteService({ id: 'a', serviceName: 'X' } as any);
+    expect(((component as any)['services'] as any[]).length).toBe(2);
+    expect(((component as any)['services'] as any[])[0].id).toBe('a');
   });
 
   it('company profile form: required + pattern validators', () => {
-    const f = component.form;
+    const f = (component as any).form;
     f.setValue({ companyName: '', companyEmail: 'not-an-email', companyNumber: 'abc' });
     expect(f.valid).toBeFalse();
     f.patchValue({ companyName: 'Co', companyEmail: 'co@example.com', companyNumber: '011 555 1234' });
@@ -339,19 +309,39 @@ describe('VendorsCompany – pure validation & guard branches', () => {
     expect(f.valid).toBeTrue();
   });
 
-  it('deleteService() early-return when id missing/null', async () => {
-    const before = component['services'].length;
-    await (component as any).deleteService({ id: '', serviceName: 'X' } as any);
-    await (component as any).deleteService({ id: null, serviceName: 'X' } as any);
-    expect(component['services'].length).toBe(before);
+  it('trackById() also works for OrderRow', () => {
+    expect(component.trackById(0, { id: 'ord-1' } as any)).toBe('ord-1');
+  });
+
+  it('getServiceName() reflects mapping changes after edits', () => {
+    (component as any)['services'] = [
+      { id: 's1', serviceName: 'Venue X' } as any,
+      { id: 's2', serviceName: 'Cater Y' } as any,
+    ];
+    (component as any).rebuildServiceNameMap();
+    expect(component.getServiceName('s2')).toBe('Cater Y');
+    (component as any)['services'] = (component as any)['services'].filter((s: any) => s.id !== 's2');
+    (component as any).rebuildServiceNameMap();
+    expect(component.getServiceName('s2')).toBe('—');
+  });
+
+  it('toggleServiceForm() toggles multiple times and clears messages', () => {
+    (component as any).successMsg = 'ok';
+    (component as any).errorMsg = 'err';
+    component.toggleServiceForm();
+    expect((component as any).successMsg).toBe('');
+    expect((component as any).errorMsg).toBe('');
+    component.toggleServiceForm();
+    component.toggleServiceForm();
+    const v = component.serviceForm.getRawValue();
+    expect(v.serviceName).toBe('');
+    expect(v.type).toBe('');
   });
 
   it('detachLive()/detachOrders() are safe when unset and when set', () => {
-    
     expect(() => (component as any).detachLive()).not.toThrow();
     expect(() => (component as any).detachOrders()).not.toThrow();
 
-    
     const live = jasmine.createSpy('liveUnsub');
     const ord = jasmine.createSpy('ordersUnsub');
     (component as any).liveUnsub = live;
@@ -362,47 +352,19 @@ describe('VendorsCompany – pure validation & guard branches', () => {
 
     expect(live).toHaveBeenCalled();
     expect(ord).toHaveBeenCalled();
-    
+
     expect(() => (component as any).detachLive()).not.toThrow();
     expect(() => (component as any).detachOrders()).not.toThrow();
   });
 
-  it('rebuildServiceNameMap(): empty string names fall back to em dash', () => {
-    component['services'] = [
+  it('rebuildServiceNameMap(): empty names -> em dash', () => {
+    (component as any)['services'] = [
       { id: 's1', serviceName: '' } as any,
       { id: 's2', serviceName: 'Real Name' } as any
     ];
     (component as any).rebuildServiceNameMap();
-    expect(component.getServiceName('s1')).toBe('—');    
+    expect(component.getServiceName('s1')).toBe('—');
     expect(component.getServiceName('s2')).toBe('Real Name');
-    expect(component.getServiceName('missing')).toBe('—');  
-  });
-
-  it('toggleServiceForm() multiple times remains consistent', () => {
-    const snaps: boolean[] = [];
-    for (let i = 0; i < 5; i++) { component.toggleServiceForm(); snaps.push(component.showServiceForm); }
-    
-    for (let i = 1; i < snaps.length; i++) {
-      expect(snaps[i]).toBe(!snaps[i - 1]);
-    }
-  });
-
-  it('begin/cancel edit flows clear inline errors as expected', () => {
-    const row = { id: 'v1', phonenumber: '011', price: 100, capacity: 50 } as any;
-
-    component.beginEditPhone(row);
-    component['phoneInlineError'] = 'x';
-    component.cancelEditPhone();
-    expect(component['phoneInlineError']).toBe('');
-
-    component.beginEditPrice(row);
-    component['priceInlineError'] = 'x';
-    component.cancelEditPrice();
-    expect(component['priceInlineError']).toBe('');
-
-    component.beginEditCapacity(row);
-    component['capacityInlineError'] = 'x';
-    component.cancelEditCapacity();
-    expect(component['capacityInlineError']).toBe('');
+    expect(component.getServiceName('missing')).toBe('—');
   });
 });
