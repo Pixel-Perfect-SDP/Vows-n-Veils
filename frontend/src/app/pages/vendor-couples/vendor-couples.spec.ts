@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Component } from '@angular/core';
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { Router } from '@angular/router';
@@ -8,7 +7,7 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { VendorCouples } from './vendor-couples';
 
-// Give async tests breathing room
+
 (jasmine as any).DEFAULT_TIMEOUT_INTERVAL = 20000;
 
 @Component({ standalone: true, template: '' })
@@ -27,16 +26,13 @@ function setupCouplesTestBed(extraRoutes: any[] = []) {
     providers: [
       provideHttpClient(),
       provideHttpClientTesting(),
-      // AuthService fake (user() returns null to hit guard branches)
+    
       {
-        provide: (void 0, ({} as any)), // placeholder to avoid dynamic import warnings
+        provide: (void 0, ({} as any)), 
         useValue: {},
       },
       {
-        // When your component imports AuthService via relative path, this keeps DI happy.
-        // Replace the next line with:
-        // provide: AuthService, useValue: { user: () => null }
-        // if you have the symbol available directly.
+      
         provide: ({} as any),
         useValue: { user: () => null },
       },
