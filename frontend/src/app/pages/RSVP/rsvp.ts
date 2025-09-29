@@ -25,6 +25,17 @@ export class Rsvp
   private db: Firestore = inject(Firestore);
   private router=inject(Router);
 
+  //making public for testing purposes
+  getRouter(): Router
+  {
+    return this.router;
+  }
+
+  getDBforTesting(): Firestore
+  {
+    return this.db;
+  }
+
   // Form data
   formData =
   {
