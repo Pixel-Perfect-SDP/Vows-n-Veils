@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { provideHttpClient } from '@angular/common/http';
@@ -6,7 +6,7 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { VendorsCompany } from './vendors-company';
 
-// Give async tests breathing room
+
 (jasmine as any).DEFAULT_TIMEOUT_INTERVAL = 20000;
 
 function wireCompanyFakes(c: any) {
