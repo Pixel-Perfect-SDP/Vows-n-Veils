@@ -11,10 +11,6 @@ const appSpies = (fbApp as any).__spies;
 const authSpies = (fbAuth as any).__spies;
 const fsSpies   = (fbFs as any).__spies;
 
-// instead of spyOn(getApp, '...'):
-spyOn(appSpies, 'getApp').and.returnValue({} as any);
-spyOn(fsSpies, 'getFirestore').and.returnValue({} as any);
-
 describe('Homepage – Event display API (Firestore reads)', () => {
   let comp: Homepage;
 
