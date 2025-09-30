@@ -3,6 +3,7 @@
 export const environment = {
   production: true,
   apiUrl: 'https://site--vowsandveils--5dl8fyl4jyqm.code.run', 
+  externalApiUrl: 'https://event-flow-6514.onrender.com',
   firebase: {
     apiKey: "AIzaSyCMTT56PkAHQr23nsk1ZOspwBye5At-wMs",
     authDomain: "ppep-2651c.firebaseapp.com",
