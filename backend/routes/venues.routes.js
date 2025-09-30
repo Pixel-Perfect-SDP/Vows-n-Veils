@@ -21,6 +21,14 @@ const bucket = admin.storage().bucket();
 
 /**
  * @swagger
+ * tags:
+ *   name: Venues
+ *   description: API endpoints for managing venues
+ */
+
+
+/**
+ * @swagger
  * /venues:
  *   get:
  *     summary: Get all venues
@@ -178,37 +186,6 @@ router.post('/', upload.array('images', 6), async (req, res) => {
   }
 });
 
-/**
- * @swagger
- * /venues/{id}:
- *   put:
- *     summary: Update an existing venue
- *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: string
- *         required: true
- *         description: Venue ID
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *     responses:
- *       200:
- *         description: Venue updated successfully
- */
-
-router.put('/:id', async (req, res) => {
-  try {
-    await db.collection('Venues').doc(req.params.id).update(req.body);
-    res.json({ ok: true });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
 
 /**
  * @swagger
@@ -470,6 +447,92 @@ router.post('/confirm-order', async (req, res) => {
     res.json({ ok: true, orderID: orderDoc.id });
   } catch (err) {
     console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * @swagger
+ * /orders/company/{companyID}:
+ *   get:
+ *     summary: Get all orders for a company
+ *     parameters:
+ *       - in: path
+ *         name: companyID
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: List of orders
+ *       404:
+ *         description: No orders found
+ *       500:
+ *         description: Server error
+ */
+
+router.get('/orders/company/:companyID', async (req, res) => {
+  try {
+    const companyID = req.params.companyID;
+
+    const snap = await db.collection('VenuesOrders').where('companyID', '==', companyID).get();
+    if (snap.empty) return res.status(404).json({ error: 'No orders found' });
+
+    const orders = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    
+    orders.sort((a, b) => {
+      const orderStatus = { pending: 0, accepted: 1, rejected: 2 };
+      return orderStatus[a.status] - orderStatus[b.status];
+    });
+
+    res.json(orders);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * @swagger
+ * /orders/{orderID}/status:
+ *   put:
+ *     summary: Update order status
+ *     parameters:
+ *       - in: path
+ *         name: orderID
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [accepted, rejected]
+ *     responses:
+ *       200:
+ *         description: Status updated
+ *       400:
+ *         description: Invalid status
+ *       500:
+ *         description: Server error
+ */
+router.put('/orders/:orderID/status', async (req, res) => {
+  try {
+    const { orderID } = req.params;
+    const { status } = req.body;
+
+    if (!['accepted', 'rejected'].includes(status)) {
+      return res.status(400).json({ error: 'Invalid status' });
+    }
+
+    await db.collection('VenuesOrders').doc(orderID).update({ status });
+
+    res.json({ ok: true, orderID, status });
+  } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });

@@ -343,6 +343,7 @@ async SubmitUpdate() {
       });
   }
 
+
   // ===== MAP FUNCTIONALITY =====
   
   // Toggle map visibility
@@ -570,6 +571,14 @@ async SubmitUpdate() {
       'venue': 'Event Venue'
     };
     return labels[venueType] || 'Venue';
+  }
+
+
+  
+trackorders(): void
+  {
+ this.router.navigate(['/trackorders']);
+    
   }
 
 }

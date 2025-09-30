@@ -1,0 +1,58 @@
+<header class="topbar">
+  <section class="logo-area">
+    <img class="logo-img" src="assets/logo.jpg" alt="Vows & Veils logo" />
+    <h1 class="logo-text">Vows & Veils</h1>
+  </section>
+
+  <nav class="nav-links">
+     <a (click)="backhome();">Back</a>
+    
+  </nav>
+</header>
+
+
+<main>
+  <section>
+    
+    <h1>Orders</h1>
+  
+      <section class="line-left"></section>
+    <section class="heart">❤</section>
+  <section class="line-right"></section>
+  
+    
+  </section>
+ <section class="loading-overlay" *ngIf="loading">
+    <section class="loading-container">
+    <section class="Loading-1"></section>
+    <section class="Loading-2"></section>
+  </section>
+  </section>
+  
+  <section *ngFor="let order of orders" class="order-card">
+    <section class="order-header">
+      <h3>Order ID: {{ order.id }}</h3>
+      <section *ngIf="order.status === 'pending'" class="order-actions">
+        <button class="accept-btn" (click)="updateStatus(order.id, 'accepted')">Accept</button>
+        <button class="reject-btn" (click)="updateStatus(order.id, 'rejected')">Reject</button>
+      </section>
+    </section>
+
+    <section class="order-details">
+      <p>Venue: {{ order.venueID }}</p>
+      <p>Event: {{ order.eventID }}</p>
+      <p>Date & Time: {{ order.startAt }}</p>
+      <p>Note: {{ order.note || 'No note' }}</p>
+      <p>Status: 
+        <span class="status-badge" [ngStyle]="{
+          background: order.status === 'pending' ? '#F3F4F6' :
+                      order.status === 'accepted' ? '#DCFCE7' :
+                      order.status === 'rejected' ? '#FEE2E2' : '#E5E7EB',
+          color: order.status === 'pending' ? '#374151' : '#111827'
+        }">
+          {{ order.status }}
+        </span>
+      </p>
+    </section>
+  </section>
+</main>

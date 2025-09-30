@@ -1,10 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
+import { Router} from '@angular/router';
 import { collection, query, where, getDocs, updateDoc, doc } from 'firebase/firestore';
+import { getDoc } from 'firebase/firestore';
 import { auth, db } from '../firebase/firebase-config';
 import { onAuthStateChanged } from 'firebase/auth';
+import { firstValueFrom } from 'rxjs';
 
 
 interface VenueImage {
@@ -22,6 +24,7 @@ interface Venue {
   email: string;
   phonenumber: string;
   price: number;
+  status?: string;
   image?: string;
   images?: VenueImage[];
 }
@@ -29,7 +32,7 @@ interface Venue {
 @Component({
   selector: 'app-venues',
   standalone: true,
-  imports: [CommonModule, RouterModule, HttpClientModule],
+  imports: [CommonModule,  HttpClientModule],
   templateUrl: './venues.html',
   styleUrls: ['./venues.css']
 })
@@ -45,21 +48,30 @@ export class Venues implements OnInit {
   constructor(private http: HttpClient, private router: Router) { }
 
   ngOnInit(): void {
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        console.log('User is logged in:', user.uid);
-        await this.getUserBudget();
-      }
-      else
-      {
-        this.userBudget = null;
-      }
-        this.getVenues();
-        this.getChosenVenue();
-        this.checkVenueOrder();
-    });
+    const user = auth.currentUser;
+    if (user) {
+      console.log('User is logged in (immediate):', user.uid);
+      this.getChosenVenue();
+      this.checkVenueOrder();
+      this.getRecommendations();
+    } else {
 
+      // Listen for login if user not yet loaded
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          console.log('User logged in (later):', user.uid);
+          this.getChosenVenue();
+          this.checkVenueOrder();
+          this.getRecommendations();
+        } else {
+          console.log('No user logged in yet');
+        }
+      });
+    }
+
+    this.getVenues();
   }
+
 
 
   getVenues(): void {
@@ -68,13 +80,6 @@ export class Venues implements OnInit {
       .subscribe({
         next: (data) => {
           this.venues = data.filter((venue: any) => venue.status === 'active');
-
-          //filtering for the recommended venues
-          if (this.userBudget !== null)
-          {
-            const recommended=this.venues.filter(venue=> venue.price <=this.userBudget!);
-            console.log("Recommended venues based on budget", this.userBudget, recommended);
-          }
           this.loading = false;
         },
         error: (err) => {
@@ -292,50 +297,65 @@ checkVenueOrder(): void {
 
   userBudget: number | null = null;
 
-  getUserBudget(): Promise<void> {
-    return new Promise((resolve, reject) => {
+  recommendedVenues: Venue[] = [];
+
+  async getRecommendations(): Promise<void> {
+    this.loading = true;
+
+    try {
       const user = auth.currentUser;
       if (!user) {
-        this.userBudget = null;
-        resolve();
+        this.recommendedVenues = [];
         return;
       }
 
       const uid = user.uid;
-      const eventsRef = collection(db,'Events');
-      const q = query(eventsRef, where('EventID','==',uid));
 
-      getDocs(q)
-        .then(querySnapshot => {
-          if (querySnapshot.empty) {
-            this.userBudget = null;
-            resolve();
-            return;
-          }
+      // Counting Guests
+      const guestSnap = await getDocs(query(collection(db, 'Guests'), where('EventID', '==', uid)));
+      const numGuests = guestSnap.size || 0;
 
-          const eventDoc = querySnapshot.docs[0];
-          const budget = eventDoc.data()?.['budget'];
-          this.userBudget = budget || null;
-          console.log("Fetched budget:", budget, "Assigned userBudget:", this.userBudget);
-          resolve();
-        })
-        .catch(err => {
-          console.error(err);
-          this.userBudget = null;
-          resolve();
-        });
-    });
+      const eventSnap = await getDoc(doc(db, 'Events', uid));
+      if (!eventSnap.exists()) {
+        this.recommendedVenues = [];
+        return;
+      }
 
+      const budgetRaw = eventSnap.data()?.['budget'];
+      const budget = budgetRaw ? Number(budgetRaw) : null;
+      this.userBudget = budget;
+      if (!budget)
+      {
+        this.recommendedVenues = [];
+        return;
+      }
 
-  }
+      // Fetch venues
+      const data = await firstValueFrom(this.http.get<Venue[]>('https://site--vowsandveils--5dl8fyl4jyqm.code.run/venues'));
+      if (!data)
+      {
+        this.recommendedVenues = [];
+        return;
+      }
 
-  venueRecommended(): Venue[]
-  {
-    if (!this.venues || this.venues.length === 0 || this.userBudget === null) {
-      return [];
+      const activeVenues = data.filter(v => v.status && v.status.toLowerCase() === 'active');
+
+      this.recommendedVenues = activeVenues.filter(
+        v => Number(v.price) <= budget && Number(v.capacity) >= numGuests
+      );
+
+    } catch (err: any) {
+      console.error(err);
+      this.recommendedVenues = [];
+      this.error = err.message || 'Failed to load recommended venues';
+    } finally {
+      this.loading = false;
     }
-    return this.venues.filter(venue => venue.price <= this.userBudget!);
   }
+
+
+
+
 
 
 }

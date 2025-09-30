@@ -25,6 +25,17 @@ export class Rsvp
   private db: Firestore = inject(Firestore);
   private router=inject(Router);
 
+  //making public for testing purposes
+  getRouter(): Router
+  {
+    return this.router;
+  }
+
+  getDBforTesting(): Firestore
+  {
+    return this.db;
+  }
+
   // Form data
   formData =
   {
@@ -42,6 +53,7 @@ export class Rsvp
   message = '';
   eventId: string = '';
   eventIdEntered: boolean = false;
+  eventCode:string='';
 
   constructor() {}
 
@@ -129,31 +141,33 @@ export class Rsvp
     }
   }
 
-  async submitEventId()
+  async submitEventCode()
   {
-    if (!this.eventId.trim()) {
-      alert("Please enter a valid Event ID");
+    if (!this.eventCode.trim()) {
+      alert("Please enter a valid Event Code ");
       return;
     }
 
     try {
-      const guestsCollection = collection(this.db, "Guests");
-      const q = query(guestsCollection, where("EventID", "==", this.eventId));
-      const querySnapshot = await getDocs(q);
 
-      if (!querySnapshot.empty) {
+      const eventCollection = collection(this.db, "Events");
+      const qCode= query(eventCollection, where("RSVPcode", "==", this.eventCode.trim()));
+      const querySnapshotCode = await getDocs(qCode);
+
+      if (!querySnapshotCode.empty) {
         this.eventIdEntered = true;
         this.message = '';
+        this.eventId = querySnapshotCode.docs[0].id;
       } else {
         this.eventIdEntered = false;
-        this.message = 'Event ID not found ❌';
-        alert('Event ID not found. Please try again');
+        this.message = 'Event Code not found ❌';
+        alert('Event Code not found. Please try again');
         this.eventId = '';
       }
     } catch (err) {
       console.error(err);
       this.eventIdEntered = false;
-      this.message = 'Error checking Event ID ❌';
+      this.message = 'Error checking Event Code ❌';
     }
   }
 

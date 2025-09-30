@@ -1,16 +1,27 @@
-<html>
+<header class="topbar">
+  <section class="logo-area">
+    <img class="logo-img" src="assets/logo.jpg" alt="Vows & Veils logo" />
+    <h1 class="logo-text">Vows & Veils</h1>
+  </section>
+
+  <nav class="nav-links">
+    <a (click)="logout()" class="logout-btn">Log out</a>
+  </nav>
+</header>
+
+<section>
     <head class="hero">
         <title>Admin Page</title>
         <link rel="stylesheet" href="admin.css">
 
     </head>
 
-    <body>
-        <span class="hero">
-            <img src="assets/logo.jpg" class="logo" />
+    <section class="admin-section">
+        <section class="pending-container">
             <h1>Pending Approvals </h1>
-            <button (click)="logout()" class="logout-btn">Logout</button>
-        </span>
+            
+        </section>
+        <section class="pending-column">
         <h2>Venues</h2>
         <span *ngIf="venues.length==0" class="noItems">
             <p>There are no pending venues</p>
@@ -24,6 +35,9 @@
                 <button (click)="changeStatus('Venues',venue.id,'rejected')" class="disp-btn">Reject</button>
             </span>
         </section>
+        </section>
+
+        <section class="pending-column">
         <h2>Vendors</h2>
         <span *ngIf="vendors.length==0" class="noItems">
             <p>There are no pending vendors</p>
@@ -37,5 +51,6 @@
                 <button (click)="changeStatus('Vendors',vendor.id,'rejected')" class="disp-btn">Reject</button>
             </span>
         </section>
-    </body>
-</html>
+        </section>
+    </section>
+</section>
