@@ -460,7 +460,7 @@ describe('Admin Component', () => {
   });
 
   it('should not throw error if ngOnDestroy is undefined', () => {
-    comp.ngOnDestroy = undefined;
+    comp.ngOnDestroy();
 
     expect(() => fixture.destroy()).not.toThrow();
   });

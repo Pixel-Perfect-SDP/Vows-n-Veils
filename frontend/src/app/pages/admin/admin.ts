@@ -38,6 +38,12 @@ export class Admin implements OnInit
         this.fetchVenues();
     }
 
+    ngOnDestroy()
+    {
+        this.vendors=[];
+        this.venues=[];
+    }
+
         async fetchVendors()
         {
             try
