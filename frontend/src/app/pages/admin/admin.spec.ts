@@ -627,25 +627,6 @@ describe('Admin Component', () => {
   }));
 
   // -------------------
-  // COMPONENT CLEANUP
-  // -------------------
-  it('should clean up component state on destroy', () => {
-    comp.vendors = [mockVendor];
-    comp.venues = [mockVenue];
-
-    // Simulate component destruction
-    comp.ngOnDestroy = () => {
-      comp.vendors = [];
-      comp.venues = [];
-    };
-
-    comp.ngOnDestroy();
-
-    expect(comp.vendors).toEqual([]);
-    expect(comp.venues).toEqual([]);
-  });
-
-  // -------------------
   // ERROR BOUNDARY TESTS
   // -------------------
   it('should not throw when methods are called with invalid parameters', async () => {
