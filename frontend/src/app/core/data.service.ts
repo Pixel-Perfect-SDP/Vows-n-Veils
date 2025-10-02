@@ -109,7 +109,7 @@ downloadGuestsCsv(eventId: string, opts?: { dietary?: string; allergy?: string; 
   });
 }
 
-// download PDF
+  // download PDF
 downloadGuestsPdf(eventId: string, opts?: { dietary?: string; allergy?: string; rsvp?: boolean }) {
   let params = new HttpParams();
   if (opts?.dietary) params = params.set('dietary', opts.dietary);
@@ -121,5 +121,66 @@ downloadGuestsPdf(eventId: string, opts?: { dietary?: string; allergy?: string; 
   });
 }
 
+  // Send guest invitation via external API
+  sendGuestInvite(inviteData: {
+    guestEmail: string;
+    guestName: string;
+    phone: string;
+    extra: {};
+  }): Observable<any> {
+    return this.http.post(`${environment.externalApiUrl}/manager/send-guest-invite`, inviteData);
+  }
+
+  // Get guest invite page (might establish session)
+  getGuestInvitePage(): Observable<any> {
+    return this.http.get(`${environment.externalApiUrl}/manager/guest-invite`);
+  }
+
+  // Test different API formats
+  testAPIFormats(guest: any): Observable<any>[] {
+    const baseUrl = `${environment.externalApiUrl}/manager/send-guest-invite`;
+    
+    // Format 1: Original from Swagger
+    const format1 = {
+      guestEmail: guest.Email,
+      guestName: guest.Name,
+      Name: "Test Event",
+      extra: guest.id
+    };
+
+    // Format 2: Minimal structure
+    const format2 = {
+      id: guest.id,
+      email: guest.Email,
+      name: guest.Name
+    };
+
+    // Format 3: Nested structure
+    const format3 = {
+      guest: {
+        id: guest.id,
+        email: guest.Email,
+        name: guest.Name
+      },
+      event: "Test Event"
+    };
+
+    // Format 4: Array format
+    const format4 = {
+      guests: [{
+        id: guest.id,
+        guestEmail: guest.Email,
+        guestName: guest.Name
+      }],
+      Name: "Test Event"
+    };
+
+    return [
+      this.http.post(baseUrl, format1),
+      this.http.post(baseUrl, format2),
+      this.http.post(baseUrl, format3),
+      this.http.post(baseUrl, format4)
+    ];
+  }
 
 }

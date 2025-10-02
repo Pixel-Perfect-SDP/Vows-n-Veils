@@ -747,6 +747,37 @@ export class Homepage
     });
   }
 
+  // Send invitation to guest using external API
+  async sendInvitation(guest: Guest) {
+    if (!guest.Email) {
+      alert('Cannot send invitation: Guest has no email address.');
+      return;
+    }
+
+    console.log('📤 Sending invitation directly to API...');
+    
+    // Send invitation with exact format and order as required
+    const inviteData = {
+      guestEmail: guest.Email,
+      guestName: guest.Name,
+      phone: "+2771XXXXXXX",
+      extra: {}
+    };
+
+    console.log('Sending exact API format:', inviteData);
+
+    this.dataService.sendGuestInvite(inviteData).subscribe({
+      next: (response) => {
+        console.log('✅ Invitation sent successfully:', response);
+        alert(`Invitation sent successfully to ${guest.Name}!`);
+      },
+      error: (error) => {
+        console.error('❌ Error sending invitation:', error);
+        alert(`Failed to send invitation to ${guest.Name}. Please try again.`);
+      }
+    });
+  }
+
 
 
   /*------------------------------user has NO event--------------------------*/

@@ -1,6 +1,7 @@
 export const environment = {
   production: false,
   apiUrl: 'http://localhost:3000',
+  externalApiUrl: 'https://event-flow-6514.onrender.com',
 
   firebase: {
     apiKey: "AIzaSyCMTT56PkAHQr23nsk1ZOspwBye5At-wMs",
