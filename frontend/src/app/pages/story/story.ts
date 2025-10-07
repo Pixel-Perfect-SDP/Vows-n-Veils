@@ -65,9 +65,36 @@ export class Story {
 
 
      drop(event: CdkDragDrop<AbstractControl[]>) {
+  // 1. Reorder controls in FormArray
   moveItemInArray(this.timeline.controls, event.previousIndex, event.currentIndex);
 
+  // 2. Map FormArray to plain objects
+  const updatedTimeline = this.timeline.controls.map(ctrl => ({
+    title: ctrl.get('title')?.value,
+    description: ctrl.get('description')?.value
+  }));
+
+  // 3. Save reordered timeline to Firestore
+  this.saveTimelineOrder(updatedTimeline);
 }
+
+
+private async saveTimelineOrder(timelineData: { title: string; description: string }[]) {
+  const user = await this.waitForUser();
+  if (!user) return;
+
+  const db = getFirestore(getApp());
+  const docRef = doc(db, 'Story', user.uid);
+
+  try {
+    await setDoc(docRef, { timeline: timelineData }, { merge: true });
+    console.log('Timeline order updated in Firebase');
+  } catch (err) {
+    console.error('Failed to update timeline order', err);
+  }
+}
+
+
 
 
 
@@ -117,15 +144,18 @@ export class Story {
       if (docSnap.exists()) {
         this.hasStory = true;
         this.storyData = docSnap.data();
+
+        this.timeline.clear();
+
+        if (this.storyData.timeline?.length) {
+        this.storyData.timeline.forEach((t: any) => this.timeline.push(this.formBuild.group({
+          title: [t.title, Validators.required],
+          description: [t.description, Validators.required]
+        })));
+      }
+
         this.form.patchValue(this.storyData);
 
-        // Patch timeline entries manually
-        if (this.storyData.timeline?.length) {
-          this.storyData.timeline.forEach((t: any) => this.timeline.push(this.formBuild.group({
-            title: [t.title, Validators.required],
-            description: [t.description, Validators.required]
-          })));
-        }
 
         this.originalStory = { ...this.storyData };
 
@@ -162,13 +192,18 @@ export class Story {
 
     const docRef = doc(db, 'Story', user.uid);
 
+     const timelineData = this.timeline.controls.map(ctrl => ({
+    title: ctrl.get('title')?.value,
+    description: ctrl.get('description')?.value
+  }));
+
     try{
       await setDoc(docRef, {
         howWeMet: this.form.value.howWeMet,
         photoURL: this.form.value.photoURL,
         proposal: this.form.value.proposal,
         userID: user.uid,
-        timeline: this.form.value.timeline,
+        timeline: timelineData,
       }
       , { merge: true }
     );
