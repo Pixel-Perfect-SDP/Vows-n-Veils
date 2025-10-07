@@ -1,0 +1,149 @@
+<header class="topbar">
+  <section class="logo-area">
+    <img class="logo-img" src="assets/logo.jpg" alt="Vows & Veils logo" />
+    <h1 class="logo-text">Vows & Veils</h1>
+  </section>
+
+  <nav class="nav-links">
+    <a routerLink="/homepage">Home</a>
+  </nav>
+</header>
+
+<section class="story-section">
+
+  <section class="header">
+        <h1>Our story</h1>
+    </section>
+
+    <section class="describe">
+      <h3>Share your journey!</h3>
+      <p>Write your love story here so guests can read it when they RSVP.</p>
+      <p>This is the perfect place to share how it all began.</p>
+    </section>
+
+  <section *ngIf="hasStory === null">
+    <section class="loading-container">
+        <section class="Loading-1"></section>
+        <section class="Loading-2"></section>
+    </section>
+  </section>
+
+  
+  <section *ngIf="hasStory !== null" class="story-flex">
+    <section class="form-container">
+    <form [formGroup]="form" (ngSubmit)="saveStory()" class="story-form">
+      <section class="form-group">
+        <label for="howWeMet">How We Met:</label>
+        <textarea
+          id="howWeMet"
+          formControlName="howWeMet"
+          rows="3"
+          placeholder="Tell us how you met..."
+        ></textarea>
+        <section class="error" *ngIf="form.get('howWeMet')?.invalid && form.get('howWeMet')?.touched">
+          This field is required.
+        </section>
+      </section>
+       <section class="section-separator"></section>
+
+      <section class="form-group">
+        <label for="proposal">Our Proposal:</label>
+        <textarea
+          id="proposal"
+          formControlName="proposal"
+          rows="3"
+          placeholder="Describe the proposal..."
+        ></textarea>
+        <section class="error" *ngIf="form.get('proposal')?.invalid && form.get('proposal')?.touched">
+          This field is required.
+        </section>
+      </section>
+      <section class="section-separator"></section>
+
+      <section class="form-group">
+        <label for="timeline">Our Milestones:</label>
+        <p>Drag and drop to reorder your milestones.</p>
+        <section formArrayName="timeline" class="timeline-container form" cdkDropList [cdkDropListOrientation]="'horizontal'" (cdkDropListDropped)="drop($event)">
+          <section 
+            *ngFor="let entry of timeline.controls; let i = index" 
+            [formGroupName]="i" 
+            class="timeline-box" 
+            cdkDrag
+            cdkDragRootElement=".timeline-box"
+          >
+            <input class="timeline-title" placeholder="Milestone Title" formControlName="title" />
+            <textarea class="timeline-description" placeholder="Description" formControlName="description"></textarea>
+            <button type="timeline-button" (click)="removeTimelineEntry(i)">Remove</button>
+          </section>
+        </section>
+
+        <button type="addTimelinebutton" (click)="addTimelineEntry()">Add Milestone</button>
+      </section>
+      <section class="section-separator"></section>
+
+
+      <section class="form-group">
+        <!-- <label for="photoURL">A Picture Of Us: (optional)</label>
+         <input
+          id="photoInput"
+          type="file"
+          accept="image/*"
+          (change)="onFileSelected($event)"
+        />
+        <p *ngIf="uploadingImage">Uploading image...</p>
+
+        <section *ngIf="form.get('photoURL')?.value" class="photo-container">
+          <img [src]="form.get('photoURL')?.value" alt="Story Photo" class="story-photo" />
+          <button type="button" (click)="removePhoto()">Remove photo</button>
+        </section> -->
+      </section>
+
+      <button type="submit" [disabled]="form.invalid">
+        {{ hasStory ? 'Update Story' : 'Create Story' }}
+      </button>
+
+      <!-- Cancel Edit button -->
+      <button type="button" *ngIf="hasStory" (click)="cancelEdit()">
+        Cancel Edit
+      </button>
+    </form>
+    </section>
+  
+
+<section *ngIf="hasStory !== null" class="story-display">
+  <h3 class="story-title">What your guests see:</h3>
+  <section class="guest-preview">
+    <h4 class="preview-heading">Our Story</h4>
+
+  <h5 class="preview-subheading">How we met</h5>
+  <p class="preview-content">{{ form.get('howWeMet')?.value }}</p>
+
+  <h5 class="preview-subheading">Our Proposal</h5>
+  <p class="preview-content">{{ form.get('proposal')?.value }}</p>
+
+
+   <section *ngIf="timeline && timeline.length > 0" class="timeline-container preview">
+    <h5 class="preview-subheading">Our Milestones</h5>
+    <section class="timeline-box" *ngFor="let entry of timeline.controls; let i = index; trackBy: trackByIndex">
+      <strong>{{ entry.get('title')?.value }}</strong>
+      <p>{{ entry.get('description')?.value }}</p>
+    </section>
+  </section>
+
+
+
+    <section *ngIf="form.get('photoURL')?.value" class="photo-container">
+      <img [src]="form.get('photoURL')?.value" alt="Story Photo" class="story-photo" />
+    </section>
+  </section>
+  <button (click)="exportPdf()">
+  Want to save this? <span class="material-symbols-outlined">
+  download
+  </span>
+</button>
+
+</section>
+
+
+</section>
+</section>

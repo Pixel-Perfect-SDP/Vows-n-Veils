@@ -121,6 +121,20 @@ downloadGuestsPdf(eventId: string, opts?: { dietary?: string; allergy?: string; 
   });
 }
 
+  // download story PDF
+  downloadStoryPdf(userId: string) {
+    return this.http.get(`${this.apiUrl}/story/${userId}/export.pdf`, {
+      responseType: 'blob'
+    });
+  }
+
+//upload story image
+ uploadStoryImage(userId: string, file: File) {
+    const form = new FormData();
+    form.append('file', file);
+    return this.http.post<{ url: string }>(`${this.apiUrl}/story/${userId}/photo`, form);
+  }
+
   // Send guest invitation via external API
   sendGuestInvite(inviteData: {
     guestEmail: string;

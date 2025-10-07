@@ -64,6 +64,10 @@ export const routes: Routes = [
     path: 'trackorders',
     loadComponent: () => import('./pages/trackorders/trackorders').then(m => m.Trackorders),
   },
+  {
+    path: 'story',
+    loadComponent: () => import('./pages/story/story').then(m => m.Story),
+  },
 
   //This must be the last route - define all other routes before this
   { path: '**', redirectTo: 'landing' },
