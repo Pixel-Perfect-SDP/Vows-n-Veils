@@ -60,6 +60,10 @@ export const routes: Routes = [
     path: 'admin',
     loadComponent: () => import('./pages/admin/admin').then(m => m.Admin),
   },
+    {
+    path: 'notifications',
+    loadComponent: () => import('./pages/notifications/notifications').then(m => m.Notifications),
+  },
   {
     path: 'trackorders',
     loadComponent: () => import('./pages/trackorders/trackorders').then(m => m.Trackorders),
