@@ -1,6 +1,8 @@
+<!--
 <head>
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
+-->
 <header class="topbar">
   <section class="logo-area">
     <img class="logo-img" src="assets/logo.jpg" alt="Vows & Veils logo" />
@@ -9,9 +11,14 @@
 
   <nav class="nav-links">
     <section>
+
       <button type="button" class="notif-btn" (click)="goToNotifications()" *ngIf="hasVenueCompany">
-        <span class="material-icons">notifications</span>
-        <span class="notification-dot" *ngIf="unreadCount > 0">{{unreadCount}}</span>
+        <svg xmlns="http://www.w3.org/2000/svg" height="25px" viewBox="0 0 24 24" width="25px" fill="#000000">
+          <path
+            d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z" />
+        </svg>
+
+        <span class="notification-dot" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
       </button>
 
     </section>
@@ -206,7 +213,8 @@
         <!-- Existing images -->
         <section class="image-list" *ngIf="editingVenue.images?.length > 0">
           <section class="image-item" *ngFor="let img of editingVenue.images; let i = index">
-            <img *ngIf="img?.url" [src]="img.url" alt="Venue Image" />
+            <img *ngIf="img?.url" [src]="img.url" alt="Venue Image"   style="max-width: 150px; max-height: 150px; object-fit: cover; border-radius: 8px;"
+/>
             <label *ngIf="img">
               <input type="checkbox" [(ngModel)]="updateData.imagesToDelete[i]" />
               Delete

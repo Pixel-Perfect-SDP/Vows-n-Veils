@@ -71,3 +71,22 @@ h2::after {
   50% { transform: scale(1.1); }
   75% { transform: scale(1.15); }
 }
+
+.nav-links {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.nav-links a {
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #333;
+  transition: color 0.3s ease, border-bottom 0.3s ease;
+  padding-bottom: 0.2rem;
+}
+
+.nav-links a:hover {
+  color: #e75480; 
+  border-bottom: 2px solid #d4af37; 
+}
