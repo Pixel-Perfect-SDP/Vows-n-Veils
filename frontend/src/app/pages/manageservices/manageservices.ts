@@ -23,6 +23,7 @@ interface VenueImage {
 interface Notification {
   id: string;
   from: string;
+  to: string;
   message: string;
   timestamp: any;
   read: boolean;
@@ -129,7 +130,7 @@ export class Manageservices implements OnInit, OnDestroy {
         this.companyVenueData = docSnap.data();
         if (this.companyVenueData.type === 'venue') {
           this.hasVenueCompany = true;
-          onAuthStateChanged(auth, async(currentUser) => {
+          onAuthStateChanged(auth, async (currentUser) => {
             this.user = currentUser;
             if (this.user) {
               console.log("Logged in user:", this.user.uid);
@@ -205,7 +206,7 @@ export class Manageservices implements OnInit, OnDestroy {
   }
 
 
-  
+
   fetchVenues() {
     if (!this.user) {
       alert("No user logged in!");
@@ -590,39 +591,37 @@ export class Manageservices implements OnInit, OnDestroy {
     this.router.navigate(['/trackorders']);
 
   }
-async fetchNotifications() {
-  if (!this.user) return;
+  async fetchNotifications() {
+    if (!this.user) return;
 
-  try {
-    const apiUrl = `https://site--vowsandveils--5dl8fyl4jyqm.code.run/notifications/${this.user.uid}`;
-    const response: any = await this.http.get(apiUrl).toPromise();
+    try {
+      const apiUrl = `https://site--vowsandveils--5dl8fyl4jyqm.code.run/venues/notifications/${this.user.uid}`;
+      const response: any = await this.http.get(apiUrl).toPromise();
 
-    // Map the notifications from API to local structure
-    this.notifications = (response.notifications || []).map((n: any) => ({
-      uid: n.id,
-      from: n.from || '',
-      message: n.message || '',
-      timestamp: n.timestamp || null,
-      read: n.read || false,
-    }));
+      this.notifications = (response.notifications || []).map((n: any) => ({
+        uid: n.id,
+        from: n.from || '',
+        to: n.to || '',
+        message: n.message || '',
+        date: n.date || null,
+        read: n.read || false,
+      }));
 
-    // Count unread notifications
-    this.unreadCount = this.notifications.filter(n => !n.read).length;
+      this.unreadCount = this.notifications.filter(n => !n.read).length;
 
-    // Sort unread on top
-    this.notifications.sort((a, b) => Number(a.read) - Number(b.read));
-    
-  } catch (err) {
-    console.error('Error fetching notifications from API:', err);
-    this.notifications = [];
-    this.unreadCount = 0;
+      this.notifications.sort((a, b) => Number(a.read) - Number(b.read));
+
+    } catch (err) {
+      console.error('Error fetching notifications from API:', err);
+      this.notifications = [];
+      this.unreadCount = 0;
+    }
   }
-}
 
 
 
-goToNotifications() {
-  this.router.navigate(['/notifications']);
-}
+  goToNotifications() {
+    this.router.navigate(['/notifications']);
+  }
 
 }

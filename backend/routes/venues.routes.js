@@ -616,7 +616,7 @@ router.get('/notifications/:id', async (req, res) => {
  *       500:
  *         description: Server error
  */
-router.put('/notifications/:id', async (req, res) => {
+router.put('/notifications/:id/read', async (req, res) => {
   try {
     const notifId = req.params.id;
     const notifRef = db.collection('Notifications').doc(notifId);

@@ -34,7 +34,7 @@ export class Notifications implements OnInit {
     console.log('Logged in user:', this.user.uid);
 
     try {
-      const apiUrl = `https://https://site--vowsandveils--5dl8fyl4jyqm.code.run/notifications/${this.user.uid}`;
+      const apiUrl = `https://https://site--vowsandveils--5dl8fyl4jyqm.code.run/venues/notifications/${this.user.uid}`;
       const response: any = await this.http.get(apiUrl).toPromise();
 
       this.notifications = response.notifications || [];
