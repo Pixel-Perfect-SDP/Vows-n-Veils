@@ -107,7 +107,7 @@
 
 
    <section *ngIf="timeline && timeline.length > 0" class="timeline-container preview">
-    <h5 class="preview-subheading">Our Milestones</h5>
+    <h5 class="preview-subheading">Our Journey</h5>
     <section class="timeline-box" *ngFor="let entry of timeline.controls; let i = index; trackBy: trackByIndex">
       <strong>{{ entry.get('title')?.value }}</strong>
       <p>{{ entry.get('description')?.value }}</p>

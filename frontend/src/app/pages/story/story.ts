@@ -252,7 +252,7 @@ private async saveTimelineOrder(timelineData: { title: string; description: stri
       },
       error: (err) => {
         console.error('PDF export failed', err);
-        alert('Failed to export PDF. Please make sure the backend route exists.');
+        alert('Failed to export PDF.');
       }
     });
   }
@@ -260,7 +260,6 @@ private async saveTimelineOrder(timelineData: { title: string; description: stri
 
 
 
-  //allow user to upload a photo
   
 
 }
