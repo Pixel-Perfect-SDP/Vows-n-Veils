@@ -8,7 +8,7 @@
       <div *ngFor="let n of notifications" [ngClass]="{'unread': !n.read}" class="notification-item">
         <p>From: {{n.from}}</p>
         <p>{{ n.message }}</p>
-        <small>{{ n.date?.toDate() | date:'long' }}</small>
+        <small>{{ n.date?.toDate() | date:'short' }}</small>
       </div>
     </section>
 

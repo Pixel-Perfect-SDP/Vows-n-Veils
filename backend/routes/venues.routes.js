@@ -576,25 +576,39 @@ router.put('/orders/:orderID/status', async (req, res) => {
 
 router.get('/notifications/:id', async (req, res) => {
   try {
-
     const userID = req.params.id;
     const notificationsRef = db.collection('Notifications');
     const querySnapshot = await notificationsRef.where('to', '==', userID).get();
+
     if (querySnapshot.empty) {
       return res.status(404).json({ error: 'No notifications found' });
     }
 
-    const notifications = querySnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
+    const notifications = querySnapshot.docs.map(doc => {
+      const data = doc.data();
+      let dateValue = null;
+      if (data.date) {
+        if (typeof data.date.toDate === 'function') {
+          dateValue = data.date.toDate(); 
+        } else {
+          dateValue = data.date; 
+        }
+      }
+
+      return {
+        id: doc.id,
+        ...data,
+        date: dateValue
+      };
+    });
+
     res.json({ notifications });
 
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
-
 });
+
 
 /**
  * @swagger
