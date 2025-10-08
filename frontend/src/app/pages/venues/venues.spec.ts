@@ -1,8 +1,9 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { Router } from '@angular/router';
+import { RouterTestingModule } from '@angular/router/testing';
 import { HttpClient } from '@angular/common/http';
 import { of, throwError } from 'rxjs';
-import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { NO_ERRORS_SCHEMA, Component } from '@angular/core';
 import { Venues } from './venues';
 import { collection, query, where, getDocs, updateDoc, doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../firebase/firebase-config';
@@ -27,6 +28,12 @@ interface Venue {
   image?: string;
   images?: VenueImage[];
 }
+
+@Component({
+  standalone: true,
+  template: ''
+})
+class DummyComponent { }
 
 describe('Venues', () => {
   let component: Venues;
@@ -113,9 +120,14 @@ describe('Venues', () => {
     spyOn(window, 'confirm').and.returnValue(true); // Mock confirm dialog
 
     await TestBed.configureTestingModule({
-      imports: [Venues],
+      imports: [
+        Venues,
+        RouterTestingModule.withRoutes([
+          { path: 'homepage', component: DummyComponent },   
+          { path: 'landing', component: DummyComponent },
+        ])
+      ],
       providers: [
-        { provide: Router, useValue: mockRouter },
         { provide: HttpClient, useValue: mockHttpClient },
         { provide: auth, useValue: mockAuth },
         { provide: db, useValue: mockDb }
@@ -123,6 +135,8 @@ describe('Venues', () => {
       schemas: [NO_ERRORS_SCHEMA]
     }).compileComponents();
 
+    const router = TestBed.inject(Router);
+    spyOn(router, 'navigate');
     fixture = TestBed.createComponent(Venues);
     component = fixture.componentInstance;
 
@@ -204,9 +218,9 @@ describe('Venues', () => {
 
   it('should go back to venue list', () => {
     component.selectedVenue = mockVenue;
-    
+
     component.backToList();
-    
+
     expect(component.selectedVenue).toBeNull();
   });
 
@@ -222,7 +236,7 @@ describe('Venues', () => {
       { ...mockVenue, id: 'venue-3', status: 'pending' },
       { ...mockVenue, id: 'venue-4', status: 'active' }
     ];
-    
+
     mockHttpClient.get.and.returnValue(of(venuesWithInactive));
     component.loading = false;
 
@@ -251,7 +265,7 @@ describe('Venues', () => {
       { ...mockVenue, id: 'venue-3', status: undefined },
       { ...mockVenue, id: 'venue-4', status: 'active' }
     ];
-    
+
     mockHttpClient.get.and.returnValue(of(venuesWithoutStatus));
     component.loading = false;
 
@@ -297,7 +311,7 @@ describe('Venues', () => {
   it('should handle multiple consecutive viewVenue calls', fakeAsync(() => {
     const venue1 = { ...mockVenue, id: 'venue-1', venuename: 'Venue 1' };
     const venue2 = { ...mockVenue, id: 'venue-2', venuename: 'Venue 2' };
-    
+
     mockHttpClient.get.and.returnValues(of(venue1), of(venue2));
     component.loading = false;
 
@@ -319,7 +333,7 @@ describe('Venues', () => {
         { url: 'image3.jpg', name: 'Image 3' }
       ]
     };
-    
+
     mockHttpClient.get.and.returnValue(of(venueWithImages));
     component.loading = false;
 
@@ -344,7 +358,7 @@ describe('Venues', () => {
   it('should handle venue with undefined images', fakeAsync(() => {
     const venueWithUndefinedImages = { ...mockVenue };
     delete venueWithUndefinedImages.images;
-    
+
     mockHttpClient.get.and.returnValue(of(venueWithUndefinedImages));
     component.loading = false;
 
@@ -381,7 +395,7 @@ describe('Venues', () => {
       image: 'main-image.jpg',
       images: [{ url: 'image1.jpg', name: 'Image 1' }]
     };
-    
+
     mockHttpClient.get.and.returnValue(of(completeVenue));
     component.loading = false;
 
@@ -408,7 +422,7 @@ describe('Venues', () => {
       price: 2000,
       status: 'active'
     };
-    
+
     mockHttpClient.get.and.returnValue(of(minimalVenue));
     component.loading = false;
 
@@ -422,7 +436,7 @@ describe('Venues', () => {
 
   it('should reset error state on successful request', fakeAsync(() => {
     component.error = 'Previous error';
-    
+
     mockHttpClient.get.and.returnValue(of(mockVenues));
     component.loading = false;
 
@@ -439,7 +453,7 @@ describe('Venues', () => {
     component.getVenues();
     component.getVenues();
     component.getVenues();
-    
+
     tick();
 
     expect(component.venues.length).toBe(2);
@@ -452,7 +466,7 @@ describe('Venues', () => {
       capacity: 150,
       price: 5000.50
     };
-    
+
     mockHttpClient.get.and.returnValue(of(venueWithNumbers));
     component.loading = false;
 
