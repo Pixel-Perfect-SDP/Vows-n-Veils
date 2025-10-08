@@ -591,6 +591,35 @@ button:hover {
   background-color: #f25c8a;
 }
 
+.timeline-box::before {
+  content: '';
+  position: absolute;
+  top: 0;               
+  left: -1.1rem;       
+  width: 12px;
+  height: 12px;
+  background-color: #f497b9;
+  border-radius: 50%;
+  border: 2px solid white;
+  z-index: 2;
+}
+
+/* connecting line */
+.timeline-box::after {
+  content: '';
+  position: absolute;
+  top: 12px;          
+  left: -0.7rem;      
+  width: 2.5px;      
+  height: calc(100%); 
+  background-color: #f497b9;
+  z-index: 1;
+}
+
+.timeline-box:last-child::after {
+  display: none;
+}
+
 
 button[type="addTimelinebutton"] {
   background-color: #f497b9;
@@ -618,3 +647,30 @@ button[type="addTimelinebutton"]:hover {
   border: 2px dashed #ccc;
 }
 
+.timeline-descriptionp {
+  font-family: 'Arial', sans-serif;
+  font-size: 0.85rem;
+  padding: 0.4rem 0.5rem;
+  border: 1px solid #f4c2d7;
+  border-radius: 8px;
+  background-color: #fff5f9;
+  resize: none;
+}
+.timeline-titlep {
+  font-family: 'Dancing Script', cursive;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #000000;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.timeline-titlep::after {
+  content: "";
+  display: block;
+  width: 40px;
+  height: 3px;
+  margin: 0.3rem auto 0;  
+ background: linear-gradient(135deg, #f497b9, #f4c2d7);
+  border-radius: 2px;
+}
