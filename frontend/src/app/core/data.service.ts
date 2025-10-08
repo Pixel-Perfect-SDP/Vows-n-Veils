@@ -121,6 +121,14 @@ downloadGuestsPdf(eventId: string, opts?: { dietary?: string; allergy?: string; 
   });
 }
 
+  // download story PDF
+  downloadStoryPdf(userId: string) {
+    return this.http.get(`${this.apiUrl}/story/${userId}/export.pdf`, {
+      responseType: 'blob'
+    });
+  }
+
+
   // Send guest invitation via external API
   sendGuestInvite(inviteData: {
     guestEmail: string;
