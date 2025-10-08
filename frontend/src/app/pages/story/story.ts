@@ -65,16 +65,13 @@ export class Story {
 
 
      drop(event: CdkDragDrop<AbstractControl[]>) {
-  // 1. Reorder controls in FormArray
   moveItemInArray(this.timeline.controls, event.previousIndex, event.currentIndex);
 
-  // 2. Map FormArray to plain objects
   const updatedTimeline = this.timeline.controls.map(ctrl => ({
     title: ctrl.get('title')?.value,
     description: ctrl.get('description')?.value
   }));
 
-  // 3. Save reordered timeline to Firestore
   this.saveTimelineOrder(updatedTimeline);
 }
 
@@ -264,48 +261,6 @@ private async saveTimelineOrder(timelineData: { title: string; description: stri
 
 
   //allow user to upload a photo
-  async onFileSelected(event: Event) {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
-    if (!file) return;
-
-    if (!file.type.startsWith('image/')) {
-      alert('Please select an image file.');
-      input.value = '';
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      alert('Image must be smaller than 5MB.');
-      input.value = '';
-      return;
-    }
-
-    this.uploadingImage = true;
-    const user = await this.waitForUser();
-    if (!user) {
-      this.uploadingImage = false;
-      return;
-    }
-
-    this.dataService.uploadStoryImage(user.uid, file).subscribe({
-      next: (res) => {
-        this.form.patchValue({ photoURL: res.url });
-      },
-      error: (err) => {
-        console.error('Upload failed:', err);
-        alert('Image upload failed.');
-      },
-      complete: () => {
-        this.uploadingImage = false;
-        if (input) input.value = '';
-      }
-    });
-  }
-
-  removePhoto() {
-    this.form.patchValue({ photoURL: null });
-    const input = document.getElementById('photoInput') as HTMLInputElement;
-    if (input) input.value = '';
-  }
+  
 
 }

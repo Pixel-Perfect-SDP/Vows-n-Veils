@@ -2,50 +2,6 @@ const PDFDocument = require('pdfkit');
 const { db } = require('../firebase');
 const axios = require('axios');
 
-//allow user to upload storage image
-const admin = require('firebase-admin');
-const { v4: uuidv4 } = require('uuid');
-const path = require('path');
-
-if (!admin.apps.length) {
-  admin.initializeApp(); // uses ADC if available; we pass bucket name below
-}
-
-//allow user to upload storage image
-exports.uploadStoryPhoto = async (req, res) => {
-  try {
-    const { userId } = req.params;
-    const file = req.file;
-
-    if (!file) return res.status(400).json({ error: 'No file uploaded' });
-    if (!file.mimetype?.startsWith('image/')) {
-      return res.status(400).json({ error: 'Only image files allowed' });
-    }
-
-    const ext = path.extname(file.originalname || '') || '.jpg';
-    const objectPath = `story/${userId}${ext}`;
-
-    
-    const bucket = admin.storage().bucket('ppep-2651c.appspot.com');
-    const fileRef = bucket.file(objectPath);
-    const token = uuidv4();
-
-    await fileRef.save(file.buffer, {
-      contentType: file.mimetype,
-      metadata: { metadata: { firebaseStorageDownloadTokens: token } },
-      resumable: false,
-      public: false
-    });
-
-    const publicUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(objectPath)}?alt=media&token=${token}`;
-
-    await db.collection('Story').doc(userId).set({ photoURL: publicUrl }, { merge: true });
-    res.json({ url: publicUrl });
-  } catch (error) {
-    console.error('Error uploading story photo:', error);
-    res.status(500).json({ message: 'Upload failed' });
-  }
-};
 
 
 

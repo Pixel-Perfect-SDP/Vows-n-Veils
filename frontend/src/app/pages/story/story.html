@@ -82,22 +82,6 @@
       <section class="section-separator"></section>
 
 
-      <section class="form-group">
-        <!-- <label for="photoURL">A Picture Of Us: (optional)</label>
-         <input
-          id="photoInput"
-          type="file"
-          accept="image/*"
-          (change)="onFileSelected($event)"
-        />
-        <p *ngIf="uploadingImage">Uploading image...</p>
-
-        <section *ngIf="form.get('photoURL')?.value" class="photo-container">
-          <img [src]="form.get('photoURL')?.value" alt="Story Photo" class="story-photo" />
-          <button type="button" (click)="removePhoto()">Remove photo</button>
-        </section> -->
-      </section>
-
       <button type="submit" [disabled]="form.invalid">
         {{ hasStory ? 'Update Story' : 'Create Story' }}
       </button>
