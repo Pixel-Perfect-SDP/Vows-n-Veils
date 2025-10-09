@@ -14,3 +14,8 @@ export const environment = {
     measurementId: "G-4Z1YLNT9HM"
   }
 };
+
+export const environmentcb = {
+  production: true,
+  huggingFaceApiKey: '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'
+};

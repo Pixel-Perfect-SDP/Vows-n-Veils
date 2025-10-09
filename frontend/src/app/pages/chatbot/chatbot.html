@@ -1,0 +1,100 @@
+<!-- Floating Chat Button -->
+<div class="chat-button" *ngIf="!isOpen" (click)="toggleChat()">
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+  </svg>
+</div>
+
+<!-- Chat Window -->
+<div class="chat-container" *ngIf="isOpen" [class.minimized]="isMinimized">
+  <!-- Chat Header -->
+  <div class="chat-header">
+    <div class="chat-header-content">
+      <div class="chat-avatar">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+        </svg>
+      </div>
+      <div class="chat-title">
+        <h3>Support Assistant</h3>
+        <span class="chat-status">Online</span>
+      </div>
+    </div>
+    <div class="chat-actions">
+      <button (click)="minimizeChat()" class="icon-button" aria-label="Minimize">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+      </button>
+      <button (click)="closeChat()" class="icon-button" aria-label="Close">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Chat Body -->
+  <div class="chat-body" *ngIf="!isMinimized">
+    <!-- FAQ Quick Buttons -->
+    <div class="faq-section" *ngIf="messages.length <= 1">
+      <p class="faq-title">Frequently Asked Questions:</p>
+      <div class="faq-buttons">
+        <button 
+          *ngFor="let faq of faqs" 
+          class="faq-button"
+          (click)="selectFAQ(faq)">
+          {{ faq.question }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Messages -->
+    <div class="messages">
+      <div 
+        *ngFor="let message of messages" 
+        class="message"
+        [class.user-message]="message.isUser"
+        [class.bot-message]="!message.isUser">
+        <div class="message-content">
+          <p>{{ message.text }}</p>
+          <span class="message-time">{{ message.timestamp | date:'shortTime' }}</span>
+        </div>
+      </div>
+
+      <!-- Loading Indicator -->
+      <div *ngIf="isLoading" class="message bot-message">
+        <div class="message-content">
+          <div class="typing-indicator">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chat Footer -->
+  <div class="chat-footer" *ngIf="!isMinimized">
+    <div class="input-container">
+      <input 
+        type="text" 
+        [(ngModel)]="userInput"
+        (keypress)="onKeyPress($event)"
+        placeholder="Type your message..."
+        class="chat-input"
+        [disabled]="isLoading">
+      <button 
+        (click)="sendMessage()" 
+        class="send-button"
+        [disabled]="!userInput.trim() || isLoading">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="22" y1="2" x2="11" y2="13"></line>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>

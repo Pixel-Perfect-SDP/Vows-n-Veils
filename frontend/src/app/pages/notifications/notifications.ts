@@ -70,6 +70,11 @@ async ngOnInit() {
 }
 
   backhome(): void {
-    this.router.navigate(['/manageservices']);
-  }
+  const from = history.state.from;
+  if (from) {
+    this.router.navigateByUrl(from);
+  } else {
+    this.router.navigate(['/landing']);
+  } 
+ }
 }

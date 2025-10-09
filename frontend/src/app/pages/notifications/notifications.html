@@ -1,16 +1,22 @@
 <body>
   <nav class="nav-links">
     <a (click)="backhome();"> Back</a>
-</nav>
+  </nav>
 
-    <h2>Notifications</h2>
-    <section class="notifications-list">
-      <div *ngFor="let n of notifications" [ngClass]="{'unread': !n.read}" class="notification-item">
-        <p>From: {{n.from}}</p>
-        <p>{{ n.message }}</p>
-        <small>{{ n.date?.toDate() | date:'short' }}</small>
-      </div>
+  <h2>Notifications</h2>
+
+
+  <section class="notifications-list">
+    <p *ngIf="notifications.length === 0">No notifications</p>
+
+    <section *ngFor="let n of notifications" [ngClass]="{'unread': !n.read}" class="notification-item">
+      <p>From: {{n.from}}</p>
+      <p>{{ n.message }}</p>
+      <small>{{ n.date | date:'short' }}</small>
     </section>
+  </section>
+  <section>
 
-  
+  </section>
+
 </body>

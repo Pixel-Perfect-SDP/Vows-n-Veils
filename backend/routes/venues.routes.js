@@ -306,7 +306,6 @@ router.get('/company/:companyID', async (req, res) => {
  *       200:
  *         description: Images updated successfully
  */
-const multerUpdate = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
 
 router.put('/:id/images', upload.array('images'), async (req, res) => {
   try {
@@ -348,7 +347,6 @@ router.put('/:id/images', upload.array('images'), async (req, res) => {
   }
 });
 
-module.exports = router;
 
 /**
  * @swagger

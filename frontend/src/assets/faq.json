@@ -1,0 +1,34 @@
+{
+  "faqs": [
+    {
+      "id": 1,
+      "question": "What are your business hours?",
+      "answer": "We are open Monday to Friday, 9 AM to 6 PM EST. Our support team is available during these hours to assist you.",
+      "keywords": ["hours", "open", "time", "schedule", "available"]
+    },
+    {
+      "id": 2,
+      "question": "How do I reset my password?",
+      "answer": "To reset your password, click on 'Forgot Password' on the login page. Enter your email address, and we'll send you a reset link within a few minutes.",
+      "keywords": ["password", "reset", "forgot", "login", "access"]
+    },
+    {
+      "id": 3,
+      "question": "What payment methods do you accept?",
+      "answer": "We accept all major credit cards (Visa, MasterCard, American Express), PayPal, and bank transfers for enterprise customers.",
+      "keywords": ["payment", "pay", "credit card", "paypal", "billing"]
+    },
+    {
+      "id": 4,
+      "question": "How can I contact customer support?",
+      "answer": "You can reach our customer support team via email at support@example.com, phone at 1-800-123-4567, or through this chat. We typically respond within 24 hours.",
+      "keywords": ["contact", "support", "help", "email", "phone", "reach"]
+    },
+    {
+      "id": 5,
+      "question": "Do you offer refunds?",
+      "answer": "Yes, we offer a 30-day money-back guarantee. If you're not satisfied with our service, contact us within 30 days of purchase for a full refund.",
+      "keywords": ["refund", "money back", "return", "cancel", "guarantee"]
+    }
+  ]
+}

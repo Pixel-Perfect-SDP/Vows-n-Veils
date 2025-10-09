@@ -10,16 +10,27 @@ import { FormGroup, FormControl, FormsModule } from '@angular/forms';
 import { DataService, Guest } from '../../core/data.service';
 import { auth } from '../firebase/firebase-config';
 import { signOut } from 'firebase/auth';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
+
+
+interface Notification {
+  id: string;
+  from: string;
+  to: string;
+  message: string;
+  timestamp: any;
+  read: boolean;
+}
+
 
 @Component({
   selector: 'app-homepage',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, FormsModule,HttpClientModule],
   templateUrl: './homepage.html',
   styleUrls: ['./homepage.css']
 })
-export class Homepage
-{
+export class Homepage {
   router = inject(Router);
   auth = inject(AuthService);
   private formBuild = inject(FormBuilder);
@@ -27,6 +38,9 @@ export class Homepage
 
   public hasEvent: boolean | null = null;
   public eventData: any = null;
+  //notificaton data 
+  public notifications: Notification[] = [];
+  public unreadCount: number = 0;
 
   // Event Display Data
   public eventDisplayInfo: {
@@ -36,18 +50,18 @@ export class Homepage
     budget: number | null;
     totalGuests: number | null;
     confirmedRSVPs: number | null;
-    selectedVendors: Array<{companyID: string, serviceName: string, orderDate?: any, status?: string}> | null;
-    rsvpCode:string|null;
+    selectedVendors: Array<{ companyID: string, serviceName: string, orderDate?: any, status?: string }> | null;
+    rsvpCode: string | null;
   } = {
-    weddingTitle: null,
-    venueName: null,
-    weddingTime: null,
-    budget: null,
-    totalGuests: null,
-    confirmedRSVPs: null,
-    selectedVendors: null,
-    rsvpCode:null
-  };
+      weddingTitle: null,
+      venueName: null,
+      weddingTime: null,
+      budget: null,
+      totalGuests: null,
+      confirmedRSVPs: null,
+      selectedVendors: null,
+      rsvpCode: null
+    };
 
   public eventInfoLoading: boolean = false;
   public eventInfoError: string | null = null;
@@ -69,8 +83,11 @@ export class Homepage
     time: ['', [Validators.required]],
     budget: ['', [Validators.required, Validators.min(0)]]
   });
+  
+  constructor(private http: HttpClient) { }
 
-    private waitForUser(): Promise<any> {
+
+  private waitForUser(): Promise<any> {
     return new Promise((resolve) => {
       const user = this.auth.user();
       if (user) resolve(user);
@@ -177,21 +194,18 @@ export class Homepage
       }
 
       //getting wedding code
-      try
-      {
-        const codeDoc=await getDoc(doc(db,'Events',eventId));
+      try {
+        const codeDoc = await getDoc(doc(db, 'Events', eventId));
 
-        if (codeDoc.exists())
-        {
-          this.eventDisplayInfo.rsvpCode = codeDoc.data()?.['RSVPcode']||null;
+        if (codeDoc.exists()) {
+          this.eventDisplayInfo.rsvpCode = codeDoc.data()?.['RSVPcode'] || null;
           console.log("RSVP Code found:", this.eventDisplayInfo.rsvpCode);
         }
-        else{
+        else {
           console.log("No RSVP Code found for EventID:", eventId);
         }
       }
-      catch(error)
-      {
+      catch (error) {
         console.error("Error fetching RSVP Code:", error);
       }
 
@@ -237,11 +251,11 @@ export class Homepage
 
         console.log('Orders query result - number of docs:', ordersSnapshot.size);
 
-        const selectedVendors: Array<{companyID: string, serviceName: string, orderDate?: any, status?: string}> = [];
+        const selectedVendors: Array<{ companyID: string, serviceName: string, orderDate?: any, status?: string }> = [];
 
         // Get all company IDs from orders, excluding declined orders
         const companyIds: Set<string> = new Set();
-        const orderDetails: {[key: string]: any} = {};
+        const orderDetails: { [key: string]: any } = {};
 
         ordersSnapshot.forEach((doc) => {
           const orderData = doc.data();
@@ -282,9 +296,9 @@ export class Homepage
               console.log(`Vendor data for companyID ${companyID}:`, vendorData);
 
               let serviceName = vendorData?.['serviceName'] ||
-                               vendorData?.['service_name'] ||
-                               vendorData?.['name'] ||
-                               `Service ${companyID}`;
+                vendorData?.['service_name'] ||
+                vendorData?.['name'] ||
+                `Service ${companyID}`;
 
               const orderStatus = orderDetails[companyID]?.status;
 
@@ -368,14 +382,11 @@ export class Homepage
   /*------------------------------End Event Data API--------------------------*/
 
   //copy RSVP code to clipboard
-  copyToClipboard(code: string): void
-  {
-    navigator.clipboard.writeText(code).then(() =>
-    {
+  copyToClipboard(code: string): void {
+    navigator.clipboard.writeText(code).then(() => {
       console.log('RSVP Code copied:', code);
       // optional: show a toast or alert to user
-    }).catch(err =>
-      {
+    }).catch(err => {
       console.error('Failed to copy RSVP Code:', err);
     });
   }
@@ -491,8 +502,7 @@ export class Homepage
   }
 
 
-  ngOnDestroy()
-  {
+  ngOnDestroy() {
     if (this.countDownInerval) clearInterval(this.countDownInerval);
   }
 
@@ -586,7 +596,7 @@ export class Homepage
   // form for new guest
   addGuestForm = this.formBuild.group({
     Name: ['', [Validators.required]],
-    Email:['', [Validators.pattern(/^$|.+@.+\..+/)]],
+    Email: ['', [Validators.pattern(/^$|.+@.+\..+/)]],
     Dietary: ['None'],
     Allergies: ['None'],
     RSVPstatus: ['false'],            // default to attending (string here, convert later)
@@ -600,8 +610,7 @@ export class Homepage
     if (!this.showAddGuest) this.addGuestForm.reset({ Name: '' }); //was RSVPstatus,'true'
   }
 
-  async submitAddGuest()
-  {
+  async submitAddGuest() {
     if (this.addGuestForm.invalid) return;
 
     const user = await this.waitForUser();
@@ -610,7 +619,7 @@ export class Homepage
     const eventId = user.uid;
     const raw = this.addGuestForm.getRawValue();
 
-    const dto :any= {
+    const dto: any = {
       Name: raw.Name?.trim() ?? '',
       Email: raw.Email?.trim() ? raw.Email?.trim() : '',
       Dietary: raw.Dietary?.trim() ?? 'None',
@@ -755,7 +764,7 @@ export class Homepage
     }
 
     console.log('📤 Sending invitation directly to API...');
-    
+
     // Send invitation with exact format and order as required
     const inviteData = {
       guestEmail: guest.Email,
@@ -782,8 +791,7 @@ export class Homepage
 
   /*------------------------------user has NO event--------------------------*/
   //allow user to create one
-  async createEvent()
-  {
+  async createEvent() {
     if (this.form.invalid) {
       return;
     }
@@ -799,19 +807,18 @@ export class Homepage
     const dateTime = new Date(`${date}T${time}`);
 
     //generating a code for RSVP
-    let num=0;
+    let num = 0;
     let strNum;
-    let temp='';
-    for (let i =0;i<3;i++)
-    {
-      num=Math.floor(Math.random() * 9) + 1;
-      strNum=String(num);
-      temp+=strNum;
+    let temp = '';
+    for (let i = 0; i < 3; i++) {
+      num = Math.floor(Math.random() * 9) + 1;
+      strNum = String(num);
+      temp += strNum;
     }
-    const RSVPCode = (name1 && name2) ? name1.substring(0, 3).toUpperCase() + name2.substring(0, 3).toUpperCase()+temp: '';
+    const RSVPCode = (name1 && name2) ? name1.substring(0, 3).toUpperCase() + name2.substring(0, 3).toUpperCase() + temp : '';
 
     try {
-        await setDoc(docRef, {
+      await setDoc(docRef, {
         Name1: this.form.value.name1,
         Name2: this.form.value.name2,
         Date_Time: dateTime,
@@ -836,8 +843,7 @@ export class Homepage
 
   }//createEvent
 
-  logout(): void
-  {
+  logout(): void {
     signOut(auth)
       .then(() => {
         console.log('User signed out successfully');
@@ -860,44 +866,39 @@ export class Homepage
 
   private countDownInerval: any;
 
-  private updateCountdown()
-  {
+  private updateCountdown() {
     if (!this.eventData?.Date_Time) return;
 
-    const eventTime= this.eventData.Date_Time.toDate() ? this.eventData.Date_Time.toDate() : this.eventData.Date_Time;
+    const eventTime = this.eventData.Date_Time.toDate() ? this.eventData.Date_Time.toDate() : this.eventData.Date_Time;
     const now = new Date();
 
-    if (eventTime <= now)
-    {
-      this.months= this.days=this.hours=this.minutes=0;
+    if (eventTime <= now) {
+      this.months = this.days = this.hours = this.minutes = 0;
       return;
     }
 
-    let yearDiff= eventTime.getFullYear()- now.getFullYear();
-    let monthsDiff = eventTime.getMonth() - now.getMonth() + yearDiff*12;
-    let daysDiff = eventTime.getDate()-now.getDate();
+    let yearDiff = eventTime.getFullYear() - now.getFullYear();
+    let monthsDiff = eventTime.getMonth() - now.getMonth() + yearDiff * 12;
+    let daysDiff = eventTime.getDate() - now.getDate();
     let hoursDiff = eventTime.getHours() - now.getHours();
     let minDiff = eventTime.getMinutes() - now.getMinutes();
 
     // if the any values are negative
 
-    if (minDiff <0)
-    {
-      minDiff+=60;
-      hoursDiff-=1;
+    if (minDiff < 0) {
+      minDiff += 60;
+      hoursDiff -= 1;
     }
 
-    if (hoursDiff <0)
-    {
-      hoursDiff+=24;
-      daysDiff-=1;
+    if (hoursDiff < 0) {
+      hoursDiff += 24;
+      daysDiff -= 1;
     }
 
-    if(daysDiff <0)
-    {
-      const lastMonth = new Date(now.getFullYear(), now.getMonth()+1,0).getDate();
-      daysDiff+=lastMonth;
-      monthsDiff-=1;
+    if (daysDiff < 0) {
+      const lastMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+      daysDiff += lastMonth;
+      monthsDiff -= 1;
     }
 
     this.months = monthsDiff;
@@ -906,4 +907,40 @@ export class Homepage
     this.minutes = minDiff;
 
   }
- }
+
+  async fetchNotifications() {
+    const user = this.auth.user();
+
+    if (!user) return;
+
+    try {
+      const apiUrl = `https://site--vowsandveils--5dl8fyl4jyqm.code.run/venues/notifications/${user.uid}`;
+      const response: any = await this.http.get(apiUrl).toPromise();
+
+      this.notifications = (response.notifications || []).map((n: any) => ({
+        uid: n.id,
+        from: n.from || '',
+        to: n.to || '',
+        message: n.message || '',
+        date: n.date || null,
+        read: n.read || false,
+      }));
+
+      this.unreadCount = this.notifications.filter(n => !n.read).length;
+
+      this.notifications.sort((a, b) => Number(a.read) - Number(b.read));
+
+    } catch (err) {
+      console.error('Error fetching notifications from API:', err);
+      this.notifications = [];
+      this.unreadCount = 0;
+    }
+  }
+
+
+
+  goToNotifications() {
+this.router.navigate(['/notifications'], { state: { from: this.router.url } });
+  }
+
+}
