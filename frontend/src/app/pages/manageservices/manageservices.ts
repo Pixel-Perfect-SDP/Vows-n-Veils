@@ -621,7 +621,7 @@ export class Manageservices implements OnInit, OnDestroy {
 
 
   goToNotifications() {
-    this.router.navigate(['/notifications']);
+this.router.navigate(['/notifications'], { state: { from: this.router.url } });
   }
 
 }

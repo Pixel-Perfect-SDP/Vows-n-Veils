@@ -1,52 +1,63 @@
-
- <header class="topbar">
+<header class="topbar">
   <section class="logo-area">
     <img class="logo-img" src="assets/logo.jpg" alt="Vows & Veils logo" />
     <h1 class="logo-text">Vows & Veils</h1>
   </section>
 
   <nav class="nav-links">
+    <section>
+
+      <button type="button" class="notif-btn" (click)="goToNotifications()" *ngIf="hasEvent=== true">
+        <svg xmlns="http://www.w3.org/2000/svg" height="25px" viewBox="0 0 24 24" width="25px" fill="#000000">
+          <path
+            d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z" />
+        </svg>
+
+        <span class="notification-dot" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
+      </button>
+
+    </section>
     <a routerLink="/landing" *ngIf="hasEvent === false">Back</a>
     <a (click)="logout()" *ngIf="hasEvent === true">Log out</a>
   </nav>
 </header>
 <!-- if user does NOT have an event: -->
- <!-- show create event page -->
+<!-- show create event page -->
 <section class="create-event" *ngIf="hasEvent === false">
 
   <h2 class="plan-wedd">Plan your wedding</h2>
   <p class="plan-weddp">Fill in the details below to get started!</p>
 
-<section class="event-form">
-  <form [formGroup]="form" (ngSubmit)="createEvent()">
-    <label>Name of first partner:</label>
-    <input formControlName="name1" />
+  <section class="event-form">
+    <form [formGroup]="form" (ngSubmit)="createEvent()">
+      <label>Name of first partner:</label>
+      <input formControlName="name1" />
 
-    <label>Name of second partner:</label>
-    <input formControlName="name2" />
+      <label>Name of second partner:</label>
+      <input formControlName="name2" />
 
-    <label>Date of wedding:</label>
-    <input type="date" formControlName="date" />
+      <label>Date of wedding:</label>
+      <input type="date" formControlName="date" />
 
-    <label>Time of wedding:</label>
-    <input type="time" formControlName="time" />
+      <label>Time of wedding:</label>
+      <input type="time" formControlName="time" />
 
-    <label>Budget: </label>
-    <input type="number" formControlName="budget" placeholder="ZAR"/>
+      <label>Budget: </label>
+      <input type="number" formControlName="budget" placeholder="ZAR" />
 
-    <button type="submit" [disabled]="form.invalid">Create our wedding</button>
-  </form>
-</section>
+      <button type="submit" [disabled]="form.invalid">Create our wedding</button>
+    </form>
+  </section>
 </section>
 
 <section class="loading-container" *ngIf="hasEvent === null">
-    <section class="Loading-1"></section>
-    <section class="Loading-2"></section>
-  </section>
+  <section class="Loading-1"></section>
+  <section class="Loading-2"></section>
+</section>
 
 <section class="homepage-section" *ngIf="hasEvent === true">
 
-  
+
 
   <!-- If user DOES have an event -->
   <section class="has-event" *ngIf="hasEvent && eventData">
@@ -64,7 +75,7 @@
         <li><a routerLink="/vendors-couples" routerLinkActive="active">Vendors</a></li>
       </ul>
     </nav>
-    
+
     <!-- Main content column -->
     <section class="main">
       <header class="event-header">
@@ -85,7 +96,7 @@
             <section class="wb-icon-skel"></section>
             <section class="wb-text-skel"></section>
             <section class="wb-text-skel short"></section>
-            </section>
+          </section>
         </ng-container>
 
         <!-- Error -->
@@ -135,42 +146,42 @@
           <section class="wb-col">
             <section class="wb-title">Add a venue to see your wedding weather</section>
             <section class="wb-sub">We’ll pull the forecast for your exact location & date.</section>
-            </section>
-            </section>
+          </section>
+        </section>
       </section>
 
 
 
       <section class="countdown-section">
         <h2 class=countHead>Time until we tie the knot.....</h2>
-      <!-- Countdown -->
-      <section class="countdown">
-        <span class="countBox">
-          <h2 class="months"> {{months | number: '2.0'}}</h2>
-          <hr class="divider">
-          <p>Months</p>
-        </span>
+        <!-- Countdown -->
+        <section class="countdown">
+          <span class="countBox">
+            <h2 class="months"> {{months | number: '2.0'}}</h2>
+            <hr class="divider">
+            <p>Months</p>
+          </span>
 
-        <span class="countBox">
-          <h2 class="days"> {{days | number: '2.0'}}</h2>
-          <hr class="divider">
-          <p>Days</p>
-        </span>
+          <span class="countBox">
+            <h2 class="days"> {{days | number: '2.0'}}</h2>
+            <hr class="divider">
+            <p>Days</p>
+          </span>
 
-        <span class="countBox">
-          <h2 class=" hours"> {{hours | number: '2.0'}}</h2>
-          <hr class="divider">
-          <p>Hours</p>
-        </span>
+          <span class="countBox">
+            <h2 class=" hours"> {{hours | number: '2.0'}}</h2>
+            <hr class="divider">
+            <p>Hours</p>
+          </span>
 
-        <span class="countBox">
-          <h2 class="minutes"> {{minutes | number: '2.0'}}</h2>
-          <hr class="divider">
-          <p>Minutes</p>
-        </span>
+          <span class="countBox">
+            <h2 class="minutes"> {{minutes | number: '2.0'}}</h2>
+            <hr class="divider">
+            <p>Minutes</p>
+          </span>
 
+        </section>
       </section>
-    </section>
 
       <!-- Event Information Panel -->
       <section class="event-info-panel" *ngIf="hasEvent && eventData">
@@ -201,7 +212,7 @@
                 <h3>Venue</h3>
               </section>
               <p class="card-value">{{ eventDisplayInfo.venueName }}</p>
-              </section>
+            </section>
 
             <!-- Wedding Time -->
             <section class="info-card time-info" *ngIf="eventDisplayInfo.weddingTime">
@@ -238,7 +249,8 @@
               </section>
               <p class="card-value">{{ eventDisplayInfo.confirmedRSVPs }}</p>
               <p class="card-subtitle" *ngIf="eventDisplayInfo.totalGuests">
-                ({{ (eventDisplayInfo.confirmedRSVPs / eventDisplayInfo.totalGuests * 100) | number:'1.0-0' }}% response rate)
+                ({{ (eventDisplayInfo.confirmedRSVPs / eventDisplayInfo.totalGuests * 100) | number:'1.0-0' }}% response
+                rate)
               </p>
             </section>
 
@@ -249,10 +261,10 @@
                 <h3>Wedding Code</h3>
               </section>
               <section class="code-row">
-              <p class="card-value">{{ eventDisplayInfo.rsvpCode || 'No code available' }} </p>
+                <p class="card-value">{{ eventDisplayInfo.rsvpCode || 'No code available' }} </p>
                 <button class="copy-btn" (click)="copyToClipboard(eventDisplayInfo.rsvpCode || '')">
-                📋<p>copy</p>
-              </button>
+                  📋<p>copy</p>
+                </button>
 
               </section>
 
@@ -260,7 +272,8 @@
             </section>
 
             <!-- Selected Vendors -->
-            <section class="info-card vendors-info" *ngIf="eventDisplayInfo.selectedVendors && eventDisplayInfo.selectedVendors.length > 0">
+            <section class="info-card vendors-info"
+              *ngIf="eventDisplayInfo.selectedVendors && eventDisplayInfo.selectedVendors.length > 0">
               <section class="card-header">
                 <span class="card-icon">🏪</span>
                 <h3>Selected Vendors</h3>
@@ -271,13 +284,13 @@
                   <section class="vendor-date" *ngIf="vendor.orderDate">
                     Ordered: {{ vendor.orderDate | date:'MMM d, y' }}
                   </section>
-                  </section>
                 </section>
-              <p class="card-subtitle">{{ eventDisplayInfo.selectedVendors.length }} vendor(s) selected</p>
               </section>
-
+              <p class="card-subtitle">{{ eventDisplayInfo.selectedVendors.length }} vendor(s) selected</p>
             </section>
+
           </section>
+        </section>
       </section>
 
 
@@ -293,7 +306,7 @@
 
         <!-- your filters row stays above -->
         <section class="filters-row">
-          <section class = "filter-group">
+          <section class="filter-group">
             <section class="filter">
               <label>Dietary</label>
               <select [(ngModel)]="selectedDietary" (change)="onFiltersChange()">
@@ -327,7 +340,7 @@
             </button>
 
             <button type="button" class="btn" (click)="toggleExport()">
-            {{ showExport ? 'Close' : 'Export' }}
+              {{ showExport ? 'Close' : 'Export' }}
             </button>
           </section>
         </section>
@@ -405,18 +418,25 @@
             <section class="table-title">Guests</section>
             <!-- space for future actions (export, add guest, etc.) -->
             <section></section>
-            </section>
+          </section>
 
           <!-- Loading -->
           <section *ngIf="guestsLoading" class="table-container">
             <table class="guest-table" aria-busy="true" aria-live="polite">
               <thead>
                 <tr>
-                  <th>Name</th><th>Email</th><th>Dietary</th><th>Allergies</th><th>RSVP</th><th>Song</th>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Dietary</th>
+                  <th>Allergies</th>
+                  <th>RSVP</th>
+                  <th>Song</th>
                 </tr>
               </thead>
               <tbody>
-                <tr class="loading-row" *ngFor="let s of [1,2,3,4,5]"><td colspan="6"></td></tr>
+                <tr class="loading-row" *ngFor="let s of [1,2,3,4,5]">
+                  <td colspan="6"></td>
+                </tr>
               </tbody>
             </table>
           </section>
@@ -459,28 +479,23 @@
                   </td>
                   <td class="td-clip" title="{{ g.Song }}">{{ g.Song }}</td>
                   <td>
-                    <button
-                      type="button"
-                      class="icon-btn success"
-                      title="Send invitation"
-                      aria-label="Send invitation to {{ g.Name }}"
-                      (click)="sendInvitation(g)"
-                      [disabled]="guestsLoading || !g.Email"
-                      style="margin-right: 8px;">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                        <path d="M.05 3.555A2 2 0 0 1 2 2h12a2 2 0 0 1 1.95 1.555L8 8.414.05 3.555ZM0 4.697v7.104l5.803-3.558L0 4.697ZM6.761 8.83l-6.57 4.027A2 2 0 0 0 2 14h12a2 2 0 0 0 1.808-1.144l-6.57-4.027L8 9.586l-1.239-.757Zm3.436-.586L16 11.801V4.697l-5.803 3.546Z"/>
+                    <button type="button" class="icon-btn success" title="Send invitation"
+                      aria-label="Send invitation to {{ g.Name }}" (click)="sendInvitation(g)"
+                      [disabled]="guestsLoading || !g.Email" style="margin-right: 8px;">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                        viewBox="0 0 16 16">
+                        <path
+                          d="M.05 3.555A2 2 0 0 1 2 2h12a2 2 0 0 1 1.95 1.555L8 8.414.05 3.555ZM0 4.697v7.104l5.803-3.558L0 4.697ZM6.761 8.83l-6.57 4.027A2 2 0 0 0 2 14h12a2 2 0 0 0 1.808-1.144l-6.57-4.027L8 9.586l-1.239-.757Zm3.436-.586L16 11.801V4.697l-5.803 3.546Z" />
                       </svg>
                     </button>
-                    <button
-                      type="button"
-                      class="icon-btn danger"
-                      title="Delete guest"
-                      aria-label="Delete guest"
-                      (click)="onDeleteGuest(g)"
-                      [disabled]="guestsLoading">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                        <path d="M5.5 5.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0V6H7v6.5a.5.5 0 0 1-1 0v-7z"/>
-                        <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4H2.5a1 1 0 0 1 0-2h3.086a1 1 0 0 1 .707-.293h2.414a1 1 0 0 1 .707.293H13.5a1 1 0 0 1 1 1zM4.118 4l.39 9.447A1 1 0 0 0 5.5 14.5h5a1 1 0 0 0 .992-.947L11.882 4H4.118z"/>
+                    <button type="button" class="icon-btn danger" title="Delete guest" aria-label="Delete guest"
+                      (click)="onDeleteGuest(g)" [disabled]="guestsLoading">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                        viewBox="0 0 16 16">
+                        <path
+                          d="M5.5 5.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0V6H7v6.5a.5.5 0 0 1-1 0v-7z" />
+                        <path fill-rule="evenodd"
+                          d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4H2.5a1 1 0 0 1 0-2h3.086a1 1 0 0 1 .707-.293h2.414a1 1 0 0 1 .707.293H13.5a1 1 0 0 1 1 1zM4.118 4l.39 9.447A1 1 0 0 0 5.5 14.5h5a1 1 0 0 0 .992-.947L11.882 4H4.118z" />
                       </svg>
                     </button>
                   </td>
@@ -492,11 +507,10 @@
               <section class="empty-state">No guests match the selected filters.</section>
             </ng-template>
           </section>
-          </section>
+        </section>
       </section>
 
 
     </section><!-- /.main -->
   </section><!-- /.has-event -->
 </section>
-

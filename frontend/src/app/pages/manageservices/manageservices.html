@@ -177,7 +177,8 @@
           <h3>{{ venue.venuename }}</h3>
           <img *ngIf="venue.images && venue.images[0]?.url" [src]="venue.images[0].url" alt="{{venue.venuename}}" />
           <label class="statuslabel">Status: {{venue.status}}</label>
-          <button class="btn" (click)="UpdateVenue(venue)">Update Venue Details</button>
+          <button class="btn" *ngIf="venue.status!== 'rejected'" (click)="UpdateVenue(venue)">Update Venue
+            Details</button>
           <button class="btn delete-btn" (click)="DeleteVenue(venue)">Delete Venue</button>
 
 
@@ -213,8 +214,8 @@
         <!-- Existing images -->
         <section class="image-list" *ngIf="editingVenue.images?.length > 0">
           <section class="image-item" *ngFor="let img of editingVenue.images; let i = index">
-            <img *ngIf="img?.url" [src]="img.url" alt="Venue Image"   style="max-width: 150px; max-height: 150px; object-fit: cover; border-radius: 8px;"
-/>
+            <img *ngIf="img?.url" [src]="img.url" alt="Venue Image"
+              style="max-width: 150px; max-height: 150px; object-fit: cover; border-radius: 8px;" />
             <label *ngIf="img">
               <input type="checkbox" [(ngModel)]="updateData.imagesToDelete[i]" />
               Delete

@@ -306,7 +306,6 @@ router.get('/company/:companyID', async (req, res) => {
  *       200:
  *         description: Images updated successfully
  */
-const multerUpdate = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
 
 router.put('/:id/images', upload.array('images'), async (req, res) => {
   try {
@@ -348,7 +347,6 @@ router.put('/:id/images', upload.array('images'), async (req, res) => {
   }
 });
 
-module.exports = router;
 
 /**
  * @swagger
@@ -521,17 +519,44 @@ router.put('/orders/:orderID/status', async (req, res) => {
     const { orderID } = req.params;
     const { status } = req.body;
 
+    const notRef = db.collection('Notifications');
+    const orderRef = db.collection('VenueOrders').doc(orderID);
     if (!['accepted', 'rejected'].includes(status)) {
       return res.status(400).json({ error: 'Invalid status' });
     }
 
-    await db.collection('VenuesOrders').doc(orderID).update({ status });
+    const orderDoc = await orderRef.get();
+    if (!orderDoc.exists) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+
+    let messagei = "";
+    if (status === "rejected") {
+      await orderRef.delete();
+      messagei = "Your venue booking has been rejected. Please choose another one. Thank you!";
+    } else {
+      await orderRef.update({ status });
+      messagei = "Your venue booking has been accepted! The company will contact you soon. Thank you!";
+    }
+
+    const startDate = new Date();
+
+    await notRef.add({
+      date: startDate,
+      from: "Management",
+      message: messagei,
+      to: orderID,
+      read: false
+    });
 
     res.json({ ok: true, orderID, status });
+
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: err.message });
   }
 });
+
 
 /**
  * @swagger
@@ -589,9 +614,9 @@ router.get('/notifications/:id', async (req, res) => {
       let dateValue = null;
       if (data.date) {
         if (typeof data.date.toDate === 'function') {
-          dateValue = data.date.toDate(); 
+          dateValue = data.date.toDate();
         } else {
-          dateValue = data.date; 
+          dateValue = data.date;
         }
       }
 
@@ -647,5 +672,7 @@ router.put('/notifications/:id/read', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+
 
 module.exports = router; 
