@@ -24,7 +24,7 @@ interface ChatMessage {
   templateUrl: './chatbot.html',
   styleUrls: ['./chatbot.css']
 })
-
+//chat
 export class Chatbot implements OnInit {
   isOpen = true;
   isMinimized = true;
