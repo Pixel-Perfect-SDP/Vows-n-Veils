@@ -5,12 +5,22 @@
   </section>
 
   <nav class="nav-links">
-    <a (click)="refreshServices()"  *ngIf="hasVendorCompany">Refresh</a>
-    <a (click)="toggleServiceForm()"  *ngIf="hasVendorCompany">
-        {{ showServiceForm ? 'Cancel' : 'Add service' }}
+    <section>
+      <button type="button" class="notif-btn" (click)="goToNotifications()" *ngIf="hasVendorCompany">
+        <svg xmlns="http://www.w3.org/2000/svg" height="25px" viewBox="0 0 24 24" width="25px" fill="#000000">
+          <path
+            d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z" />
+        </svg>
+        <span class="notification-dot" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
+      </button>
+
+    </section>
+    <a (click)="refreshServices()" *ngIf="hasVendorCompany">Refresh</a>
+    <a (click)="toggleServiceForm()" *ngIf="hasVendorCompany">
+      {{ showServiceForm ? 'Cancel' : 'Add service' }}
     </a>
     <a (click)="logout()">Log out</a>
-    
+
   </nav>
 </header>
 
@@ -70,7 +80,7 @@
     </section>
 
     <section *ngIf="loadingServices" style="color:#6b7280">Loading services…</section>
-    <section class="empty-services" *ngIf="!loadingServices && services.length === 0" >
+    <section class="empty-services" *ngIf="!loadingServices && services.length === 0">
       No services yet — add your first one.
     </section>
 
@@ -92,7 +102,7 @@
             <td>{{ s.serviceName }}</td>
             <td>{{ s.type }}</td>
 
-            <td >
+            <td>
               <ng-container *ngIf="editPhoneId !== s.id; else editingPhone">
                 <span>{{ s.phonenumber || '—' }}</span>
                 <button (click)="beginEditPhone(s)" [disabled]="phoneBusyId===s.id">
@@ -101,7 +111,7 @@
               </ng-container>
               <ng-template #editingPhone>
                 <section>
-                <input type="tel" [value]="phoneInput" (input)="phoneInput=$any($event.target).value" />
+                  <input type="tel" [value]="phoneInput" (input)="phoneInput=$any($event.target).value" />
                   <button (click)="saveEditPhone(s)" [disabled]="phoneBusyId===s.id">
                     {{ phoneBusyId===s.id ? 'Saving…' : 'Save' }}
                   </button>
@@ -111,14 +121,15 @@
               </ng-template>
             </td>
 
-            <td >
+            <td>
               <ng-container *ngIf="editPriceId !== s.id; else editingPrice">
                 <span>R{{ s.price | number:'1.0-2' }}</span>
-                <button  (click)="beginEditPrice(s)" [disabled]="priceBusyId===s.id">Edit</button>
+                <button (click)="beginEditPrice(s)" [disabled]="priceBusyId===s.id">Edit</button>
               </ng-container>
               <ng-template #editingPrice>
-                <section >
-                  <input type="number" min="0" step="0.01" [value]="priceInput" (input)="priceInput=+$any($event.target).value"  />
+                <section>
+                  <input type="number" min="0" step="0.01" [value]="priceInput"
+                    (input)="priceInput=+$any($event.target).value" />
                   <button (click)="saveEditPrice(s)" [disabled]="priceBusyId===s.id">
                     {{ priceBusyId===s.id ? 'Saving…' : 'Save' }}
                   </button>
@@ -128,16 +139,17 @@
               </ng-template>
             </td>
 
-            <td >
+            <td>
               <ng-container *ngIf="editCapacityId !== s.id; else editingCapacity">
                 <span>{{ s.capacity ?? '—' }}</span>
-                <button  (click)="beginEditCapacity(s)" [disabled]="capacityBusyId===s.id">
+                <button (click)="beginEditCapacity(s)" [disabled]="capacityBusyId===s.id">
                   {{ s.capacity == null ? 'Add' : 'Edit' }}
                 </button>
               </ng-container>
               <ng-template #editingCapacity>
-                <section >
-                  <input type="number" min="0" step="1" [value]="capacityInput" (input)="capacityInput=+$any($event.target).value"/>
+                <section>
+                  <input type="number" min="0" step="1" [value]="capacityInput"
+                    (input)="capacityInput=+$any($event.target).value" />
                   <button (click)="saveEditCapacity(s)" [disabled]="capacityBusyId===s.id">
                     {{ capacityBusyId===s.id ? 'Saving…' : 'Save' }}
                   </button>
@@ -147,12 +159,12 @@
               </ng-template>
             </td>
 
-            <td >
+            <td>
               <span class="status-pill {{ s.status || 'pending' }}">
                 {{ s.status || 'pending' }}
               </span>
             </td>
-            <td >
+            <td>
               <button (click)="deleteService(s)" [disabled]="busyId===s.id">
                 {{ busyId===s.id ? 'Deleting…' : 'Delete' }}
               </button>
@@ -165,40 +177,40 @@
     <h3 class="incomingOrders">Incoming orders</h3>
 
     <section *ngIf="loadingOrders">Loading orders…</section>
-    <section class="noOrdersYet" *ngIf="!loadingOrders && orders.length === 0" >
+    <section class="noOrdersYet" *ngIf="!loadingOrders && orders.length === 0">
       No orders yet.
     </section>
 
     <section class="orders-table-wrapper" *ngIf="orders.length > 0">
       <table class="orders-table">
         <thead>
-          <tr >
-            <th >Placed</th>
-            <th >Service</th>
-            <th >Guests</th>
-            <th >Date</th>
-            <th >Time</th>
-            <th >Notes</th>
-            <th >Status</th>
+          <tr>
+            <th>Placed</th>
+            <th>Service</th>
+            <th>Guests</th>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Notes</th>
+            <th>Status</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let o of orders; trackBy: trackById" >
-            <td >{{ o.createdAtDate || o.startAtDate | date:'MMM d, y, h:mm a' }}</td>
-            <td >{{ getServiceName(o.vendorID) }}</td>
-            <td >{{ o.guestsNum }}</td>
+          <tr *ngFor="let o of orders; trackBy: trackById">
+            <td>{{ o.createdAtDate || o.startAtDate | date:'MMM d, y, h:mm a' }}</td>
+            <td>{{ getServiceName(o.vendorID) }}</td>
+            <td>{{ o.guestsNum }}</td>
             <td>{{ o.startAtDate | date:'MMM d, y' }}</td>
-            <td >{{ o.startAtDate | date:'shortTime' }} – {{ o.endAtDate | date:'shortTime' }}</td>
-            <td >
-              <span >{{ o.note || '—' }}</span>
+            <td>{{ o.startAtDate | date:'shortTime' }} – {{ o.endAtDate | date:'shortTime' }}</td>
+            <td>
+              <span>{{ o.note || '—' }}</span>
             </td>
-            <td >
+            <td>
               <span class="ordersStatus {{ o.status | lowercase }}">
                 {{ o.status }}
               </span>
             </td>
-            <td >
+            <td>
               <button (click)="acceptOrder(o)" [disabled]="!canAct(o) || orderBusyId===o.id">
                 {{ orderBusyId===o.id && orderBusyAction==='accept' ? 'Accepting…' : 'Accept' }}
               </button>
@@ -211,7 +223,7 @@
       </table>
     </section>
 
-    <p *ngIf="errorMsg" >{{ errorMsg }}</p>
+    <p *ngIf="errorMsg">{{ errorMsg }}</p>
   </section>
 
 

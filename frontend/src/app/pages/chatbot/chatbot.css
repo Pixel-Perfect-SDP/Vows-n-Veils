@@ -277,3 +277,35 @@
 
   .chat-button { bottom: 16px; right: 16px; }
 }
+.back-to-faq-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  margin: 10px 0;
+  background: white;
+  border: 1px solid #e75480;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #e75480;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(231, 84, 128, 0.1);
+}
+
+.back-to-faq-button:hover {
+  background: linear-gradient(135deg, #e75480 0%, #d46a6a 100%);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(231, 84, 128, 0.25);
+}
+
+.back-to-faq-button svg {
+  flex-shrink: 0;
+  transition: transform 0.3s ease;
+}
+
+.back-to-faq-button:hover svg {
+  transform: translateX(-2px);
+}

@@ -2,33 +2,153 @@
   "faqs": [
     {
       "id": 1,
-      "question": "What are your business hours?",
-      "answer": "We are open Monday to Friday, 9 AM to 6 PM EST. Our support team is available during these hours to assist you.",
-      "keywords": ["hours", "open", "time", "schedule", "available"]
+      "question": "How do I start planning my wedding on Vows & Veils?",
+      "answer": "Sign in using Google and fill in basic wedding details on the provided form.",
+      "keywords": ["start", "planning", "wedding", "sign in", "google", "begin"]
     },
     {
       "id": 2,
-      "question": "How do I reset my password?",
-      "answer": "To reset your password, click on 'Forgot Password' on the login page. Enter your email address, and we'll send you a reset link within a few minutes.",
-      "keywords": ["password", "reset", "forgot", "login", "access"]
+      "question": "What do I do once I have signed in?",
+      "answer": "Begin planning your special day by selecting a wedding venue, adding guests, creating an invitation, and choosing vendor services. It is recommended that you follow this order.",
+      "keywords": ["signed in", "planning", "venue", "guests", "invitation", "vendor", "order"]
     },
     {
       "id": 3,
-      "question": "What payment methods do you accept?",
-      "answer": "We accept all major credit cards (Visa, MasterCard, American Express), PayPal, and bank transfers for enterprise customers.",
-      "keywords": ["payment", "pay", "credit card", "paypal", "billing"]
+      "question": "How do I choose a wedding venue?",
+      "answer": "Go to your dashboard and select 'Venues' on the sidebar. You will be shown various available options where you can then view more details about each venue. Click the 'select' button to choose that venue.",
+      "keywords": ["venue", "choose", "dashboard", "select", "sidebar", "options"]
     },
     {
       "id": 4,
-      "question": "How can I contact customer support?",
-      "answer": "You can reach our customer support team via email at support@example.com, phone at 1-800-123-4567, or through this chat. We typically respond within 24 hours.",
-      "keywords": ["contact", "support", "help", "email", "phone", "reach"]
+      "question": "How do I add guests?",
+      "answer": "Go to your dashboard and select 'Guests' on the sidebar. You will be shown a button to add guests, where you can enter details for your guest and add them to your guest list. Next, you will be shown a code which you must give to your guests for them to RSVP.",
+      "keywords": ["guests", "add", "guest list", "code", "RSVP", "dashboard"]
     },
     {
       "id": 5,
-      "question": "Do you offer refunds?",
-      "answer": "Yes, we offer a 30-day money-back guarantee. If you're not satisfied with our service, contact us within 30 days of purchase for a full refund.",
-      "keywords": ["refund", "money back", "return", "cancel", "guarantee"]
+      "question": "How does the RSVP code work?",
+      "answer": "When you add guests to your guest list, you will be shown a code to give to your guests to RSVP. This ensures that only your allowed guests are able to RSVP to your wedding. Guests will then enter the code into the RSVP section when they are ready.",
+      "keywords": ["RSVP", "code", "guests", "security", "allowed"]
+    },
+    {
+      "id": 6,
+      "question": "What if a guest is not able to RSVP online?",
+      "answer": "No problem! When you add a guest to your guest list, you can set their status to accepted manually, and they will be shown on your accepted guests.",
+      "keywords": ["RSVP", "online", "manual", "accepted", "status", "guest"]
+    },
+    {
+      "id": 7,
+      "question": "Do I have to fill in all the details when adding a new guest?",
+      "answer": "Nope! The only required detail you need to fill in to ensure a guest can RSVP is their full name.",
+      "keywords": ["guest", "details", "required", "name", "add", "fill"]
+    },
+    {
+      "id": 8,
+      "question": "How do I create an invitation?",
+      "answer": "Go to your dashboard and select 'Invitations' on the sidebar. You will be shown various invitation templates, where you can choose one and add a message and picture.",
+      "keywords": ["invitation", "create", "template", "dashboard", "message", "picture"]
+    },
+    {
+      "id": 9,
+      "question": "How do I send the invitations to my guests?",
+      "answer": "Once you completed your invitation, you will be able to download it and send it to your guests. It includes a link to the website for guests to RSVP, so make sure you send guests your wedding code along with the invitation!",
+      "keywords": ["invitation", "send", "download", "guests", "code", "link"]
+    },
+    {
+      "id": 10,
+      "question": "How do I choose vendor services?",
+      "answer": "Go to your dashboard and select 'Vendors' on the sidebar. You will be shown various vendor services which shows the price of the service as well as the maximum amount of guests catered for. If you like a service, click 'Order', and you will be shown an order form to send to the vendor company.",
+      "keywords": ["vendor", "services", "order", "dashboard", "price", "guests"]
+    },
+    {
+      "id": 11,
+      "question": "How will I know the price of venues and vendor services?",
+      "answer": "The company owning your selected venue or vendor service will contact you privately to discuss payment options. This is not done on-site.",
+      "keywords": ["price", "venue", "vendor", "payment", "contact", "cost"]
+    },
+    {
+      "id": 12,
+      "question": "How do I RSVP to a wedding?",
+      "answer": "Enter the invitation code given to you by the couple when prompted, and fill in the required details.",
+      "keywords": ["RSVP", "wedding", "code", "invitation", "attend"]
+    },
+    {
+      "id": 13,
+      "question": "What if I am unable to RSVP on the website?",
+      "answer": "Let the couple know and they will manually RSVP for you.",
+      "keywords": ["RSVP", "unable", "website", "manual", "problem"]
+    },
+    {
+      "id": 14,
+      "question": "How do I add my company to the website?",
+      "answer": "Sign in using Google for the company type you want (venue/vendor) and fill in basic company details on the provided form to add your company to the website. This will then allow you to add your venues or vendor services for your company.",
+      "keywords": ["company", "add", "sign in", "venue", "vendor", "register"]
+    },
+    {
+      "id": 15,
+      "question": "How do I add a venue to my company profile?",
+      "answer": "Make sure that you have created a company profile specifically for venues company. Go to your dashboard and click the 'Add venue' button. You will then be prompted to enter basic venue details, and you can submit this venue to be reviewed by the admin. Once the admin has approved your venue, it will be available on the main page for couples to choose from.",
+      "keywords": ["venue", "add", "company", "profile", "admin", "approval"]
+    },
+    {
+      "id": 16,
+      "question": "Can I delete a venue that I no longer have available?",
+      "answer": "Yes! Go to your venue company dashboard and click the 'Delete venue' button on the venue that you no longer want.",
+      "keywords": ["delete", "venue", "remove", "unavailable"]
+    },
+    {
+      "id": 17,
+      "question": "Can I edit the details of a venue that has already been added?",
+      "answer": "Yes! Go to your venue company dashboard and click the 'Edit venue' button on the venue that you want to edit.",
+      "keywords": ["edit", "venue", "modify", "change", "update"]
+    },
+    {
+      "id": 18,
+      "question": "How do I add a vendor service?",
+      "answer": "Make sure that you have created a company profile specifically for vendor companies. Go to your dashboard and click the 'Add service' button. You will then be prompted to enter basic vendor service details, and you can submit this vendor service to be reviewed by the admin. Once the admin has approved your vendor service, it will be available on the main page for couples to choose from.",
+      "keywords": ["vendor", "service", "add", "admin", "approval", "submit"]
+    },
+    {
+      "id": 19,
+      "question": "Can I delete a vendor service that I no longer offer?",
+      "answer": "Yes! Go to your vendor company dashboard and click the 'Delete service' button on the vendor service that you no longer offer.",
+      "keywords": ["delete", "vendor", "service", "remove", "discontinue"]
+    },
+    {
+      "id": 20,
+      "question": "Can I have different types of vendor services in one company?",
+      "answer": "Yes! When you add a new vendor service, you will choose the category of the new service to be added.",
+      "keywords": ["vendor", "service", "types", "category", "multiple", "different"]
+    },
+    {
+      "id": 21,
+      "question": "What if I have one company that offers both venues and vendor services?",
+      "answer": "No problem! However, you will need to create a company profile for venues and vendors separately.",
+      "keywords": ["company", "venue", "vendor", "both", "separate", "profiles"]
+    },
+    {
+      "id": 22,
+      "question": "How do I know if the admin has approved my venue or vendor service?",
+      "answer": "The status of your venue or vendor service will be set to 'Active' if the admin has approved it. If the admin has not yet reviewed your venue or vendor service, the status will be set to 'Pending'.",
+      "keywords": ["admin", "approved", "status", "active", "pending", "review"]
+    },
+    {
+      "id": 23,
+      "question": "What if the admin does not approve my venue or vendor service?",
+      "answer": "Unfortunately, your venue or vendor service will not be available for couples to choose from. However, you can reapply for the admin to review your venue or vendor service again.",
+      "keywords": ["admin", "not approved", "reapply", "rejected", "denied"]
+    },
+    {
+      "id": 24,
+      "question": "How do I accept or decline a couple's request for my venue or vendor service?",
+      "answer": "Go to your respective company dashboard. You will see a couple's pending order, and a status bar available for you to change to 'Accept' or 'Decline'.",
+      "keywords": ["accept", "decline", "request", "order", "booking", "manage"]
+    },
+    {
+      "id": 25,
+      "question": "How do payments work?",
+      "answer": "Payments are arranged between the company and the couple privately. This is not done on-site.",
+      "keywords": ["payment", "pay", "billing", "money", "cost", "price"]
     }
   ]
 }

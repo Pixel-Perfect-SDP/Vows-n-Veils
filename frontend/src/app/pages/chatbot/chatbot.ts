@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpClientModule, HttpHeaders } from '@angular/common/http';
 import { catchError, map, of } from 'rxjs';
-import { environmentcb } from '../../../environments/environment';
 
 interface FAQ {
   id: number;
@@ -28,35 +27,34 @@ interface ChatMessage {
 
 export class Chatbot implements OnInit {
   isOpen = true;
-  isMinimized = false;
+  isMinimized = true;
   messages: ChatMessage[] = [];
   userInput = '';
   faqs: FAQ[] = [];
   isLoading = false;
 
-  private huggingFaceApiUrl = 'https://api-inference.huggingface.co/models/sentence-transformers/all-MiniLM-L6-v2';
-
   constructor(private http: HttpClient) { }
 
   ngOnInit(): void {
     this.loadFAQs();
-        console.log('Chatbot loaded'); // check console
+    console.log('Chatbot loaded'); // check console
 
 
   }
 
-  private loadFAQs(): void {
-  this.http.get<{ faqs: FAQ[] }>('/assets/faq.json').subscribe({
-    next: (data) => {
-      this.faqs = data.faqs;
-      this.addBotMessage('Hello! How can I help you today? Click on a question below or type your own.');
-    },
-    error: (error) => {
-      console.error('Error loading FAQs:', error);
-      this.addBotMessage('Sorry, I had trouble loading the FAQ data.');
-    }
-  });
-}
+  loadFAQs(): void {
+    this.http.get<{ faqs: FAQ[] }>('/assets/faq.json').subscribe({
+      next: (data) => {
+        this.addBotMessage('Hello! How can I help you today? ');
+
+        this.faqs = data.faqs;
+      },
+      error: (error) => {
+        console.error('Error loading FAQs:', error);
+        this.addBotMessage('Sorry, I had trouble loading the FAQ data.');
+      }
+    });
+  }
 
   toggleChat(): void {
     this.isOpen = !this.isOpen;
@@ -101,7 +99,7 @@ export class Chatbot implements OnInit {
     this.findAnswerWithAI(question);
   }
 
-  private searchByKeywords(userInput: string): FAQ | null {
+  searchByKeywords(userInput: string): FAQ | null {
     const lowerInput = userInput.toLowerCase();
 
     for (const faq of this.faqs) {
@@ -120,24 +118,17 @@ export class Chatbot implements OnInit {
     return null;
   }
 
-  private findAnswerWithAI(userQuestion: string): void {
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${environmentcb.huggingFaceApiKey}`,
-      'Content-Type': 'application/json'
-    });
 
-    this.http.post<any>(
-      this.huggingFaceApiUrl,
+  findAnswerWithAI(userQuestion: string): void {
+    this.http.post<{ scores: number[] }>(
+      'https://site--vowsandveils--5dl8fyl4jyqm.code.run/chatbot/answer',
       {
-        inputs: {
-          source_sentence: userQuestion,
-          sentences: this.faqs.map(faq => faq.question)
-        }
-      },
-      { headers }
+        question: userQuestion,
+        faqQuestions: this.faqs.map(faq => faq.question)
+      }
     ).pipe(
       map(response => {
-        const scores = response;
+        const scores = response.scores;
         let maxScore = -1;
         let bestMatchIndex = 0;
 
@@ -155,7 +146,7 @@ export class Chatbot implements OnInit {
         return this.faqs[bestMatchIndex].answer;
       }),
       catchError(error => {
-        console.error('Error calling Hugging Face API:', error);
+        console.error('Error calling backend:', error);
         return of("I'm having trouble processing your question right now. Please try again or contact support.");
       })
     ).subscribe({
@@ -170,8 +161,7 @@ export class Chatbot implements OnInit {
       }
     });
   }
-
-  private addUserMessage(text: string): void {
+  addUserMessage(text: string): void {
     this.messages.push({
       text,
       isUser: true,
@@ -179,7 +169,7 @@ export class Chatbot implements OnInit {
     });
   }
 
-  private addBotMessage(text: string): void {
+  addBotMessage(text: string): void {
     this.messages.push({
       text,
       isUser: false,
@@ -192,5 +182,10 @@ export class Chatbot implements OnInit {
       event.preventDefault();
       this.sendMessage();
     }
+  }
+  backtofaq(): void {
+    this.messages = [];
+    this.addBotMessage('Hello! How can I help you today? ');
+
   }
 }

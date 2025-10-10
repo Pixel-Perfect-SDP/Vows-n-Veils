@@ -90,3 +90,69 @@ h2::after {
   color: #e75480; 
   border-bottom: 2px solid #d4af37; 
 }
+
+.topbar {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background: #fff; 
+  border-bottom: 2px solid #f8dfe6;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  box-sizing: border-box;
+}
+
+.logo-area {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.logo-img {
+  height: 42px;
+  width: auto;
+  border-radius: 8px;
+}
+
+.logo-text {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #d46a6a; 
+  margin: 0;
+  font-family: "Georgia", serif;
+}
+.loading-container{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 0vh;
+  padding-top: 20vh;
+  gap: 20px;
+  background: var(--beige-300);
+}
+.Loading-1 {
+  width: 120px;
+  aspect-ratio: 1;
+  background: linear-gradient(#dc1818 0 0) bottom/100% 0% no-repeat #ccc;
+  -webkit-mask:
+    radial-gradient(circle at 60% 65%, #000 62%, #0000 65%) top left,
+    radial-gradient(circle at 40% 65%, #000 62%, #0000 65%) top right,
+    linear-gradient(to bottom left, #000 42%,#0000 43%) bottom left,
+    linear-gradient(to bottom right,#000 42%,#0000 43%) bottom right;
+  -webkit-mask-size: 50% 50%;
+  -webkit-mask-repeat: no-repeat;
+  animation: l19 2s infinite linear;
+}
+@keyframes l19 { 90%,100% { background-size:100% 100% } }
+
+.Loading-2 {
+  margin-left: 30px;
+  font-weight: bold;
+  font-family: sans-serif;
+  font-size: 30px;
+  animation: l1 1s linear infinite alternate;
+}
+.Loading-2:before { content:"Loading..." }
+@keyframes l1 { to { opacity: 0 } }

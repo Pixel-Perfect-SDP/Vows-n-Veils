@@ -1,13 +1,24 @@
-<body>
+<header class="topbar">
+  <section class="logo-area">
+    <img class="logo-img" src="assets/logo.jpg" alt="Vows & Veils logo" />
+    <h1 class="logo-text">Vows & Veils</h1>
+  </section>
   <nav class="nav-links">
     <a (click)="backhome();"> Back</a>
   </nav>
+</header>
+<body>
 
   <h2>Notifications</h2>
 
-
+  <section class="loading-overlay" *ngIf="loading">
+        <section class="loading-container">
+        <section class="Loading-1"></section>
+        <section class="Loading-2"></section>
+    </section>
+    </section>
   <section class="notifications-list">
-    <p *ngIf="notifications.length === 0">No notifications</p>
+    <p *ngIf="notifications.length === 0" &&*ngIf="!loading">No notifications</p>
 
     <section *ngFor="let n of notifications" [ngClass]="{'unread': !n.read}" class="notification-item">
       <p>From: {{n.from}}</p>

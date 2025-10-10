@@ -23,7 +23,7 @@ interface Notification {
 export class Notifications implements OnInit {
   notifications: Notification[] = [];
   user: User | null = getAuth(getApp()).currentUser;
-
+  loading = false;
   constructor(private router: Router, private http: HttpClient) { }
 
 
@@ -37,12 +37,13 @@ async ngOnInit() {
   console.log('Logged in user:', this.user.uid);
 
   try {
+    this.loading=true;
     const apiUrl = `https://site--vowsandveils--5dl8fyl4jyqm.code.run/venues/notifications/${this.user.uid}`;
     const response: any = await this.http.get(apiUrl).toPromise();
 
     this.notifications = response.notifications || [];
     console.log(`Fetched ${this.notifications.length} notifications`);
-
+    this.loading=false;
     this.notifications.sort((a, b) => Number(a.read) - Number(b.read));
 
     const unread = this.notifications.filter(n => !n.read);
@@ -64,8 +65,10 @@ async ngOnInit() {
     }));
 
     console.log('Notifications fetched and updated:', this.notifications);
+  
   } catch (err) {
     console.error('Error fetching notifications from API:', err);
+    this.loading =false;
   }
 }
 

@@ -14,10 +14,6 @@ export const environment = {
   }
 };
 
-export const environmentcb = {
-  production: false,
-  huggingFaceApiKey: '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'
-};
 
 /*/// Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
