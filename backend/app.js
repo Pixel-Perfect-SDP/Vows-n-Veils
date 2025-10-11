@@ -76,7 +76,7 @@ app.get('/', (req, res) => {
   res.send('Backend is up ');
 });
 
-const chatbotRoutes = require('./routes/chatbot'); 
+const chatbotRoutes = require('./routes/chatbot.routes'); 
 app.use('/chatbot', chatbotRoutes);
 
 module.exports = app;
