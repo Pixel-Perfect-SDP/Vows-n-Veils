@@ -2,7 +2,7 @@ import { Component, inject, OnInit, OnDestroy, PLATFORM_ID, NgZone, ChangeDetect
 import { isPlatformBrowser, CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import { Firestore, collection, addDoc, doc, getDoc, setDoc, serverTimestamp, getDocs, query, where } from 'firebase/firestore';
+import { Firestore, collection, addDoc, doc, getDoc, setDoc, serverTimestamp, getDocs, query, where, updateDoc, deleteDoc } from 'firebase/firestore';
 import { AuthService } from '../../core/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getApp } from 'firebase/app';
@@ -22,6 +22,16 @@ interface Notification {
   read: boolean;
 }
 
+//Add checklist
+type ChecklistTask = {
+  id: string;
+  title: string;
+  dueDate?: any;
+  assignee?: string;
+  done: boolean;
+  createdAt?: any;
+  priority?: 'high' | 'medium' | 'low';
+};
 
 @Component({
   selector: 'app-homepage',
@@ -407,6 +417,9 @@ export class Homepage {
 
         // Get comprehensive event display data
         await this.getEventDataForDisplay();
+
+        //Checklist added
+        await this.loadChecklist();
 
         //countdown
         this.updateCountdown();
@@ -943,4 +956,138 @@ export class Homepage {
 this.router.navigate(['/notifications'], { state: { from: this.router.url } });
   }
 
+  
+
+  checklist: ChecklistTask[] = [];
+  checklistLoading = false;
+  showAddTask = false;
+  sortDoneLast = false;
+
+  addTaskForm = this.formBuild.group({
+    title: ['', [Validators.required]],
+    dueDate: [''],
+    assignee: [''],
+    priority: ['medium']
+  });
+
+  private async getChecklistColRef() {
+    const user = await this.waitForUser();
+    if (!user) throw new Error('No authenticated user.');
+    const db = getFirestore(getApp());
+    return collection(db, 'Events', user.uid, 'Checklist');
+  }
+
+  async loadChecklist() {
+    try {
+      this.checklistLoading = true;
+      const colRef = await this.getChecklistColRef();
+      const snap = await getDocs(colRef);
+
+      const items: ChecklistTask[] = [];
+      snap.forEach(d => {
+        const data: any = d.data();
+        items.push({
+          id: d.id,
+          title: data?.title ?? '',
+          dueDate: data?.dueDate ?? null,
+          assignee: data?.assignee ?? '',
+          done: !!data?.done,
+          createdAt: data?.createdAt ?? null,
+          priority: (data?.priority as 'high'|'medium'|'low') ?? 'medium'
+        });
+      });
+
+      items.sort((a, b) => {
+        const ad = a.dueDate?.toDate ? a.dueDate.toDate() : (a.dueDate ? new Date(a.dueDate) : null);
+        const bd = b.dueDate?.toDate ? b.dueDate.toDate() : (b.dueDate ? new Date(b.dueDate) : null);
+        if (ad && bd) return ad.getTime() - bd.getTime();
+        if (ad && !bd) return -1;
+        if (!ad && bd) return 1;
+        return 0;
+      });
+
+      this.checklist = items;
+    } catch (e) {
+      console.error('Failed to load checklist', e);
+    } finally {
+      this.checklistLoading = false;
+    }
+  }
+
+  get checklistSorted(): ChecklistTask[] {
+    if (!this.sortDoneLast) return this.checklist;
+    const open = this.checklist.filter(t => !t.done);
+    const done = this.checklist.filter(t => t.done);
+    return open.concat(done);
+  }
+
+  toggleAddTask() {
+    this.showAddTask = !this.showAddTask;
+    if (!this.showAddTask) this.addTaskForm.reset({ title: '' });
+  }
+
+  async submitAddTask() {
+    if (this.addTaskForm.invalid) return;
+
+    try {
+      this.checklistLoading = true;
+      const colRef = await this.getChecklistColRef();
+      const raw = this.addTaskForm.getRawValue();
+
+      let due: any = undefined;
+      if (raw.dueDate) {
+        due = new Date(raw.dueDate as string);
+      }
+
+      await addDoc(colRef, {
+        title: (raw.title || '').toString().trim(),
+        dueDate: due ?? null,
+        assignee: (raw.assignee || '').toString().trim() || null,
+        done: false,
+        createdAt: serverTimestamp(),
+        priority: (raw.priority as 'high'|'medium'|'low') || 'medium'
+      });
+
+      await this.loadChecklist();
+      this.toggleAddTask();
+    } catch (e) {
+      console.error('Failed to add task', e);
+      alert('Failed to add task. Please try again.');
+    } finally {
+      this.checklistLoading = false;
+    }
+  }
+
+  async toggleTaskDone(t: ChecklistTask) {
+    try {
+      this.checklistLoading = true;
+      const db = getFirestore(getApp());
+      await updateDoc(doc(db, 'Events', (await this.waitForUser())!.uid, 'Checklist', t.id), {
+        done: !t.done
+      });
+      await this.loadChecklist();
+    } catch (e) {
+      console.error('Failed to update task', e);
+      alert('Failed to update task.');
+    } finally {
+      this.checklistLoading = false;
+    }
+  }
+
+  async deleteTask(t: ChecklistTask) {
+    const sure = window.confirm(`Delete "${t.title}"?`);
+    if (!sure) return;
+
+    try {
+      this.checklistLoading = true;
+      const db = getFirestore(getApp());
+      await deleteDoc(doc(db, 'Events', (await this.waitForUser())!.uid, 'Checklist', t.id));
+      await this.loadChecklist();
+    } catch (e) {
+      console.error('Failed to delete task', e);
+      alert('Failed to delete task.');
+    } finally {
+      this.checklistLoading = false;
+    }
+  }
 }
