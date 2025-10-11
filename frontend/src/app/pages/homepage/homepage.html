@@ -293,6 +293,122 @@
         </section>
       </section>
 
+      <!-- Adding checklist-->
+      <section class="table-card" *ngIf="hasEvent && eventData">
+        <section class="table-header">
+          <section class="table-title">Checklist</section>
+          <section style="display:flex; gap:10px;">
+            <label style="display:flex; align-items:center; gap:6px; font-size:12px;">
+              <input type="checkbox" [(ngModel)]="sortDoneLast" />
+              Sorted by complete/incomplete
+            </label>
+            <button type="button" class="btn" (click)="toggleAddTask()">
+              {{ showAddTask ? 'Close' : 'Add Task' }}
+            </button>
+          </section>
+        </section>
+
+        <!--Panel for task adding-->
+        <section class="add-card" *ngIf="showAddTask">
+          <form [formGroup]="addTaskForm" (ngSubmit)="submitAddTask()">
+            <section class="form-grid">
+              <label class="grid-span-2">
+                <span>Task *</span>
+                <input formControlName="title" placeholder="e.g. Book photographer" />
+              </label>
+
+              <label>
+                <span>Due date</span>
+                <input type="date" formControlName="dueDate" />
+              </label>
+
+              <label>
+                <span>Assignee</span>
+                <input formControlName="assignee" placeholder="Optional" />
+              </label>
+
+              <label>
+                <span>Priority</span>
+                <select formControlName="priority">
+                  <option value="high">High</option>
+                  <option value="medium">Medium</option>
+                  <option value="low">Low</option>
+                </select>
+              </label>
+            </section>
+
+            <section class="add-card-actions">
+              <button type="button" class="btn btn-secondary" (click)="toggleAddTask()">Cancel</button>
+              <button type="submit" class="btn btn-primary" [disabled]="addTaskForm.invalid || checklistLoading">
+                Save Task
+              </button>
+            </section>
+          </form>
+        </section>
+
+        <!-- Table for checklist items-->
+        <section class="table-container">
+          <table class="guest-table">
+            <thead>
+              <tr>
+                <th style="width:1%"></th>
+                <th>Task</th>
+                <th>Due</th>
+                <th>Assignee</th>
+                <th>Priority</th>
+                <th style="width:1%; white-space: nowrap;">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let t of checklistSorted">
+                <td>
+                  <input
+                    type="checkbox"
+                    [checked]="t.done"
+                    (change)="toggleTaskDone(t)"
+                    [disabled]="checklistLoading"
+                    aria-label="Mark task {{t.title}} done"
+                  />
+                </td>
+                <td class="td-clip" [title]="t.title">
+                  <span [ngClass]="t.done ? 'chip chip--muted' : ''">{{ t.title }}</span>
+                </td>
+                <td>
+                  <ng-container *ngIf="t.dueDate; else noDue">
+                    {{ (t.dueDate.toDate ? t.dueDate.toDate() : t.dueDate) | date:'MMM d, y' }}
+                  </ng-container>
+                  <ng-template #noDue>—</ng-template>
+                </td>
+                <td>{{ t.assignee || '—' }}</td>
+                <td>
+                  <span class="chip"
+                        [ngClass]="{
+                          'chip--warn': t.priority === 'high',
+                          'chip--ok': t.priority === 'medium',
+                          'chip--muted': t.priority === 'low'
+                        }">{{ t.priority || '—' }}</span>
+                </td>
+                <td>
+                  <button
+                    type="button"
+                    class="icon-btn danger"
+                    title="Delete task"
+                    aria-label="Delete task"
+                    (click)="deleteTask(t)"
+                    [disabled]="checklistLoading">
+                    🗑️
+                  </button>
+                </td>
+              </tr>
+
+              <tr *ngIf="!checklist?.length">
+                <td colspan="6" class="empty-state">No tasks yet. Click “Add Task”.</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+      </section>
+
 
 
       <!-- Default landing content -->
