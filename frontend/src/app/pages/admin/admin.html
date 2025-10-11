@@ -1,16 +1,27 @@
-<html>
+<header class="topbar">
+  <section class="logo-area">
+    <img class="logo-img" src="assets/logo.jpg" alt="Vows & Veils logo" />
+    <h1 class="logo-text">Vows & Veils</h1>
+  </section>
+
+  <nav class="nav-links">
+    <a (click)="logout()" class="logout-btn">Log out</a>
+  </nav>
+</header>
+
+<section>
     <head class="hero">
         <title>Admin Page</title>
         <link rel="stylesheet" href="admin.css">
 
     </head>
 
-    <body>
-        <span class="hero">
-            <img src="assets/logo.jpg" class="logo" />
+    <section class="admin-section">
+        <section class="pending-container">
             <h1>Pending Approvals </h1>
-            <button (click)="logout()" class="logout-btn">Logout</button>
-        </span>
+
+        </section>
+        <section class="pending-column">
         <h2>Venues</h2>
         <span *ngIf="venues.length==0" class="noItems">
             <p>There are no pending venues</p>
@@ -20,10 +31,23 @@
             <span class="disp-box" *ngFor="let venue of venues">
                 <h3>{{venue.venuename}}</h3>
                 <p>{{venue.address}}</p>
-                <button  (click)="changeStatus('Venues',venue.id,'active')" class="disp-btn">Approve</button>
-                <button (click)="changeStatus('Venues',venue.id,'rejected')" class="disp-btn">Reject</button>
+                <select [(ngModel)]="venue.reason" name="reason" id="reason">
+                    <option value=" disabled selected hidden">Reason for rejection</option>
+                    <option value="Incomplete details">Incomplete details</option>
+                    <option value="Inappropriate content">Inappropriate content</option>
+                    <option value="Low-Quality images">Low-Quality Images</option>
+                    <option value="Unavailable or closed">Venue unavailable or closed</option>
+                </select>
+                <button  (click)="changeStatus('Venues',venue.id,'active')" class="disp-btn" [disabled]="venue.reason">Approve</button>
+                <button (click)="changeStatus('Venues',venue.id,'rejected',venue.reason)" class="disp-btn" [disabled]="!venue.reason">Reject</button>
+
             </span>
+
+
         </section>
+        </section>
+
+        <section class="pending-column">
         <h2>Vendors</h2>
         <span *ngIf="vendors.length==0" class="noItems">
             <p>There are no pending vendors</p>
@@ -33,9 +57,19 @@
             <span class="disp-box" *ngFor="let vendor of vendors">
                 <h3>{{vendor.serviceName}}</h3>
                 <p>{{vendor.type}}</p>
-                <button (click)="changeStatus('Vendors',vendor.id,'active')" class="disp-btn">Approve</button>
-                <button (click)="changeStatus('Vendors',vendor.id,'rejected')" class="disp-btn">Reject</button>
+                <select [(ngModel)]="vendor.reason" name="reason" id="reason">
+                    <option value=" disabled selected hidden">Reason for rejection</option>
+                    <option value="Incomplete profile">Incomplete profile</option>
+                    <option value="Inappropriate content">Inappropriate content</option>
+                    <option value="Low-Quality images">Low-Quality Images</option>
+                    <option value="Service Mismatch">Submitted category does not fit offered services</option>
+                    <option value="Negative Reputation">Vendor has poor reviews or complaints</option>
+                </select>
+                <button (click)="changeStatus('Vendors',vendor.id,'active')" class="disp-btn" [disabled]="vendor.reason">Approve</button>
+                <button (click)="changeStatus('Vendors',vendor.id,'rejected',vendor.reason)" class="disp-btn" [disabled]="!vendor.reason">Reject</button>
+
             </span>
         </section>
-    </body>
-</html>
+        </section>
+    </section>
+</section>
