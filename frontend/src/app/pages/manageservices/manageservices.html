@@ -1,3 +1,34 @@
+<!--
+<head>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+-->
+<header class="topbar">
+  <section class="logo-area">
+    <img class="logo-img" src="assets/logo.jpg" alt="Vows & Veils logo" />
+    <h1 class="logo-text">Vows & Veils</h1>
+  </section>
+
+  <nav class="nav-links">
+    <section>
+
+      <button type="button" class="notif-btn" (click)="goToNotifications()" *ngIf="hasVenueCompany">
+        <svg xmlns="http://www.w3.org/2000/svg" height="25px" viewBox="0 0 24 24" width="25px" fill="#000000">
+          <path
+            d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z" />
+        </svg>
+
+        <span class="notification-dot" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
+      </button>
+
+    </section>
+    <a (click)="trackorders()" *ngIf="hasVenueCompany"> Track My Orders</a>
+    <a (click)="logout()">Log out</a>
+
+
+  </nav>
+</header>
+
 <section class="manageservices-section">
 
   <!-- Loading -->
@@ -7,23 +38,16 @@
   </section>
 
   <section class="loading-overlay" *ngIf="loading">
-    <div class="loading-content">
-      <p>Loading...</p>
-    </div>
+    <section class="loading-container" *ngIf="hasVenueCompany === null">
+      <section class="Loading-1"></section>
+      <section class="Loading-2"></section>
+    </section>
   </section>
+
 
   <!-- If venue company exists -->
   <section class="has-venue-company" *ngIf="hasVenueCompany && companyVenueData">
-    <nav class="sidebar">
-      <section class="sidebar-header">
-        <img src="assets/logo.jpg" alt="Vows & Veils logo" class="logo" />
-        <h1>Vows & Veils</h1>
-      </section>
 
-      <!-- actions -->
-      <!--<button disabled>Track orders</button>-->
-      <button (click)="logout()">Log out</button>
-    </nav>
 
     <section class="venue-company-details">
       <p class="company-name">Welcome, {{ companyVenueData.companyName }}</p>
@@ -34,85 +58,80 @@
   <section class="services" *ngIf="hasVenueCompany && companyVenueData">
     <h3 class="my-venues">My venues:</h3>
     <section class="button-container">
-      <button (click)="select('Venues')"[ngClass]="selected === 'Venues' ? 'yes-style' : 'default-style'">View my venues</button>
-        <button class="add-venue-btn" *ngIf="selected === 'Venues' && !addingVenue && !editingVenue" (click)="AddVenue()">Add Venue</button>
-        <button class="map-toggle-btn" *ngIf="selected === 'Venues'" (click)="toggleMap()">
-          {{ mapVisible ? 'Hide Map' : 'Show Map' }}
-        </button>
+      <button (click)="select('Venues')" [ngClass]="selected === 'Venues' ? 'yes-style' : 'default-style'">View my
+        venues</button>
+      <button class="add-venue-btn" *ngIf="selected === 'Venues' && !addingVenue && !editingVenue"
+        (click)="AddVenue()">Add Venue</button>
+      <button class="map-toggle-btn" *ngIf="selected === 'Venues'" (click)="toggleMap()">
+        {{ mapVisible ? 'Hide Map' : 'Show Map' }}
+      </button>
     </section> <!--button-container-->
 
     <!-- Map Section -->
     <section class="map-section" *ngIf="mapVisible && selected === 'Venues'">
       <!-- Map Search Bar -->
-      <div class="map-search-bar">
-        <input 
-          type="text" 
-          [(ngModel)]="searchAddress" 
-          placeholder="Search for a location..." 
-          class="map-search-input"
-          (keyup.enter)="searchLocation()"
-        />
+      <section class="map-search-bar">
+        <input type="text" [(ngModel)]="searchAddress" placeholder="Search for a location..." class="map-search-input"
+          (keyup.enter)="searchLocation()" />
         <button (click)="searchLocation()" class="map-search-btn" [disabled]="mapLoading">
           {{ mapLoading ? 'Searching...' : 'Search' }}
         </button>
-      </div>
+      </section>
 
       <!-- Loading -->
-      <div class="map-loading" *ngIf="mapLoading">
-        <div class="map-loader"></div>
+      <section class="map-loading" *ngIf="mapLoading">
+        <section class="map-loader"></section>
         <span>Loading map data...</span>
-      </div>
+      </section>
 
       <!-- Error -->
-      <div class="map-error" *ngIf="mapError && !mapLoading">
+      <section class="map-error" *ngIf="mapError && !mapLoading">
         <span>{{ mapError }}</span>
-        <div class="map-error-help" *ngIf="mapError.includes('temporarily unavailable')">
+        <section class="map-error-help" *ngIf="mapError.includes('temporarily unavailable')">
           <small>💡 You can still enter addresses manually in the venue form below</small>
-        </div>
-      </div>
+        </section>
+      </section>
 
       <!-- Map Display -->
-      <div class="map-container" *ngIf="mapVisible && !mapError">
-        <div class="map-display">
+      <section class="map-container" *ngIf="mapVisible && !mapError">
+        <section class="map-display">
           <!-- Real Leaflet Map -->
-          <div id="leaflet-map" class="leaflet-map-container"></div>
-          
+          <section id="leaflet-map" class="leaflet-map-container"></section>
+
           <!-- Map Info Panel -->
-          <div class="map-info-panel">
-            <div class="map-info-section" *ngIf="mapPin">
+          <section class="map-info-panel">
+            <section class="map-info-section" *ngIf="mapPin">
               <h4>📍 Current Location</h4>
               <p class="location-address">{{ mapPin?.address || 'Click on the map to select a location' }}</p>
-              <p class="location-coords" *ngIf="mapPin">{{ mapPin.lat | number:'1.4-4' }}, {{ mapPin.lon | number:'1.4-4' }}</p>
-              
-              <button 
-                *ngIf="(addingVenue || editingVenue) && mapPin" 
-                (click)="useLocationForVenue()" 
-                class="use-location-btn"
-              >
+              <p class="location-coords" *ngIf="mapPin">{{ mapPin.lat | number:'1.4-4' }}, {{ mapPin.lon |
+                number:'1.4-4' }}</p>
+
+              <button *ngIf="(addingVenue || editingVenue) && mapPin" (click)="useLocationForVenue()"
+                class="use-location-btn">
                 Use this address for venue
               </button>
-            </div>
-            
-            <div class="map-info-section" *ngIf="!mapPin && mapVisible">
+            </section>
+
+            <section class="map-info-section" *ngIf="!mapPin && mapVisible">
               <h4>🗺️ Interactive Map</h4>
               <p class="location-address">Click anywhere on the map to select a location</p>
               <small>You can also search for addresses using the search box above</small>
-            </div>
+            </section>
 
             <!-- Nearby Places -->
-            <div class="map-info-section" *ngIf="nearbyPlaces.length > 0">
+            <section class="map-info-section" *ngIf="nearbyPlaces.length > 0">
               <h4>🏛️ Nearby Venues</h4>
-              <div class="nearby-places">
-                <div class="nearby-place" *ngFor="let venue of nearbyPlaces | slice:0:5">
+              <section class="nearby-places">
+                <section class="nearby-place" *ngFor="let venue of nearbyPlaces | slice:0:5">
                   <span class="place-name">{{ venue.name }}</span>
                   <span class="place-type">{{ getVenueTypeLabel(venue.venueType) }}</span>
                   <span class="venue-address" *ngIf="venue.address">{{ venue.address }}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+                </section>
+              </section>
+            </section>
+          </section>
+        </section>
+      </section>
     </section>
 
 
@@ -157,8 +176,9 @@
         <section class="card" *ngFor="let venue of venues">
           <h3>{{ venue.venuename }}</h3>
           <img *ngIf="venue.images && venue.images[0]?.url" [src]="venue.images[0].url" alt="{{venue.venuename}}" />
-          <label class="statuslabel">Status:{{venue.status}}</label>
-          <button class="btn" (click)="UpdateVenue(venue)">Update Venue Details</button>
+          <label class="statuslabel">Status: {{venue.status}}</label>
+          <button class="btn" *ngIf="venue.status!== 'rejected'" (click)="UpdateVenue(venue)">Update Venue
+            Details</button>
           <button class="btn delete-btn" (click)="DeleteVenue(venue)">Delete Venue</button>
 
 
@@ -192,9 +212,10 @@
         <input type="number" [(ngModel)]="updateData.price" placeholder="Add new price" />
 
         <!-- Existing images -->
-        <div class="image-list" *ngIf="editingVenue.images?.length > 0">
-          <div class="image-item" *ngFor="let img of editingVenue.images; let i = index">
-            <img *ngIf="img?.url" [src]="img.url" alt="Venue Image" />
+        <section class="image-list" *ngIf="editingVenue.images?.length > 0">
+          <section class="image-item" *ngFor="let img of editingVenue.images; let i = index">
+            <img *ngIf="img?.url" [src]="img.url" alt="Venue Image"
+              style="max-width: 150px; max-height: 150px; object-fit: cover; border-radius: 8px;" />
             <label *ngIf="img">
               <input type="checkbox" [(ngModel)]="updateData.imagesToDelete[i]" />
               Delete
@@ -203,8 +224,8 @@
             <p class="disclaimer" *ngIf="img">
               Deleted images cannot be retrieved once the update button is pressed.
             </p>
-          </div>
-        </div>
+          </section>
+        </section>
 
 
 
@@ -235,7 +256,7 @@
     <section class="venue-company-card">
       <img src="assets/logo.jpg" alt="Vows & Veils logo" class="logo" />
       <h2>Join as a venue company</h2>
-      <p>Fill in the details below to get started!</p>
+      <p>Fill in the details to get started!</p>
     </section>
 
     <section class="venue-company-form">

@@ -20,6 +20,14 @@ interface VenueImage {
   url: string;
   name: string; // this is the Firebase Storage path/filename
 }
+interface Notification {
+  id: string;
+  from: string;
+  to: string;
+  message: string;
+  timestamp: any;
+  read: boolean;
+}
 
 interface Venue {
   id: string;
@@ -38,7 +46,7 @@ interface Venue {
 @Component({
   selector: 'app-manageservices',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, HttpClientModule,FormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, HttpClientModule, FormsModule],
   templateUrl: './manageservices.html',
   styleUrls: ['./manageservices.css']
 })
@@ -61,6 +69,9 @@ export class Manageservices implements OnInit, OnDestroy {
   newUpdateFiles: FileList | null = null;
   addingVenue: boolean = false;
   newVenueData: any = {};
+  public notifications: Notification[] = [];
+  public unreadCount: number = 0;
+  private db = getFirestore(getApp());
 
   user: User | null = null;
 
@@ -72,7 +83,7 @@ export class Manageservices implements OnInit, OnDestroy {
   public mapPin: { lat: number; lon: number; address?: string } | null = null;
   public nearbyPlaces: any[] = [];
   public searchAddress: string = '';
-  
+
   // Leaflet-specific properties
   private map: L.Map | null = null;
   private currentMarker: L.Marker | null = null;
@@ -110,7 +121,6 @@ export class Manageservices implements OnInit, OnDestroy {
     try {
       const user = await this.waitForUser();
       if (!user) return;
-
       const db = getFirestore(getApp());
       const docRef = doc(db, 'CompaniesVenues', user.uid);
       const docSnap = await getDoc(docRef);
@@ -120,11 +130,12 @@ export class Manageservices implements OnInit, OnDestroy {
         this.companyVenueData = docSnap.data();
         if (this.companyVenueData.type === 'venue') {
           this.hasVenueCompany = true;
-          onAuthStateChanged(auth, (currentUser) => {
+          onAuthStateChanged(auth, async (currentUser) => {
             this.user = currentUser;
             if (this.user) {
               console.log("Logged in user:", this.user.uid);
               this.selected = 'Venues'
+              await this.fetchNotifications();
 
             } else {
               console.warn("No user logged in!");
@@ -194,6 +205,8 @@ export class Manageservices implements OnInit, OnDestroy {
     }
   }
 
+
+
   fetchVenues() {
     if (!this.user) {
       alert("No user logged in!");
@@ -209,61 +222,61 @@ export class Manageservices implements OnInit, OnDestroy {
   }
 
   // update venue
-onNewFilesSelected(event: any) {
-  this.newUpdateFiles = event.target.files;
-}
+  onNewFilesSelected(event: any) {
+    this.newUpdateFiles = event.target.files;
+  }
   UpdateVenue(venue: any) {
     this.editingVenue = { ...venue };
     this.updateData = { ...venue };
-    
-   this.updateData.imagesToDelete = this.editingVenue.images?.map(() => false) || [];
+
+    this.updateData.imagesToDelete = this.editingVenue.images?.map(() => false) || [];
   }
 
-async SubmitUpdate() {
-  if (!this.editingVenue || !this.user) return;
-  this.loading = true;
+  async SubmitUpdate() {
+    if (!this.editingVenue || !this.user) return;
+    this.loading = true;
 
-  try {
-    const venueId = this.editingVenue.id;
+    try {
+      const venueId = this.editingVenue.id;
 
-    const imagesToDelete = this.updateData.imagesToDelete
-      ?.map((checked: boolean, idx: number) => 
-        checked ? this.editingVenue!.images[idx].name : null
-      )
-      .filter((v: string | null) => v) || [];
+      const imagesToDelete = this.updateData.imagesToDelete
+        ?.map((checked: boolean, idx: number) =>
+          checked ? this.editingVenue!.images[idx].name : null
+        )
+        .filter((v: string | null) => v) || [];
 
-    const formData = new FormData();
-    formData.append('deleteImages', JSON.stringify(imagesToDelete));
+      const formData = new FormData();
+      formData.append('deleteImages', JSON.stringify(imagesToDelete));
 
-    // Append new files
-    if (this.newUpdateFiles) {
-      for (let i = 0; i < this.newUpdateFiles.length; i++) {
-        formData.append('images', this.newUpdateFiles[i]);
+      // Append new files
+      if (this.newUpdateFiles) {
+        for (let i = 0; i < this.newUpdateFiles.length; i++) {
+          formData.append('images', this.newUpdateFiles[i]);
+        }
       }
+
+      const venueData = { ...this.updateData };
+      delete venueData.images;
+      delete venueData.imagesToDelete;
+      formData.append('venueData', JSON.stringify(venueData));
+
+      const apiUrl = `https://site--vowsandveils--5dl8fyl4jyqm.code.run/venues/${venueId}/images`;
+      const result: any = await this.http.put(apiUrl, formData).toPromise();
+
+      this.editingVenue.images = result.images || [];
+
+      alert('Venue updated successfully!');
+      this.editingVenue = null;
+      this.fetchVenues();
+
+    } catch (err) {
+      console.error('Error updating venue', err);
+      alert('Failed to update venue.');
+    } finally {
+      this.loading = false;
+      this.newUpdateFiles = null;
     }
-
-    const venueData = { ...this.updateData };
-    delete venueData.images;
-    delete venueData.imagesToDelete;
-    formData.append('venueData', JSON.stringify(venueData));
-
-    const apiUrl = `https://site--vowsandveils--5dl8fyl4jyqm.code.run/venues/${venueId}/images`;
-    const result: any = await this.http.put(apiUrl, formData).toPromise();
-
-    this.editingVenue.images = result.images || [];
-
-    alert('Venue updated successfully!');
-    this.editingVenue = null;
-    this.fetchVenues();
-
-  } catch (err) {
-    console.error('Error updating venue', err);
-    alert('Failed to update venue.');
-  } finally {
-    this.loading = false;
-    this.newUpdateFiles = null;
   }
-}
   CancelUpdate() { this.editingVenue = null; }
 
   AddVenue() {
@@ -276,13 +289,13 @@ async SubmitUpdate() {
       phonenumber: '',
       capacity: null,
       price: null,
-      status:"pending"
+      status: "pending"
     };
   }
 
   onFileSelected(event: any): void {
-  this.selectedFiles = event.target.files; 
-}
+    this.selectedFiles = event.target.files;
+  }
 
   SubmitNewVenue() {
     if (!this.user) {
@@ -292,18 +305,18 @@ async SubmitUpdate() {
     this.newVenueData.companyID = this.user.uid;
     this.loading = true;
     delete this.newVenueData.images;
-    
-  const formData = new FormData();
-  formData.append('venue', JSON.stringify(this.newVenueData));
-  if (this.selectedFiles) {
-    for (let i = 0; i < this.selectedFiles.length; i++) {
-      formData.append('images', this.selectedFiles[i]);
+
+    const formData = new FormData();
+    formData.append('venue', JSON.stringify(this.newVenueData));
+    if (this.selectedFiles) {
+      for (let i = 0; i < this.selectedFiles.length; i++) {
+        formData.append('images', this.selectedFiles[i]);
+      }
     }
-  }
     this.http.post(`https://site--vowsandveils--5dl8fyl4jyqm.code.run/venues`, formData)
       .subscribe({
-        next: () => { alert('New venue added successfully!'); this.addingVenue = false; this.fetchVenues(); this.loading=false;},
-        error: err => { console.error('Error adding venue', err); alert('Failed to add venue.'); this.loading=false;}
+        next: () => { alert('New venue added successfully!'); this.addingVenue = false; this.fetchVenues(); this.loading = false; },
+        error: err => { console.error('Error adding venue', err); alert('Failed to add venue.'); this.loading = false; }
       });
   }
 
@@ -313,7 +326,7 @@ async SubmitUpdate() {
   DeleteVenue(venue: any) {
     const confirmDelete = confirm(`Are you sure you want to delete "${venue.venuename}"? This cannot be undone!`);
     if (!confirmDelete) return;
-  this.loading=true;
+    this.loading = true;
     this.http.delete(`https://site--vowsandveils--5dl8fyl4jyqm.code.run/venues/${venue.id}`)
       .subscribe({
         next: () => {
@@ -331,8 +344,7 @@ async SubmitUpdate() {
       });
   }
 
-  logout(): void
-  {
+  logout(): void {
     signOut(auth)
       .then(() => {
         console.log('User signed out successfully');
@@ -343,8 +355,9 @@ async SubmitUpdate() {
       });
   }
 
+
   // ===== MAP FUNCTIONALITY =====
-  
+
   // Toggle map visibility
   toggleMap(): void {
     this.mapVisible = !this.mapVisible;
@@ -362,7 +375,7 @@ async SubmitUpdate() {
   private attemptMapInitialization(attempt: number): void {
     const maxAttempts = 5;
     const delay = 100 + (attempt * 100); // 100ms, 200ms, 300ms, etc.
-    
+
     setTimeout(() => {
       const container = document.getElementById('leaflet-map');
       if (container && container.offsetWidth > 0 && container.offsetHeight > 0) {
@@ -382,7 +395,7 @@ async SubmitUpdate() {
   private initializeLeafletMap(): void {
     this.mapLoading = true;
     this.mapError = null;
-    
+
     try {
       // Check if container exists
       const container = document.getElementById('leaflet-map');
@@ -400,11 +413,11 @@ async SubmitUpdate() {
 
       // Fix for default markers in production
       this.fixLeafletIcons();
-      
+
       // Initialize map with default location (Johannesburg based on your screenshot)
       const defaultLat = -26.2041;
       const defaultLon = 28.0473;
-      
+
       // Create map
       this.map = L.map('leaflet-map', {
         center: [defaultLat, defaultLon],
@@ -427,14 +440,14 @@ async SubmitUpdate() {
       // Set initial pin
       this.setMapPin(defaultLat, defaultLon, 'Johannesburg, South Africa');
       this.mapLoading = false;
-      
+
     } catch (error) {
       console.error('Error initializing map:', error);
       this.mapError = 'Failed to initialize map. Please try refreshing the page.';
       this.mapLoading = false;
     }
   }
-  
+
   // Fix Leaflet default icon paths for production
   private fixLeafletIcons(): void {
     // This fixes marker icons in production builds
@@ -446,7 +459,7 @@ async SubmitUpdate() {
       shadowUrl: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDEiIGhlaWdodD0iNDEiIHZpZXdCb3g9IjAgMCA0MSA0MSIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGVsbGlwc2UgY3g9IjIwLjUiIGN5PSIzNy41IiByeD0iMTcuNSIgcnk9IjMuNSIgZmlsbD0iYmxhY2siIGZpbGwtb3BhY2l0eT0iMC4zIi8+Cjwvc3ZnPgo=',
       shadowSize: [41, 41]
     });
-    
+
     L.Marker.prototype.options.icon = iconDefault;
   }
 
@@ -460,32 +473,32 @@ async SubmitUpdate() {
   // Search for an address
   searchLocation(): void {
     if (!this.searchAddress.trim()) return;
-    
+
     this.mapLoading = true;
     this.mapError = null;
-    
+
     this.dataService.getMapData(this.searchAddress).subscribe({
       next: (data: any) => {
         this.mapData = data;
         this.setMapPin(data.lat, data.lon, data.display_name);
-        
+
         // Pan map to new location
         if (this.map) {
           this.map.setView([data.lat, data.lon], 13);
         }
-        
+
         this.mapLoading = false;
       },
       error: (err) => {
         console.error('Map search error:', err);
-        
+
         // Check if it's a connection error (backend unavailable)
         if (err.status === 0 || err.error?.message?.includes('Connection refused')) {
           this.mapError = 'Map service temporarily unavailable. You can still click on the map to select locations.';
         } else {
           this.mapError = 'Address not found. Please try a different search term.';
         }
-        
+
         this.mapLoading = false;
       }
     });
@@ -497,7 +510,7 @@ async SubmitUpdate() {
       this.setMapPin(lat, lng, `${lat.toFixed(4)}, ${lng.toFixed(4)}`);
       return;
     }
-    
+
     this.mapLoading = true;
     this.dataService.getMapData(undefined, lat, lng).subscribe({
       next: (data: any) => {
@@ -515,20 +528,20 @@ async SubmitUpdate() {
   // Set a pin on the map
   setMapPin(lat: number, lon: number, address?: string): void {
     this.mapPin = { lat, lon, address };
-    
+
     if (this.map) {
       // Remove existing marker
       if (this.currentMarker) {
         this.map.removeLayer(this.currentMarker);
       }
-      
+
       // Add new marker
       this.currentMarker = L.marker([lat, lon])
         .addTo(this.map)
         .bindPopup(address || `${lat.toFixed(4)}, ${lon.toFixed(4)}`)
         .openPopup();
     }
-    
+
     // Only try to load nearby places if we're not already in an error state
     if (!this.mapError) {
       this.loadNearbyPlaces(lat, lon);
@@ -570,6 +583,45 @@ async SubmitUpdate() {
       'venue': 'Event Venue'
     };
     return labels[venueType] || 'Venue';
+  }
+
+
+
+  trackorders(): void {
+    this.router.navigate(['/trackorders']);
+
+  }
+  async fetchNotifications() {
+    if (!this.user) return;
+
+    try {
+      const apiUrl = `https://site--vowsandveils--5dl8fyl4jyqm.code.run/venues/notifications/${this.user.uid}`;
+      const response: any = await this.http.get(apiUrl).toPromise();
+
+      this.notifications = (response.notifications || []).map((n: any) => ({
+        uid: n.id,
+        from: n.from || '',
+        to: n.to || '',
+        message: n.message || '',
+        date: n.date || null,
+        read: n.read || false,
+      }));
+
+      this.unreadCount = this.notifications.filter(n => !n.read).length;
+
+      this.notifications.sort((a, b) => Number(a.read) - Number(b.read));
+
+    } catch (err) {
+      console.error('Error fetching notifications from API:', err);
+      this.notifications = [];
+      this.unreadCount = 0;
+    }
+  }
+
+
+
+  goToNotifications() {
+this.router.navigate(['/notifications'], { state: { from: this.router.url } });
   }
 
 }

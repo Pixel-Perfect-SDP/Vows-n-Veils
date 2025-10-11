@@ -1,0 +1,441 @@
+openapi: 3.0.3
+info:
+  title: Vows & Veils – Vendor API (corrected)
+  version: "1.0.0"
+  description: >
+    CRUD for vendor services stored in Firestore. Images are signed URLs from Firebase Storage.
+    No auth enforced by these routes (frontend handles sign-in). Returned shapes mirror Firestore docs.
+
+servers:
+  - url: https://site--vowsandveils--5dl8fyl4jyqm.code.run
+    description: Production
+  - url: http://localhost:3000
+    description: Local
+
+tags:
+  - name: vendors
+    description: Vendor service docs (one doc per service)
+
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Missing required fields (name, type, companyID, email, phonenumber)
+
+    ApiOkResponse:
+      type: object
+      properties:
+        ok:
+          type: boolean
+          example: true
+
+    VendorCreateRequest:
+      type: object
+      description: Body for creating a vendor service doc. Provide either "name" or "serviceName".
+      oneOf:
+        - required: [name, type, companyID, email, phonenumber]
+        - required: [serviceName, type, companyID, email, phonenumber]
+      properties:
+        name:
+          type: string
+          example: Full-day Photography
+        serviceName:
+          type: string
+          example: Full-day Photography
+        type:
+          type: string
+          example: Photography
+        companyID:
+          type: string
+          example: userUid_company
+        email:
+          type: string
+          format: email
+          example: hello@studio.co.za
+        phonenumber:
+          type: string
+          example: "+27 82 123 4567"
+        price:
+          type: number
+          nullable: true
+          example: 18500
+        capacity:
+          type: number
+          nullable: true
+          example: 150
+        description:
+          type: string
+          example: 10 hours, 2 shooters, online gallery
+        bookingNotes:
+          type: string
+          example: 50% deposit required
+        status:
+          type: string
+          description: Defaults to 'active' if not provided
+          example: active
+
+    VendorCreateResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          example: AbC123xyz
+
+    VendorUpdateRequest:
+      type: object
+      description: PUT accepts partial fields; server mirrors name/serviceName if one is missing.
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+        serviceName:
+          type: string
+        type:
+          type: string
+        companyID:
+          type: string
+        email:
+          type: string
+          format: email
+        phonenumber:
+          type: string
+          description: 7–20 chars; digits and ()-+ and spaces allowed
+        price:
+          type: number
+          nullable: true
+        capacity:
+          type: number
+          nullable: true
+        description:
+          type: string
+        bookingNotes:
+          type: string
+        status:
+          type: string
+
+    PhoneUpdateRequest:
+      type: object
+      required:
+        - phonenumber
+      properties:
+        phonenumber:
+          type: string
+          example: "+27 82 123 4567"
+
+    Vendor:
+      type: object
+      description: >
+        Firestore Vendor document. "images" are signed URLs for objects under vendors/{id}/ in Firebase Storage.
+      properties:
+        id:
+          type: string
+          example: AbC123xyz
+        name:
+          type: string
+          example: Full-day Photography
+        serviceName:
+          type: string
+          example: Full-day Photography
+        type:
+          type: string
+          example: Photography
+        companyID:
+          type: string
+          example: userUid_company
+        email:
+          type: string
+          format: email
+          example: hello@studio.co.za
+        phonenumber:
+          type: string
+          example: "+27 82 123 4567"
+        price:
+          type: number
+          nullable: true
+          example: 18500
+        capacity:
+          type: number
+          nullable: true
+          example: 150
+        description:
+          type: string
+          example: 10 hours, 2 shooters, online gallery
+        bookingNotes:
+          type: string
+          example: 50% deposit required
+        status:
+          type: string
+          example: active
+        images:
+          type: array
+          items:
+            type: string
+            format: uri
+          example:
+            - https://storage.googleapis.com/...signed1
+            - https://storage.googleapis.com/...signed2
+
+paths:
+  /vendors:
+    get:
+      tags:
+        - vendors
+      summary: List all vendor service docs
+      description: Returns every document in the Firestore Vendors collection with signed image URLs.
+      responses:
+        "200":
+          description: Array of vendors
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Vendor"
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    post:
+      tags:
+        - vendors
+      summary: Create a vendor service doc
+      description: name OR serviceName is required; server mirrors the other if missing.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VendorCreateRequest"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VendorCreateResponse"
+        "400":
+          description: Missing fields or invalid phone
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /vendors/{id}:
+    get:
+      tags:
+        - vendors
+      summary: Get a vendor service doc by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Vendor found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vendor"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    put:
+      tags:
+        - vendors
+      summary: Update fields on a vendor service doc (treated as partial update)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VendorUpdateRequest"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiOkResponse"
+        "400":
+          description: Invalid phone number (if phonenumber provided)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      tags:
+        - vendors
+      summary: Delete a vendor service doc and its images
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiOkResponse"
+        "404":
+          description: Vendor not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /vendors/company/{companyID}:
+    get:
+      tags:
+        - vendors
+      summary: List vendor service docs for a company
+      parameters:
+        - in: path
+          name: companyID
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Array of vendors for the company
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Vendor"
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /vendors/{id}/phone:
+    patch:
+      tags:
+        - vendors
+      summary: Update a vendor's phone number
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PhoneUpdateRequest"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiOkResponse"
+        "400":
+          description: Invalid phone number format
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Vendor not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /vendors/company/{companyID}/phone:
+    patch:
+      tags:
+        - vendors
+      summary: Bulk update phone number for all vendor docs under a company
+      parameters:
+        - in: path
+          name: companyID
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PhoneUpdateRequest"
+      responses:
+        "200":
+          description: Updated count returned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+                  updated:
+                    type: integer
+                    example: 3
+        "400":
+          description: Invalid phone number format
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"

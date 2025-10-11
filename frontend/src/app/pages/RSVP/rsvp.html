@@ -1,53 +1,67 @@
-<html>
-    <head class="hero">
+ <header class="topbar">
+  <section class="logo-area">
+    <img class="logo-img" src="assets/logo.jpg" alt="Vows & Veils logo" />
+    <h1 class="logo-text">Vows & Veils</h1>
+  </section>
+
+  <nav class="nav-links">
+     <a routerLink="/landing">Back</a> 
+  </nav>
+</header>
+
+<section>
+    <section class="hero">
         <link rel="stylesheet" href="rsvp.css">
         <title> RSVP</title>
 
-    </head>
-    <body>
+    </section>
+    <section class="rsvp-section">
 
-        <span *ngIf ="!eventIdEntered" class= "eventId">
-            <p>Enter your Event code:</p>
+        <section *ngIf ="!eventIdEntered" class= "eventId">
+            <p>Enter your wedding code:</p>
             <input type="text" [(ngModel)]="eventCode" placeholder="Wedding Code">
             <button  class="idSumbit" (click)="submitEventCode()">Continue</button>
-        </span>
+        </section>
 
-    <span *ngIf= "eventIdEntered">
+    <section *ngIf= "eventIdEntered">
 
-        <span class="hero">
+        <section class="attendance">
+        <section class="hero">
             <img src="assets/logo.jpg" class="logo" />
             <h1>Will you be joining us?</h1>
-        </span>
+            <section class="div-line"></section>
+        </section>
 
-        <span class="div-line">
+        
 
-        </span>
-
-        <span class="question-box">
-            <p>First Name</p>
-            <input type="text" [(ngModel)]="formData.Name" name="name" placeholder="First Name">
-        </span>
-
-        <span class="question-box">
-            <p>Surname</p>
-            <input type="text" [(ngModel)]="formData.Surname" name="surname" placeholder="Surname">
-        </span>
-
-        <span class="question-box">
-            <p>Email Address</p>
-            <input type="text" [(ngModel)]="formData.Email" name="email" placeholder="Email">
-        </span>
-        <span class="question-box">
+        <section class="form-fields">
+            <section class="question-box">
             <p>Will you be attending?</p>
             <select [(ngModel)]="formData.Attending" name="attending">
                 <option value="Yes">Yes</option>
                 <option value="No">No</option>
                 </select>
-        </span>
+        </section>
+        <section class="question-box">
+            <p>First Name</p>
+            <input type="text" [(ngModel)]="formData.Name" name="name" placeholder="Your first name">
+        </section>
 
-        <!-- Only show these if Attending is "Yes" -->
-        <span *ngIf="formData.Attending === 'Yes'">
-        <span class="question-box">
+        <section class="question-box">
+            <p>Surname</p>
+            <input type="text" [(ngModel)]="formData.Surname" name="surname" placeholder="Your surname">
+        </section>
+
+        <section class="question-box">
+            <p>Email Address</p>
+            <input type="text" [(ngModel)]="formData.Email" name="email" placeholder="Your email address">
+        </section>
+        </section>
+
+
+         <!-- Only show these if Attending is "Yes" -->
+        <section class="yesAttend" *ngIf="formData.Attending === 'Yes'">
+        <section class="question-box">
             <p>Dietary Requirements</p>
             <select [(ngModel)]="formData.Diet" name="diet">
                 <option value="Kosher">Kosher</option>
@@ -57,28 +71,69 @@
                 </select>
             <p>Other</p>
             <input type="text" [(ngModel)]="formData.otherDiet" name="otherDiet" placeholder="Other">
-        </span>
+        </section>
 
-        <span class="question-box">
+        <section class="question-box">
             <p>Allergies</p>
             <input type="text" [(ngModel)]="formData.Allergy" name="allergy" placeholder="Allergies">
-        </span>
+        </section>
 
-        <span class="question-box">
+        <section class="question-box">
             <p>Song Request</p>
             <input type="text" [(ngModel)]="formData.Song" name="song" placeholder="Song Requests">
-        </span>
-        </span>
+        </section>
+        </section>
 
-        <span class="sub-container">
+        
+        </section>
+
+
+
+      <section class="sub-container">
             <button (click)="onSubmit()">Submit Details</button>
 
-        </span>
-
-    </span>
+        </section>
 
 
-    </body>
+
+          <section *ngIf="storyData" class="story-display">
+            <h2 class="story-title">Our Story</h2>
+
+            <img *ngIf="storyData.photoURL" [src]="storyData.photoURL" alt="Our Story Photo" class="story-img"/>
+
+            <section class="story-section">
+                <h3 class="preview-subheading">How We Met</h3>
+                <p class="preview-content">{{ storyData.howWeMet }}</p>
+            </section>
+
+            <section class="story-section">
+                <h3 class="preview-subheading">The Proposal</h3>
+                <p class="preview-content">{{ storyData.proposal }}</p>
+            </section>
+
+            <!-- Timeline -->
+            <section *ngIf="storyData.timeline?.length" class="timeline-container preview">
+                <h3 class="preview-subheading">Our Journey</h3>
+                <section class="timeline">
+                <section *ngFor="let step of storyData.timeline" class="timeline-box">
+                    <section class="timeline-dot"></section>
+                    <section class="timeline-content">
+                    <h4 class="timeline-title">{{ step.title }}</h4>
+                    <p class="timeline-description">{{ step.description }}</p>
+                    </section>
+                </section>
+                </section>
+            </section>
+
+            </section>
+       
+
+        
+
+    </section>
 
 
-</html>
+    </section>
+
+
+</section>

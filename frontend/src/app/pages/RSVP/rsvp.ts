@@ -5,7 +5,7 @@ import { getDocs, updateDoc } from '@angular/fire/firestore';
 import { AuthService } from '../../core/auth';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 
 @Component
 (
@@ -14,7 +14,7 @@ import { Router } from '@angular/router';
   templateUrl: './rsvp.html',
   styleUrls: ['./rsvp.css'],
   standalone:true,
-  imports: [FormsModule, CommonModule]
+  imports: [FormsModule, CommonModule, RouterModule]
   }
 )
 
@@ -56,6 +56,9 @@ export class Rsvp
   eventCode:string='';
 
   constructor() {}
+
+  //for showing the couple story
+  storyData: any = null;
 
 
   // Form submission
@@ -157,8 +160,25 @@ export class Rsvp
       if (!querySnapshotCode.empty) {
         this.eventIdEntered = true;
         this.message = '';
-        this.eventId = querySnapshotCode.docs[0].id;
-      } else {
+        const eventDoc = querySnapshotCode.docs[0].data();
+        //this.eventId = querySnapshotCode.docs[0].id;
+
+        const eventData: any = querySnapshotCode.docs[0].data();
+        const eventIDValue = eventData.EventID;
+
+        //for story couple
+        const storyCollection = collection(this.db, "Story");
+        const qStory= query(storyCollection, where("userID", "==", eventIDValue));
+        const storySnapshot = await getDocs(qStory);
+
+        if (!storySnapshot.empty) {
+          this.storyData = storySnapshot.docs[0].data() as any;
+        }
+        else{
+          this.storyData = null; // No story found for this event
+        }
+      } 
+      else {
         this.eventIdEntered = false;
         this.message = 'Event Code not found ❌';
         alert('Event Code not found. Please try again');
