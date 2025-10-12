@@ -12,13 +12,14 @@ import { FormGroup, FormControl, FormsModule, AbstractControl  } from '@angular/
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { DataService} from '../../core/data.service';
 import { DragDropModule, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+import { HttpClientModule, HttpClient } from '@angular/common/http';
 
 
 
 @Component({
   selector: 'app-story',
   standalone: true,
-  imports: [CommonModule, RouterModule, ReactiveFormsModule, FormsModule, DragDropModule],
+  imports: [CommonModule, RouterModule, ReactiveFormsModule, FormsModule, DragDropModule, HttpClientModule],
   templateUrl: './story.html',
   styleUrls: ['./story.css']
 })
@@ -26,6 +27,9 @@ export class Story {
   router = inject(Router);
   auth = inject(AuthService);
   private dataService = inject(DataService);
+
+  http = inject(HttpClient);
+
 
   private formBuild = inject(FormBuilder);
 
@@ -255,6 +259,29 @@ private async saveTimelineOrder(timelineData: { title: string; description: stri
         alert('Failed to export PDF.');
       }
     });
+  }
+
+
+  //allow user to upload their own photo
+  onFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    this.uploadingImage = true;
+
+    this.dataService.uploadStoryPhoto(this.auth.user()?.uid!, file)
+      .subscribe({
+        next: (res) => {
+          this.form.patchValue({ photoURL: res.photoURL });
+          this.uploadingImage = false;
+          alert('Image uploaded!');
+        },
+        error: (err) => {
+          console.error('Upload failed', err);
+          this.uploadingImage = false;
+          alert('Image upload failed.');
+        }
+      });
   }
 
 

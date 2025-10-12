@@ -2,6 +2,34 @@ const PDFDocument = require('pdfkit');
 const { db } = require('../firebase');
 const axios = require('axios');
 
+//for image upload
+const { getStorage, ref, uploadBytes, getDownloadURL } = require('firebase/storage');
+const { initializeApp } = require('firebase/app');
+const { firebaseConfig } = require('../firebase/firebase-config');
+
+const app = initializeApp(firebaseConfig);
+const storage = getStorage(app);
+
+exports.uploadStoryImage = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const file = req.file;
+
+    if (!file) return res.status(400).json({ error: 'No file uploaded.' });
+
+    const storageRef = ref(storage, `storyImages/${userId}/${file.originalname}`);
+    await uploadBytes(storageRef, file.buffer);
+    const downloadURL = await getDownloadURL(storageRef);
+
+    // Save photoURL to Firestore
+    await db.collection('Story').doc(userId).set({ photoURL: downloadURL }, { merge: true });
+
+    res.status(200).json({ photoURL: downloadURL });
+  } catch (err) {
+    console.error('Error uploading image:', err);
+    res.status(500).json({ error: 'Upload failed' });
+  }
+};
 
 
 

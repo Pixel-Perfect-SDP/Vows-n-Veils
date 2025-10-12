@@ -128,6 +128,15 @@ downloadGuestsPdf(eventId: string, opts?: { dietary?: string; allergy?: string; 
     });
   }
 
+    //upload story photo
+  uploadStoryPhoto(userId: string, file: File): Observable<{ photoURL: string }> {
+    const formData = new FormData();
+    formData.append('photo', file);
+    return this.http.post<{ photoURL: string }>(`/api/story/${userId}/upload`, formData);
+  }
+
+
+
 
   // Send guest invitation via external API
   sendGuestInvite(inviteData: {

@@ -81,6 +81,17 @@
       </section>
       <section class="section-separator"></section>
 
+      <section class="form-group">
+        <label>Upload a photo:</label>
+        <input type="file" accept="image/*" (change)="onFileSelected($event)" />
+        <section *ngIf="uploadingImage" class="uploading">
+          Uploading...
+        </section>
+  
+        </section>
+
+        <section class="section-separator"></section>
+
 
       <button type="submit" [disabled]="form.invalid">
         {{ hasStory ? 'Update Story' : 'Create Story' }}
