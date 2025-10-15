@@ -1,18 +1,18 @@
 const { createRes } = require('../helpers/httpMocks');
 const { MockPDFDocument } = require('../helpers/mockPdfDocument');
 
-const collectionMock = {
+const mockCollection = {
   where: jest.fn(),
   add: jest.fn(),
   doc: jest.fn()
 };
 
-const dbMock = {
-  collection: jest.fn(() => collectionMock)
+const mockDb = {
+  collection: jest.fn(() => mockCollection)
 };
 
 jest.mock('../../firebase', () => ({
-  db: dbMock
+  db: mockDb
 }));
 
 jest.mock('pdfkit', () => jest.fn(() => new MockPDFDocument()));
@@ -22,10 +22,10 @@ const guestsController = require('../../controllers/guests.controller');
 describe('guests.controller', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    collectionMock.where.mockReset();
-    collectionMock.add.mockReset();
-    collectionMock.doc.mockReset();
-    dbMock.collection.mockImplementation(() => collectionMock);
+    mockCollection.where.mockReset();
+    mockCollection.add.mockReset();
+    mockCollection.doc.mockReset();
+    mockDb.collection.mockImplementation(() => mockCollection);
   });
 
   describe('listGuestsByEvent', () => {
@@ -54,14 +54,14 @@ describe('guests.controller', () => {
           })
         }
       ];
-      collectionMock.where.mockReturnValue({
+      mockCollection.where.mockReturnValue({
         get: jest.fn(() => Promise.resolve({ docs: guests }))
       });
 
       const res = createRes();
       await guestsController.listGuestsByEvent(req, res);
 
-      expect(collectionMock.where).toHaveBeenCalledWith('EventID', '==', 'event-1');
+      expect(mockCollection.where).toHaveBeenCalledWith('EventID', '==', 'event-1');
       expect(res.json).toHaveBeenCalledWith([
         {
           id: '1',
@@ -87,7 +87,7 @@ describe('guests.controller', () => {
           data: () => ({ Dietary: 'Vegan', Allergies: '' })
         }
       ];
-      collectionMock.where.mockReturnValue({
+      mockCollection.where.mockReturnValue({
         get: jest.fn(() => Promise.resolve({
           forEach: (cb) => guests.forEach(cb)
         }))
@@ -117,7 +117,7 @@ describe('guests.controller', () => {
     });
 
     it('creates guest with normalized payload', async () => {
-      const addMock = jest.fn();
+      const mockAdd = jest.fn();
       const savedData = {
         Name: 'Amy',
         Email: 'amy@example.com',
@@ -129,10 +129,10 @@ describe('guests.controller', () => {
       };
       const savedSnap = { data: () => savedData };
       const ref = { id: 'new-guest', get: jest.fn(() => Promise.resolve(savedSnap)) };
-      addMock.mockResolvedValue(ref);
+      mockAdd.mockResolvedValue(ref);
 
-      dbMock.collection.mockImplementation(() => ({
-        add: addMock
+      mockDb.collection.mockImplementation(() => ({
+        add: mockAdd
       }));
 
       const req = {
@@ -149,7 +149,7 @@ describe('guests.controller', () => {
 
       await guestsController.createGuestForEvent(req, res);
 
-      expect(addMock).toHaveBeenCalledWith({
+      expect(mockAdd).toHaveBeenCalledWith({
         Name: 'Amy',
         Email: 'amy@example.com',
         Dietary: 'Vegetarian',
@@ -168,7 +168,7 @@ describe('guests.controller', () => {
       const docRef = {
         get: jest.fn(() => Promise.resolve({ exists: false }))
       };
-      dbMock.collection.mockImplementation(() => ({
+      mockDb.collection.mockImplementation(() => ({
         doc: jest.fn(() => docRef)
       }));
 
@@ -185,7 +185,7 @@ describe('guests.controller', () => {
       const docRef = {
         get: jest.fn(() => Promise.resolve({ exists: true, data: () => ({ EventID: 'other' }) }))
       };
-      dbMock.collection.mockImplementation(() => ({
+      mockDb.collection.mockImplementation(() => ({
         doc: jest.fn(() => docRef)
       }));
 
@@ -203,7 +203,7 @@ describe('guests.controller', () => {
         get: jest.fn(() => Promise.resolve({ exists: true, data: () => ({ EventID: 'evt' }) })),
         delete: jest.fn(() => Promise.resolve())
       };
-      dbMock.collection.mockImplementation(() => ({
+      mockDb.collection.mockImplementation(() => ({
         doc: jest.fn(() => docRef)
       }));
 
@@ -232,7 +232,7 @@ describe('guests.controller', () => {
           })
         }
       ];
-      collectionMock.where.mockReturnValue({
+      mockCollection.where.mockReturnValue({
         get: jest.fn(() => Promise.resolve({ docs }))
       });
 
@@ -262,7 +262,7 @@ describe('guests.controller', () => {
           })
         }
       ];
-      collectionMock.where.mockReturnValue({
+      mockCollection.where.mockReturnValue({
         get: jest.fn(() => Promise.resolve({ docs }))
       });
 
