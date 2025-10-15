@@ -35,6 +35,8 @@ jobs:
         uses: codecov/codecov-action@v4
         with:
           files: frontend/coverage/frontend/lcov.info
+          flags: frontend
+          root_dir: frontend
           token: ${{ secrets.CODECOV_TOKEN }}
 
 

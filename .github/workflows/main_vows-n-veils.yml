@@ -20,12 +20,25 @@ jobs:
         with:
           node-version: '22.x'
 
-      - name: npm install, build, and test
+      - name: Install dependencies and build
         run: |
           cd backend
           npm install
           npm run build --if-present
-          
+
+      - name: Run backend tests with coverage
+        run: |
+          cd backend
+          npm test -- --coverage
+
+      - name: Upload backend coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: backend/coverage/lcov.info
+          flags: backend
+          root_dir: backend
+          token: ${{ secrets.CODECOV_TOKEN }}
+
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
