@@ -974,7 +974,7 @@ export class Homepage {
     const user = await this.waitForUser();
     if (!user) throw new Error('No authenticated user.');
     const db = getFirestore(getApp());
-    return collection(db, 'Events', user.uid, 'Checklist');
+    return collection(db, `Events/${user.uid}/Checklist`);
   }
 
   async loadChecklist() {
@@ -1062,7 +1062,9 @@ export class Homepage {
     try {
       this.checklistLoading = true;
       const db = getFirestore(getApp());
-      await updateDoc(doc(db, 'Events', (await this.waitForUser())!.uid, 'Checklist', t.id), {
+      const user = await this.waitForUser();
+      if (!user) throw new Error('No authenticated user.');
+      await updateDoc(doc(db, `Events/${user.uid}/Checklist/${t.id}`), {
         done: !t.done
       });
       await this.loadChecklist();
@@ -1081,7 +1083,9 @@ export class Homepage {
     try {
       this.checklistLoading = true;
       const db = getFirestore(getApp());
-      await deleteDoc(doc(db, 'Events', (await this.waitForUser())!.uid, 'Checklist', t.id));
+      const user = await this.waitForUser();
+      if (!user) throw new Error('No authenticated user.');
+      await deleteDoc(doc(db, `Events/${user.uid}/Checklist/${t.id}`));
       await this.loadChecklist();
     } catch (e) {
       console.error('Failed to delete task', e);
