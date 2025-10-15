@@ -25,20 +25,28 @@ jobs:
           cd frontend
           npm install
       
+      # .github/workflows/frontend.yml  (your Static Web Apps workflow)
       - name: Run Tests with Coverage
         run: |
           cd frontend
-          npx ng test --watch=false --browsers=ChromeHeadless --code-coverage
-        continue-on-error: true
+          npx ng test --watch=false --browsers=ChromeHeadlessCI --code-coverage
 
-      - name: Upload coverage to Codecov
+      # Always run the upload step, even if tests fail, so you can see missing-file errors.
+      - name: Upload frontend coverage to Codecov
+        if: always()
         uses: codecov/codecov-action@v4
         with:
-          files: coverage/frontend/lcov.info
+          files: ./frontend/coverage/lcov.info   # 👈 full path from repo root
           flags: frontend
-          root_dir: frontend
-          config: .codecov.yml
           token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: true
+          verbose: true
+
+      # Optional: debug if it still fails
+      - name: Debug coverage tree
+        if: always()
+        run: ls -R frontend/coverage || true
+
 
 
       - name: Build Angular App
