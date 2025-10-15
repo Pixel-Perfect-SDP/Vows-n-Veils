@@ -519,16 +519,21 @@ router.put('/orders/:orderID/status', async (req, res) => {
     const { orderID } = req.params;
     const { status } = req.body;
 
-    const notRef = db.collection('Notifications');
-    const orderRef = db.collection('VenueOrders').doc(orderID);
     if (!['accepted', 'rejected'].includes(status)) {
       return res.status(400).json({ error: 'Invalid status' });
     }
 
+    const dbRef = admin.firestore();
+    const orderRef = dbRef.collection('VenuesOrders').doc(orderID);
     const orderDoc = await orderRef.get();
+
     if (!orderDoc.exists) {
       return res.status(404).json({ error: 'Order not found' });
     }
+
+    const orderData = orderDoc.data();
+    const customerID = orderData.customerID;
+    const notRef = dbRef.collection('Notifications');
 
     let messagei = "";
     if (status === "rejected") {
@@ -539,18 +544,15 @@ router.put('/orders/:orderID/status', async (req, res) => {
       messagei = "Your venue booking has been accepted! The company will contact you soon. Thank you!";
     }
 
-    const startDate = new Date();
-
     await notRef.add({
-      date: startDate,
+      date: new Date(),
       from: "Management",
       message: messagei,
-      to: orderID,
+      to: customerID, // ✅ correct receiver
       read: false
     });
 
-    res.json({ ok: true, orderID, status });
-
+    res.json({ ok: true, orderID, status, to: customerID });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });

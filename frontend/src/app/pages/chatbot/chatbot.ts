@@ -131,14 +131,14 @@ export class Chatbot implements OnInit {
         const scores = response.scores;
         let maxScore = -1;
         let bestMatchIndex = 0;
-
+        
         scores.forEach((score: number, index: number) => {
           if (score > maxScore) {
             maxScore = score;
             bestMatchIndex = index;
           }
         });
-
+        console.log("maxscore",maxScore);
         if (maxScore < 0.3) {
           return "I'm sorry, I couldn't find a relevant answer to your question. Please try rephrasing or contact our support team for assistance.";
         }
