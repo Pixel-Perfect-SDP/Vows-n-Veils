@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpClientModule, HttpHeaders } from '@angular/common/http';
 import { catchError, map, of } from 'rxjs';
+import { Router, NavigationEnd } from '@angular/router';
+import { filter } from 'rxjs/operators';
 
 interface FAQ {
   id: number;
@@ -16,7 +18,7 @@ interface ChatMessage {
   isUser: boolean;
   timestamp: Date;
 }
-
+//trying
 @Component({
   selector: 'app-chatbot',
   standalone: true,
@@ -33,11 +35,22 @@ export class Chatbot implements OnInit {
   faqs: FAQ[] = [];
   isLoading = false;
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private router: Router) { }
 
   ngOnInit(): void {
     this.loadFAQs();
-    console.log('Chatbot loaded'); // check console
+    this.router.events
+      .pipe(filter((event: any) => event instanceof NavigationEnd))
+      .subscribe((event: any) => {
+        const currentUrl = event.urlAfterRedirects;
+      if (currentUrl.includes('/landing') || currentUrl.includes('/login')) {
+          this.isMinimized = true; 
+        } else {
+          this.isOpen = false;
+          this.isMinimized = false;
+        }
+      });
+    console.log('Chatbot loaded'); 
 
 
   }
@@ -138,7 +151,7 @@ export class Chatbot implements OnInit {
             bestMatchIndex = index;
           }
         });
-
+        console.log("maxscore", maxScore);
         if (maxScore < 0.3) {
           return "I'm sorry, I couldn't find a relevant answer to your question. Please try rephrasing or contact our support team for assistance.";
         }
