@@ -36,7 +36,7 @@ type ChecklistTask = {
 @Component({
   selector: 'app-homepage',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, FormsModule,HttpClientModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, FormsModule, HttpClientModule],
   templateUrl: './homepage.html',
   styleUrls: ['./homepage.css']
 })
@@ -93,7 +93,7 @@ export class Homepage {
     time: ['', [Validators.required]],
     budget: ['', [Validators.required, Validators.min(0)]]
   });
-  
+
   constructor(private http: HttpClient) { }
 
 
@@ -414,12 +414,12 @@ export class Homepage {
       if (docSnap.exists()) {
         this.hasEvent = true;
         this.eventData = docSnap.data();
-
         // Get comprehensive event display data
         await this.getEventDataForDisplay();
 
         //Checklist added
         await this.loadChecklist();
+        await this.fetchNotifications();
 
         //countdown
         this.updateCountdown();
@@ -940,7 +940,7 @@ export class Homepage {
       }));
 
       this.unreadCount = this.notifications.filter(n => !n.read).length;
-
+      console.log("fetched this many notifications", this.unreadCount);
       this.notifications.sort((a, b) => Number(a.read) - Number(b.read));
 
     } catch (err) {
@@ -953,10 +953,10 @@ export class Homepage {
 
 
   goToNotifications() {
-this.router.navigate(['/notifications'], { state: { from: this.router.url } });
+    this.router.navigate(['/notifications'], { state: { from: this.router.url } });
   }
 
-  
+
 
   checklist: ChecklistTask[] = [];
   checklistLoading = false;
@@ -993,7 +993,7 @@ this.router.navigate(['/notifications'], { state: { from: this.router.url } });
           assignee: data?.assignee ?? '',
           done: !!data?.done,
           createdAt: data?.createdAt ?? null,
-          priority: (data?.priority as 'high'|'medium'|'low') ?? 'medium'
+          priority: (data?.priority as 'high' | 'medium' | 'low') ?? 'medium'
         });
       });
 
@@ -1045,7 +1045,7 @@ this.router.navigate(['/notifications'], { state: { from: this.router.url } });
         assignee: (raw.assignee || '').toString().trim() || null,
         done: false,
         createdAt: serverTimestamp(),
-        priority: (raw.priority as 'high'|'medium'|'low') || 'medium'
+        priority: (raw.priority as 'high' | 'medium' | 'low') || 'medium'
       });
 
       await this.loadChecklist();
