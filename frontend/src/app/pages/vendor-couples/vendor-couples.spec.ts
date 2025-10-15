@@ -6,7 +6,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { VendorCouples } from './vendor-couples';
-
+import { AuthService } from '../../core/auth';
 
 (jasmine as any).DEFAULT_TIMEOUT_INTERVAL = 20000;
 
@@ -26,14 +26,8 @@ function setupCouplesTestBed(extraRoutes: any[] = []) {
     providers: [
       provideHttpClient(),
       provideHttpClientTesting(),
-    
       {
-        provide: (void 0, ({} as any)), 
-        useValue: {},
-      },
-      {
-      
-        provide: ({} as any),
+        provide: AuthService,
         useValue: { user: () => null },
       },
     ],
@@ -97,12 +91,14 @@ describe('VendorCouples – core & branches', () => {
 
   it('toggleOrders() flips repeatedly without hanging', fakeAsync(async () => {
     const a = component.showOrders;
+    const lm = spyOn<any>(component, 'loadMyOrders').and.returnValue(Promise.resolve());
     const p1 = component.toggleOrders(); tick(); await p1;
     expect(component.showOrders).toBe(!a);
     const p2 = component.toggleOrders(); tick(); await p2;
     expect(component.showOrders).toBe(a);
     const p3 = component.toggleOrders(); tick(); await p3;
     expect(component.showOrders).toBe(!a);
+    expect(lm).toHaveBeenCalledTimes(1);
   }));
 
   it('closeOrder() hides form and clears selectedService', () => {
