@@ -1,0 +1,22 @@
+coverage:
+  status:
+    project:
+      default: false
+      frontend:
+        flags:
+          - frontend
+        target: auto
+      backend:
+        flags:
+          - backend
+        target: auto
+    patch:
+      default: false
+      frontend:
+        flags:
+          - frontend
+        target: auto
+      backend:
+        flags:
+          - backend
+        target: auto
