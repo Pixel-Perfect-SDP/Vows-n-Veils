@@ -484,4 +484,113 @@ describe('RsvpComponent', () => {
     }));
   });
 
+  describe('Extended Firebase and Story Integration', () => {
+    it('should handle valid event code with story data found', async () => {
+      const mockStoryData = { title: 'Our Story', text: 'How we met' };
+
+      // Mock Firestore query chain for event and story collections
+      spyOn<any>(component, 'getDBforTesting').and.returnValue(mockFirestore);
+
+      const mockEventSnapshot = {
+        empty: false,
+        docs: [{ data: () => ({ EventID: 'event123' }) }]
+      };
+
+      const mockStorySnapshot = {
+        empty: false,
+        docs: [{ data: () => mockStoryData }]
+      };
+
+      // Mock getDocs to return event first, then story
+      spyOn<any>(window, 'getDocs').and.callFake((q: any) => {
+        if (q && q._query?.collectionId === 'Events') {
+          return Promise.resolve(mockEventSnapshot);
+        } else if (q && q._query?.collectionId === 'Story') {
+          return Promise.resolve(mockStorySnapshot);
+        }
+        return Promise.resolve({ empty: true, docs: [] });
+      });
+
+      component.eventCode = 'VALIDCODE';
+      await component.submitEventCode();
+
+      expect(component.storyData).toEqual(mockStoryData);
+      expect(component.eventIdEntered).toBeTrue();
+      expect(component.message).toBe('');
+    });
+
+    it('should handle valid event code but no story data found', async () => {
+      const mockEventSnapshot = {
+        empty: false,
+        docs: [{ data: () => ({ EventID: 'eventXYZ' }) }]
+      };
+
+      const mockEmptyStorySnapshot = {
+        empty: true,
+        docs: []
+      };
+
+      spyOn<any>(window, 'getDocs').and.callFake((q: any) => {
+        if (q && q._query?.collectionId === 'Events') {
+          return Promise.resolve(mockEventSnapshot);
+        } else if (q && q._query?.collectionId === 'Story') {
+          return Promise.resolve(mockEmptyStorySnapshot);
+        }
+        return Promise.resolve({ empty: true, docs: [] });
+      });
+
+      component.eventCode = 'CODE123';
+      await component.submitEventCode();
+
+      expect(component.storyData).toBeNull();
+      expect(component.eventIdEntered).toBeTrue();
+    });
+
+    it('should handle event code not found and alert the user', async () => {
+      spyOn(window, 'alert');
+      const mockEmptyEventSnapshot = { empty: true, docs: [] };
+
+      spyOn<any>(window, 'getDocs').and.returnValue(Promise.resolve(mockEmptyEventSnapshot));
+
+      component.eventCode = 'INVALID';
+      await component.submitEventCode();
+
+      expect(window.alert).toHaveBeenCalledWith('Event Code not found. Please try again');
+      expect(component.eventIdEntered).toBeFalse();
+      expect(component.message).toBe('Event Code not found ❌');
+    });
+
+    it('should handle error thrown in submitEventCode', async () => {
+      spyOn<any>(window, 'getDocs').and.throwError('Firestore error');
+      spyOn(console, 'error');
+
+      component.eventCode = 'ERRCODE';
+      await component.submitEventCode();
+
+      expect(console.error).toHaveBeenCalled();
+      expect(component.message).toBe('Error checking Event Code ❌');
+      expect(component.eventIdEntered).toBeFalse();
+    });
+
+    it('should handle error in onSubmit gracefully (catch block)', async () => {
+      spyOn(console, 'error');
+      component.formData.Name = 'Test';
+      component.formData.Surname = 'User';
+      component.formData.Attending = 'Yes';
+      component.eventId = 'id123';
+      component.eventIdEntered = true;
+
+      // Force getDocs to throw error
+      spyOn<any>(window, 'getDocs').and.throwError('Firestore read failed');
+      await component.onSubmit();
+
+      expect(console.error).toHaveBeenCalled();
+      expect(component.message).toBe('Something went wrong ❌');
+    });
+  });
+
+
+
+
+
 });
