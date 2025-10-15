@@ -16,7 +16,7 @@ interface ChatMessage {
   isUser: boolean;
   timestamp: Date;
 }
-
+//trying
 @Component({
   selector: 'app-chatbot',
   standalone: true,
