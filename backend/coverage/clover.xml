@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1760536628540" clover="3.2.0">
-  <project timestamp="1760536628540" name="All files">
-    <metrics statements="669" coveredstatements="521" conditionals="331" coveredconditionals="208" methods="86" coveredmethods="67" elements="1086" coveredelements="796" complexity="0" loc="669" ncloc="669" packages="3" files="13" classes="13"/>
+<coverage generated="1760537897599" clover="3.2.0">
+  <project timestamp="1760537897599" name="All files">
+    <metrics statements="669" coveredstatements="581" conditionals="331" coveredconditionals="234" methods="86" coveredmethods="74" elements="1086" coveredelements="889" complexity="0" loc="669" ncloc="669" packages="3" files="13" classes="13"/>
     <package name="backend">
-      <metrics statements="36" coveredstatements="29" conditionals="4" coveredconditionals="1" methods="3" coveredmethods="2"/>
+      <metrics statements="36" coveredstatements="34" conditionals="4" coveredconditionals="4" methods="3" coveredmethods="2"/>
       <file name="app.js" path="/Users/siphojrmntambo/Downloads/VnV (temp 3)/Vows-n-Veils/backend/app.js">
-        <metrics statements="36" coveredstatements="29" conditionals="4" coveredconditionals="1" methods="3" coveredmethods="2"/>
+        <metrics statements="36" coveredstatements="34" conditionals="4" coveredconditionals="4" methods="3" coveredmethods="2"/>
         <line num="1" count="5" type="stmt"/>
         <line num="2" count="5" type="stmt"/>
         <line num="3" count="5" type="stmt"/>
@@ -15,12 +15,12 @@
         <line num="14" count="5" type="stmt"/>
         <line num="15" count="5" type="stmt"/>
         <line num="18" count="5" type="stmt"/>
-        <line num="21" count="42" type="cond" truecount="1" falsecount="1"/>
-        <line num="22" count="0" type="cond" truecount="0" falsecount="2"/>
-        <line num="23" count="0" type="stmt"/>
-        <line num="24" count="0" type="stmt"/>
-        <line num="26" count="0" type="stmt"/>
-        <line num="27" count="0" type="stmt"/>
+        <line num="21" count="47" type="cond" truecount="2" falsecount="0"/>
+        <line num="22" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="23" count="1" type="stmt"/>
+        <line num="24" count="1" type="stmt"/>
+        <line num="26" count="1" type="stmt"/>
+        <line num="27" count="1" type="stmt"/>
         <line num="33" count="5" type="stmt"/>
         <line num="35" count="5" type="stmt"/>
         <line num="36" count="5" type="stmt"/>
@@ -38,21 +38,21 @@
         <line num="69" count="5" type="stmt"/>
         <line num="70" count="5" type="stmt"/>
         <line num="75" count="5" type="stmt"/>
-        <line num="76" count="1" type="stmt"/>
+        <line num="76" count="2" type="stmt"/>
         <line num="79" count="5" type="stmt"/>
         <line num="80" count="5" type="stmt"/>
         <line num="82" count="5" type="stmt"/>
       </file>
     </package>
     <package name="backend.controllers">
-      <metrics statements="293" coveredstatements="224" conditionals="168" coveredconditionals="108" methods="42" coveredmethods="32"/>
+      <metrics statements="293" coveredstatements="274" conditionals="168" coveredconditionals="131" methods="42" coveredmethods="39"/>
       <file name="example.controller.js" path="/Users/siphojrmntambo/Downloads/VnV (temp 3)/Vows-n-Veils/backend/controllers/example.controller.js">
         <metrics statements="2" coveredstatements="2" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
         <line num="1" count="1" type="stmt"/>
         <line num="2" count="1" type="stmt"/>
       </file>
       <file name="guests.controller.js" path="/Users/siphojrmntambo/Downloads/VnV (temp 3)/Vows-n-Veils/backend/controllers/guests.controller.js">
-        <metrics statements="155" coveredstatements="118" conditionals="85" coveredconditionals="46" methods="27" coveredmethods="21"/>
+        <metrics statements="155" coveredstatements="142" conditionals="85" coveredconditionals="58" methods="27" coveredmethods="24"/>
         <line num="2" count="5" type="stmt"/>
         <line num="3" count="5" type="stmt"/>
         <line num="5" count="5" type="stmt"/>
@@ -113,16 +113,16 @@
         <line num="112" count="1" type="stmt"/>
         <line num="114" count="0" type="stmt"/>
         <line num="115" count="0" type="stmt"/>
-        <line num="121" count="2" type="stmt"/>
-        <line num="122" count="2" type="stmt"/>
-        <line num="124" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="121" count="4" type="stmt"/>
+        <line num="122" count="3" type="stmt"/>
+        <line num="124" count="3" type="cond" truecount="2" falsecount="0"/>
         <line num="125" count="1" type="cond" truecount="1" falsecount="1"/>
-        <line num="127" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="127" count="3" type="cond" truecount="2" falsecount="0"/>
         <line num="128" count="1" type="cond" truecount="0" falsecount="2"/>
-        <line num="130" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="130" count="3" type="cond" truecount="2" falsecount="0"/>
         <line num="131" count="1" type="stmt"/>
         <line num="132" count="1" type="stmt"/>
-        <line num="134" count="2" type="stmt"/>
+        <line num="134" count="3" type="stmt"/>
         <line num="138" count="1" type="stmt"/>
         <line num="139" count="1" type="cond" truecount="1" falsecount="1"/>
         <line num="140" count="1" type="cond" truecount="1" falsecount="1"/>
@@ -144,70 +144,70 @@
         <line num="172" count="0" type="stmt"/>
         <line num="173" count="0" type="stmt"/>
         <line num="178" count="5" type="stmt"/>
-        <line num="179" count="1" type="stmt"/>
-        <line num="180" count="1" type="stmt"/>
-        <line num="181" count="1" type="stmt"/>
-        <line num="183" count="1" type="stmt"/>
-        <line num="186" count="1" type="stmt"/>
-        <line num="187" count="1" type="cond" truecount="1" falsecount="1"/>
-        <line num="188" count="1" type="cond" truecount="1" falsecount="1"/>
-        <line num="189" count="1" type="cond" truecount="1" falsecount="1"/>
-        <line num="190" count="1" type="stmt"/>
-        <line num="192" count="1" type="stmt"/>
-        <line num="193" count="1" type="stmt"/>
-        <line num="195" count="1" type="stmt"/>
-        <line num="196" count="1" type="stmt"/>
-        <line num="199" count="1" type="stmt"/>
-        <line num="208" count="1" type="stmt"/>
-        <line num="209" count="6" type="stmt"/>
-        <line num="210" count="1" type="stmt"/>
-        <line num="211" count="1" type="stmt"/>
-        <line num="212" count="1" type="stmt"/>
-        <line num="213" count="1" type="stmt"/>
-        <line num="214" count="1" type="stmt"/>
-        <line num="217" count="1" type="stmt"/>
-        <line num="218" count="1" type="stmt"/>
-        <line num="223" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="179" count="3" type="stmt"/>
+        <line num="180" count="3" type="stmt"/>
+        <line num="181" count="3" type="stmt"/>
+        <line num="183" count="3" type="stmt"/>
+        <line num="186" count="2" type="stmt"/>
+        <line num="187" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="188" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="189" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="190" count="2" type="stmt"/>
+        <line num="192" count="2" type="stmt"/>
+        <line num="193" count="2" type="stmt"/>
+        <line num="195" count="2" type="stmt"/>
+        <line num="196" count="2" type="stmt"/>
+        <line num="199" count="2" type="stmt"/>
+        <line num="208" count="2" type="stmt"/>
+        <line num="209" count="12" type="stmt"/>
+        <line num="210" count="2" type="stmt"/>
+        <line num="211" count="2" type="stmt"/>
+        <line num="212" count="2" type="stmt"/>
+        <line num="213" count="2" type="stmt"/>
+        <line num="214" count="2" type="stmt"/>
+        <line num="217" count="2" type="stmt"/>
+        <line num="218" count="2" type="stmt"/>
+        <line num="223" count="2" type="cond" truecount="2" falsecount="0"/>
         <line num="224" count="1" type="stmt"/>
-        <line num="231" count="1" type="stmt"/>
-        <line num="232" count="1" type="stmt"/>
-        <line num="233" count="1" type="stmt"/>
-        <line num="234" count="1" type="stmt"/>
-        <line num="235" count="1" type="stmt"/>
-        <line num="236" count="6" type="stmt"/>
-        <line num="240" count="6" type="stmt"/>
-        <line num="243" count="1" type="stmt"/>
-        <line num="250" count="1" type="stmt"/>
-        <line num="255" count="0" type="stmt"/>
-        <line num="256" count="0" type="cond" truecount="0" falsecount="2"/>
-        <line num="257" count="0" type="stmt"/>
-        <line num="258" count="0" type="stmt"/>
-        <line num="259" count="0" type="stmt"/>
-        <line num="260" count="0" type="stmt"/>
-        <line num="265" count="1" type="stmt"/>
-        <line num="266" count="1" type="stmt"/>
-        <line num="270" count="0" type="stmt"/>
-        <line num="273" count="0" type="stmt"/>
-        <line num="283" count="0" type="stmt"/>
-        <line num="284" count="0" type="stmt"/>
-        <line num="285" count="0" type="stmt"/>
-        <line num="286" count="0" type="stmt"/>
-        <line num="287" count="0" type="stmt"/>
-        <line num="289" count="0" type="stmt"/>
-        <line num="292" count="0" type="stmt"/>
-        <line num="295" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="231" count="3" type="stmt"/>
+        <line num="232" count="3" type="stmt"/>
+        <line num="233" count="3" type="stmt"/>
+        <line num="234" count="3" type="stmt"/>
+        <line num="235" count="3" type="stmt"/>
+        <line num="236" count="18" type="stmt"/>
+        <line num="240" count="18" type="stmt"/>
+        <line num="243" count="3" type="stmt"/>
+        <line num="250" count="3" type="stmt"/>
+        <line num="255" count="1" type="stmt"/>
+        <line num="256" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="257" count="1" type="stmt"/>
+        <line num="258" count="1" type="stmt"/>
+        <line num="259" count="1" type="stmt"/>
+        <line num="260" count="1" type="stmt"/>
+        <line num="265" count="2" type="stmt"/>
+        <line num="266" count="2" type="stmt"/>
+        <line num="270" count="1" type="stmt"/>
+        <line num="273" count="1" type="stmt"/>
+        <line num="283" count="1" type="stmt"/>
+        <line num="284" count="1" type="stmt"/>
+        <line num="285" count="6" type="stmt"/>
+        <line num="286" count="6" type="stmt"/>
+        <line num="287" count="6" type="stmt"/>
+        <line num="289" count="1" type="stmt"/>
+        <line num="292" count="1" type="stmt"/>
+        <line num="295" count="1" type="cond" truecount="1" falsecount="1"/>
         <line num="296" count="0" type="stmt"/>
         <line num="297" count="0" type="stmt"/>
-        <line num="301" count="0" type="stmt"/>
-        <line num="302" count="0" type="stmt"/>
-        <line num="303" count="0" type="stmt"/>
-        <line num="307" count="0" type="stmt"/>
-        <line num="311" count="0" type="stmt"/>
-        <line num="319" count="0" type="stmt"/>
-        <line num="323" count="1" type="stmt"/>
-        <line num="325" count="1" type="stmt"/>
-        <line num="327" count="0" type="stmt"/>
-        <line num="328" count="0" type="stmt"/>
+        <line num="301" count="1" type="stmt"/>
+        <line num="302" count="1" type="stmt"/>
+        <line num="303" count="6" type="stmt"/>
+        <line num="307" count="6" type="stmt"/>
+        <line num="311" count="1" type="stmt"/>
+        <line num="319" count="1" type="stmt"/>
+        <line num="323" count="2" type="stmt"/>
+        <line num="325" count="2" type="stmt"/>
+        <line num="327" count="1" type="stmt"/>
+        <line num="328" count="1" type="stmt"/>
       </file>
       <file name="map.controller.js" path="/Users/siphojrmntambo/Downloads/VnV (temp 3)/Vows-n-Veils/backend/controllers/map.controller.js">
         <metrics statements="47" coveredstatements="43" conditionals="54" coveredconditionals="49" methods="4" coveredmethods="4"/>
@@ -260,67 +260,67 @@
         <line num="133" count="1" type="stmt"/>
       </file>
       <file name="story.controller.js" path="/Users/siphojrmntambo/Downloads/VnV (temp 3)/Vows-n-Veils/backend/controllers/story.controller.js">
-        <metrics statements="57" coveredstatements="41" conditionals="19" coveredconditionals="10" methods="2" coveredmethods="1"/>
+        <metrics statements="57" coveredstatements="55" conditionals="19" coveredconditionals="15" methods="2" coveredmethods="2"/>
         <line num="1" count="6" type="stmt"/>
         <line num="2" count="6" type="stmt"/>
         <line num="3" count="6" type="stmt"/>
         <line num="9" count="6" type="stmt"/>
-        <line num="10" count="3" type="stmt"/>
-        <line num="11" count="3" type="stmt"/>
-        <line num="14" count="3" type="stmt"/>
-        <line num="15" count="3" type="stmt"/>
-        <line num="17" count="3" type="cond" truecount="2" falsecount="0"/>
+        <line num="10" count="5" type="stmt"/>
+        <line num="11" count="5" type="stmt"/>
+        <line num="14" count="5" type="stmt"/>
+        <line num="15" count="5" type="stmt"/>
+        <line num="17" count="5" type="cond" truecount="2" falsecount="0"/>
         <line num="18" count="1" type="stmt"/>
-        <line num="21" count="2" type="stmt"/>
-        <line num="24" count="2" type="stmt"/>
-        <line num="25" count="2" type="stmt"/>
-        <line num="26" count="2" type="stmt"/>
-        <line num="28" count="2" type="stmt"/>
-        <line num="71" count="2" type="stmt"/>
-        <line num="78" count="2" type="stmt"/>
-        <line num="82" count="2" type="stmt"/>
-        <line num="83" count="2" type="stmt"/>
-        <line num="84" count="2" type="stmt"/>
-        <line num="85" count="2" type="stmt"/>
-        <line num="86" count="2" type="stmt"/>
-        <line num="92" count="2" type="stmt"/>
-        <line num="95" count="2" type="stmt"/>
-        <line num="100" count="2" type="stmt"/>
-        <line num="110" count="2" type="stmt"/>
-        <line num="113" count="2" type="stmt"/>
-        <line num="118" count="2" type="stmt"/>
-        <line num="128" count="2" type="stmt"/>
-        <line num="131" count="2" type="cond" truecount="4" falsecount="1"/>
-        <line num="132" count="0" type="stmt"/>
-        <line num="138" count="0" type="stmt"/>
-        <line num="140" count="0" type="stmt"/>
-        <line num="142" count="0" type="stmt"/>
-        <line num="148" count="0" type="stmt"/>
-        <line num="159" count="0" type="cond" truecount="0" falsecount="2"/>
-        <line num="160" count="0" type="stmt"/>
-        <line num="161" count="0" type="stmt"/>
-        <line num="162" count="0" type="stmt"/>
-        <line num="163" count="0" type="stmt"/>
-        <line num="169" count="0" type="stmt"/>
-        <line num="171" count="0" type="stmt"/>
-        <line num="175" count="0" type="stmt"/>
-        <line num="180" count="2" type="cond" truecount="2" falsecount="0"/>
-        <line num="181" count="1" type="stmt"/>
-        <line num="182" count="1" type="stmt"/>
+        <line num="21" count="4" type="stmt"/>
+        <line num="24" count="4" type="stmt"/>
+        <line num="25" count="4" type="stmt"/>
+        <line num="26" count="4" type="stmt"/>
+        <line num="28" count="4" type="stmt"/>
+        <line num="71" count="4" type="stmt"/>
+        <line num="78" count="4" type="stmt"/>
+        <line num="82" count="4" type="stmt"/>
+        <line num="83" count="4" type="stmt"/>
+        <line num="84" count="4" type="stmt"/>
+        <line num="85" count="4" type="stmt"/>
+        <line num="86" count="4" type="stmt"/>
+        <line num="92" count="4" type="stmt"/>
+        <line num="95" count="4" type="stmt"/>
+        <line num="100" count="4" type="stmt"/>
+        <line num="110" count="4" type="stmt"/>
+        <line num="113" count="4" type="stmt"/>
+        <line num="118" count="4" type="stmt"/>
+        <line num="128" count="4" type="stmt"/>
+        <line num="131" count="4" type="cond" truecount="5" falsecount="0"/>
+        <line num="132" count="1" type="stmt"/>
+        <line num="138" count="1" type="stmt"/>
+        <line num="140" count="1" type="stmt"/>
+        <line num="142" count="2" type="stmt"/>
+        <line num="148" count="2" type="stmt"/>
+        <line num="159" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="160" count="1" type="stmt"/>
+        <line num="161" count="1" type="stmt"/>
+        <line num="162" count="1" type="stmt"/>
+        <line num="163" count="1" type="stmt"/>
+        <line num="169" count="1" type="stmt"/>
+        <line num="171" count="1" type="stmt"/>
+        <line num="175" count="1" type="stmt"/>
+        <line num="180" count="4" type="cond" truecount="2" falsecount="0"/>
+        <line num="181" count="2" type="stmt"/>
+        <line num="182" count="2" type="stmt"/>
         <line num="183" count="1" type="stmt"/>
         <line num="185" count="1" type="stmt"/>
         <line num="186" count="1" type="stmt"/>
         <line num="188" count="1" type="stmt"/>
         <line num="194" count="1" type="stmt"/>
-        <line num="196" count="0" type="stmt"/>
-        <line num="201" count="2" type="stmt"/>
-        <line num="202" count="2" type="stmt"/>
-        <line num="210" count="2" type="stmt"/>
+        <line num="196" count="1" type="stmt"/>
+        <line num="201" count="4" type="stmt"/>
+        <line num="202" count="4" type="stmt"/>
+        <line num="210" count="4" type="stmt"/>
         <line num="212" count="0" type="stmt"/>
         <line num="213" count="0" type="stmt"/>
       </file>
       <file name="weather-crossing.controller.js" path="/Users/siphojrmntambo/Downloads/VnV (temp 3)/Vows-n-Veils/backend/controllers/weather-crossing.controller.js">
-        <metrics statements="32" coveredstatements="20" conditionals="10" coveredconditionals="3" methods="8" coveredmethods="5"/>
+        <metrics statements="32" coveredstatements="32" conditionals="10" coveredconditionals="9" methods="8" coveredmethods="8"/>
         <line num="1" count="6" type="stmt"/>
         <line num="2" count="6" type="stmt"/>
         <line num="5" count="6" type="stmt"/>
@@ -333,30 +333,30 @@
         <line num="15" count="1" type="stmt"/>
         <line num="17" count="1" type="stmt"/>
         <line num="21" count="6" type="stmt"/>
-        <line num="22" count="1" type="stmt"/>
-        <line num="23" count="0" type="cond" truecount="0" falsecount="2"/>
-        <line num="24" count="0" type="stmt"/>
-        <line num="26" count="0" type="stmt"/>
+        <line num="22" count="2" type="stmt"/>
+        <line num="23" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="24" count="1" type="stmt"/>
+        <line num="26" count="1" type="stmt"/>
         <line num="30" count="6" type="stmt"/>
         <line num="31" count="1" type="stmt"/>
         <line num="32" count="1" type="stmt"/>
-        <line num="33" count="0" type="stmt"/>
+        <line num="33" count="1" type="stmt"/>
         <line num="36" count="6" type="stmt"/>
-        <line num="37" count="1" type="stmt"/>
-        <line num="38" count="0" type="cond" truecount="0" falsecount="2"/>
-        <line num="39" count="0" type="stmt"/>
-        <line num="40" count="0" type="stmt"/>
-        <line num="42" count="0" type="stmt"/>
+        <line num="37" count="2" type="stmt"/>
+        <line num="38" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="39" count="1" type="stmt"/>
+        <line num="40" count="1" type="stmt"/>
+        <line num="42" count="1" type="stmt"/>
         <line num="46" count="6" type="stmt"/>
-        <line num="47" count="1" type="stmt"/>
-        <line num="48" count="0" type="cond" truecount="0" falsecount="2"/>
-        <line num="49" count="0" type="stmt"/>
-        <line num="50" count="0" type="stmt"/>
-        <line num="52" count="0" type="stmt"/>
+        <line num="47" count="2" type="stmt"/>
+        <line num="48" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="49" count="1" type="stmt"/>
+        <line num="50" count="1" type="stmt"/>
+        <line num="52" count="1" type="stmt"/>
       </file>
     </package>
     <package name="backend.routes">
-      <metrics statements="340" coveredstatements="268" conditionals="159" coveredconditionals="99" methods="41" coveredmethods="33"/>
+      <metrics statements="340" coveredstatements="273" conditionals="159" coveredconditionals="99" methods="41" coveredmethods="33"/>
       <file name="chatbot.routes.js" path="/Users/siphojrmntambo/Downloads/VnV (temp 3)/Vows-n-Veils/backend/routes/chatbot.routes.js">
         <metrics statements="20" coveredstatements="18" conditionals="9" coveredconditionals="9" methods="1" coveredmethods="1"/>
         <line num="1" count="5" type="stmt"/>
@@ -522,7 +522,7 @@
         <line num="426" count="5" type="stmt"/>
       </file>
       <file name="venues.routes.js" path="/Users/siphojrmntambo/Downloads/VnV (temp 3)/Vows-n-Veils/backend/routes/venues.routes.js">
-        <metrics statements="182" coveredstatements="124" conditionals="75" coveredconditionals="35" methods="25" coveredmethods="17"/>
+        <metrics statements="182" coveredstatements="129" conditionals="75" coveredconditionals="35" methods="25" coveredmethods="17"/>
         <line num="1" count="5" type="stmt"/>
         <line num="2" count="5" type="stmt"/>
         <line num="3" count="5" type="stmt"/>
@@ -653,12 +653,12 @@
         <line num="482" count="1" type="stmt"/>
         <line num="484" count="0" type="stmt"/>
         <line num="517" count="5" type="stmt"/>
-        <line num="518" count="4" type="stmt"/>
-        <line num="519" count="4" type="stmt"/>
-        <line num="520" count="4" type="stmt"/>
-        <line num="522" count="4" type="cond" truecount="2" falsecount="0"/>
+        <line num="518" count="5" type="stmt"/>
+        <line num="519" count="5" type="stmt"/>
+        <line num="520" count="5" type="stmt"/>
+        <line num="522" count="5" type="cond" truecount="2" falsecount="0"/>
         <line num="523" count="1" type="stmt"/>
-        <line num="526" count="3" type="stmt"/>
+        <line num="526" count="4" type="stmt"/>
         <line num="527" count="3" type="stmt"/>
         <line num="528" count="3" type="stmt"/>
         <line num="530" count="3" type="cond" truecount="2" falsecount="0"/>
@@ -674,13 +674,13 @@
         <line num="544" count="1" type="stmt"/>
         <line num="547" count="2" type="stmt"/>
         <line num="555" count="2" type="stmt"/>
-        <line num="557" count="0" type="stmt"/>
-        <line num="558" count="0" type="stmt"/>
+        <line num="557" count="1" type="stmt"/>
+        <line num="558" count="1" type="stmt"/>
         <line num="604" count="5" type="stmt"/>
-        <line num="605" count="2" type="stmt"/>
-        <line num="606" count="2" type="stmt"/>
-        <line num="607" count="2" type="stmt"/>
-        <line num="608" count="2" type="stmt"/>
+        <line num="605" count="3" type="stmt"/>
+        <line num="606" count="3" type="stmt"/>
+        <line num="607" count="3" type="stmt"/>
+        <line num="608" count="3" type="stmt"/>
         <line num="610" count="2" type="cond" truecount="2" falsecount="0"/>
         <line num="611" count="1" type="stmt"/>
         <line num="614" count="1" type="stmt"/>
@@ -692,18 +692,18 @@
         <line num="621" count="0" type="stmt"/>
         <line num="625" count="1" type="stmt"/>
         <line num="632" count="1" type="stmt"/>
-        <line num="635" count="0" type="stmt"/>
+        <line num="635" count="1" type="stmt"/>
         <line num="660" count="5" type="stmt"/>
-        <line num="661" count="2" type="stmt"/>
-        <line num="662" count="2" type="stmt"/>
-        <line num="663" count="2" type="stmt"/>
+        <line num="661" count="3" type="stmt"/>
+        <line num="662" count="3" type="stmt"/>
+        <line num="663" count="3" type="stmt"/>
         <line num="665" count="2" type="stmt"/>
         <line num="666" count="2" type="cond" truecount="2" falsecount="0"/>
         <line num="667" count="1" type="stmt"/>
         <line num="670" count="1" type="stmt"/>
         <line num="671" count="1" type="stmt"/>
-        <line num="673" count="0" type="stmt"/>
-        <line num="674" count="0" type="stmt"/>
+        <line num="673" count="1" type="stmt"/>
+        <line num="674" count="1" type="stmt"/>
         <line num="680" count="5" type="stmt"/>
       </file>
       <file name="weather-crossing.routes.js" path="/Users/siphojrmntambo/Downloads/VnV (temp 3)/Vows-n-Veils/backend/routes/weather-crossing.routes.js">

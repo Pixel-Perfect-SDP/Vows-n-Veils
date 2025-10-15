@@ -90,4 +90,54 @@ describe('story.controller', () => {
     expect(axios.get).toHaveBeenCalledWith('https://example.com/photo.jpg', { responseType: 'arraybuffer' });
     expect(createdDoc.image).toHaveBeenCalled();
   });
+
+  it('renders story timeline entries', async () => {
+    const timeline = [
+      { title: 'First date', description: 'We met for coffee.' },
+      { title: 'Proposal', description: 'At the beach.' }
+    ];
+    mockDocRef.get.mockResolvedValue({
+      exists: true,
+      data: () => ({
+        howWeMet: 'At work',
+        proposal: 'On a mountain',
+        timeline
+      })
+    });
+
+    const req = { params: { userId: 'user-timeline' } };
+    const res = createRes();
+
+    await storyController.exportStoryPdf(req, res);
+
+    const createdDoc = mockPdfKit.mock.results[0].value;
+    expect(createdDoc.text).toHaveBeenCalledWith('Our Milestones', { underline: false });
+    expect(createdDoc.text).toHaveBeenCalledWith('1. First date', { continued: false });
+    expect(createdDoc.text).toHaveBeenCalledWith('2. Proposal', { continued: false });
+  });
+
+  it('continues when photo download fails', async () => {
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+    try {
+      axios.get.mockRejectedValue(new Error('network down'));
+      mockDocRef.get.mockResolvedValue({
+        exists: true,
+        data: () => ({
+          howWeMet: 'Somewhere',
+          proposal: 'Somehow',
+          photoURL: 'https://example.com/photo.jpg',
+          timeline: []
+        })
+      });
+
+      const req = { params: { userId: 'user-photo-fail' } };
+      const res = createRes();
+
+      await storyController.exportStoryPdf(req, res);
+
+      expect(consoleSpy).toHaveBeenCalledWith('Could not load image:', expect.any(Error));
+    } finally {
+      consoleSpy.mockRestore();
+    }
+  });
 });

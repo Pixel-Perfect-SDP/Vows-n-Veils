@@ -8,4 +8,18 @@ describe('App basic routes', () => {
     expect(response.status).toBe(200);
     expect(response.text).toContain('Backend is up');
   });
+
+  it('allows configured origins through CORS', async () => {
+    const response = await request(app).get('/').set('Origin', 'http://localhost:4200');
+
+    expect(response.status).toBe(200);
+    expect(response.headers['access-control-allow-origin']).toBe('http://localhost:4200');
+  });
+
+  it('rejects unknown origins via CORS', async () => {
+    const response = await request(app).get('/').set('Origin', 'https://malicious.example');
+
+    expect(response.status).toBe(500);
+    expect(response.text).toContain('Not allowed by CORS');
+  });
 });

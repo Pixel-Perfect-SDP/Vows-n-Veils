@@ -436,4 +436,41 @@ describe('venues routes', () => {
     expect(response.status).toBe(404);
     expect(response.body).toEqual({ error: 'Notification not found' });
   });
+
+  it('handles Firestore errors when updating order status', async () => {
+    admin.firestore.mockImplementationOnce(() => {
+      throw new Error('firestore down');
+    });
+
+    const response = await request(app)
+      .put('/venues/orders/order-err/status')
+      .send({ status: 'accepted' });
+
+    expect(response.status).toBe(500);
+    expect(response.body).toEqual({ error: 'firestore down' });
+  });
+
+  it('returns 500 when fetching notifications fails', async () => {
+    const notificationsCollection = getCollection('Notifications');
+    notificationsCollection.where.mockImplementation(() => {
+      throw new Error('query failed');
+    });
+
+    const response = await request(app).get('/venues/notifications/user-err');
+
+    expect(response.status).toBe(500);
+    expect(response.body).toEqual({ error: 'query failed' });
+  });
+
+  it('returns 500 when marking notification as read fails', async () => {
+    const notificationsCollection = getCollection('Notifications');
+    notificationsCollection.doc.mockImplementation(() => {
+      throw new Error('doc failed');
+    });
+
+    const response = await request(app).put('/venues/notifications/notif-err/read');
+
+    expect(response.status).toBe(500);
+    expect(response.body).toEqual({ error: 'doc failed' });
+  });
 });

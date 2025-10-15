@@ -16,6 +16,7 @@ jest.mock('../../firebase', () => ({
 }));
 
 jest.mock('pdfkit', () => jest.fn(() => new MockPDFDocument()));
+const pdfKit = require('pdfkit');
 
 const guestsController = require('../../controllers/guests.controller');
 
@@ -279,6 +280,52 @@ describe('guests.controller', () => {
         'Content-Disposition',
         'attachment; filename="guest-list-diet_Vegan-allergy_Pollen-rsvp_true.pdf"'
       );
+    });
+
+    it('adds a new page when a row would overflow the current page', async () => {
+      const docs = [
+        {
+          id: '1',
+          data: () => ({
+            Name: 'A'.repeat(200),
+            Email: 'amy@example.com',
+            Dietary: 'Vegetarian',
+            Allergies: 'Pollen',
+            RSVPstatus: true,
+            Song: 'Song'
+          })
+        }
+      ];
+      pdfKit.mockImplementationOnce(() => {
+        const doc = new MockPDFDocument();
+        doc.heightOfString.mockReturnValue(600);
+        return doc;
+      });
+      mockCollection.where.mockReturnValue({
+        get: jest.fn(() => Promise.resolve({ docs }))
+      });
+
+      const req = { params: { eventId: 'evt' }, query: {} };
+      const res = createRes();
+
+      await guestsController.exportGuestsPdf(req, res);
+
+      const createdDoc = pdfKit.mock.results[0].value;
+      expect(createdDoc.addPage).toHaveBeenCalled();
+    });
+
+    it('returns 500 when PDF generation fails', async () => {
+      mockDb.collection.mockImplementationOnce(() => {
+        throw new Error('db offline');
+      });
+
+      const req = { params: { eventId: 'evt' }, query: {} };
+      const res = createRes();
+
+      await guestsController.exportGuestsPdf(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({ message: 'Failed to export PDF' });
     });
   });
 });
