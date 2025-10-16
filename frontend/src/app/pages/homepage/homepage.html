@@ -475,11 +475,18 @@
             <!-- Select which guest to edit -->
             <label style="display:block; margin-bottom:10px;">
               <span>Select Guest</span>
-              <select [ngModel]="selectedGuestId" (ngModelChange)="onSelectEditGuest($event)">
-                <option [ngValue]="null" disabled selected>-- choose a guest --</option>
-                <option *ngFor="let g of guests" [ngValue]="g.id">{{ g.Name }} — {{ g.Email }}</option>
+              <select
+                [(ngModel)]="selectedGuestId"
+                [ngModelOptions]="{ standalone: true }"
+                (ngModelChange)="onSelectEditGuest($event)"
+              >
+                <option [ngValue]="null" disabled>-- choose a guest --</option>
+                <option *ngFor="let g of guests" [ngValue]="g.id">
+                  {{ g.Name }} — {{ g.Email }}
+                </option>
               </select>
             </label>
+
 
             <!-- Only show the form fields once a guest is chosen -->
             <div class="form-grid" *ngIf="selectedGuestId">
