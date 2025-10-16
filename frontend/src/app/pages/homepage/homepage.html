@@ -451,6 +451,10 @@
           </section>
 
           <section class="addGuest">
+            <button type="button" class="btn" style="margin-left:12px" (click)="toggleEdit()">
+              {{ showEdit ? 'Close' : 'Edit Guest' }}
+            </button>
+
             <button type="button" class="btn" (click)="toggleAddGuest()">
               {{ showAddGuest ? 'Close' : 'Add Guest' }}
             </button>
@@ -462,6 +466,67 @@
         </section>
 
         <!-- Actions row -->
+
+        <!-- Edit Guest Card -->
+        <section class="add-card" *ngIf="showEdit">
+          <form [formGroup]="editGuestForm" (ngSubmit)="submitEditGuest()">
+            <strong style="display:block; margin-bottom:8px;">Edit Guest</strong>
+
+            <!-- Select which guest to edit -->
+            <label style="display:block; margin-bottom:10px;">
+              <span>Select Guest</span>
+              <select [ngModel]="selectedGuestId" (ngModelChange)="onSelectEditGuest($event)">
+                <option [ngValue]="null" disabled selected>-- choose a guest --</option>
+                <option *ngFor="let g of guests" [ngValue]="g.id">{{ g.Name }} — {{ g.Email }}</option>
+              </select>
+            </label>
+
+            <!-- Only show the form fields once a guest is chosen -->
+            <div class="form-grid" *ngIf="selectedGuestId">
+              <label>
+                <span>Name</span>
+                <input formControlName="Name" placeholder="Full name" />
+              </label>
+
+              <label>
+                <span>Email</span>
+                <input formControlName="Email" type="email" placeholder="email@example.com" />
+              </label>
+
+              <label>
+                <span>Dietary</span>
+                <input formControlName="Dietary" placeholder="e.g. Vegan" />
+              </label>
+
+              <label>
+                <span>Allergies</span>
+                <input formControlName="Allergies" placeholder="e.g. Peanuts" />
+              </label>
+
+              <label>
+                <span>RSVP</span>
+                <select formControlName="RSVPstatus">
+                  <option value="">— leave unchanged —</option>
+                  <option value="true">Attending</option>
+                  <option value="false">Not Attending</option>
+                </select>
+              </label>
+
+              <label class="grid-span-2">
+                <span>Song request</span>
+                <input formControlName="Song" placeholder="Favorite song" />
+              </label>
+            </div>
+
+            <div class="add-card-actions">
+              <button type="button" class="btn btn-secondary" (click)="toggleEdit()">Cancel</button>
+              <button type="submit" class="btn btn-primary" [disabled]="!selectedGuestId || guestsLoading">
+                Save Changes
+              </button>
+            </div>
+          </form>
+        </section>
+
 
         <!-- Add Guest Card -->
         <section class="add-card" *ngIf="showAddGuest">

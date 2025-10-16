@@ -328,3 +328,47 @@ exports.exportGuestsPdf = async (req, res) => {
     res.status(500).json({ message: 'Failed to export PDF' });
   }
 };
+
+// UPDATE a guest (partial update)
+exports.updateGuestForEvent = async (req, res) => {
+  try {
+    const { eventId, guestId } = req.params;
+    const { Name, Email, Dietary, Allergies, RSVPstatus, Song } = req.body || {};
+
+    // Load doc and validate belongs to event
+    const ref = db.collection('Guests').doc(guestId);
+    const snap = await ref.get();
+    if (!snap.exists) return res.status(404).json({ message: 'Guest not found' });
+
+    const data = snap.data();
+    if (data.EventID !== eventId) {
+      return res.status(403).json({ message: 'Guest does not belong to this event' });
+    }
+
+    // Build a SAFE update payload (ignore unknown fields & EventID)
+    const update = {};
+    if (typeof Name !== 'undefined') update.Name = String(Name).trim();
+    if (typeof Email !== 'undefined') update.Email = String(Email).trim();
+    if (typeof Dietary !== 'undefined') update.Dietary = String(Dietary ?? '').trim();
+    if (typeof Allergies !== 'undefined') update.Allergies = String(Allergies ?? '').trim();
+    if (typeof Song !== 'undefined') update.Song = String(Song ?? '').trim();
+
+    if (typeof RSVPstatus !== 'undefined') {
+      update.RSVPstatus = typeof RSVPstatus === 'boolean'
+        ? RSVPstatus
+        : String(RSVPstatus).toLowerCase() === 'true';
+    }
+
+    // Nothing to update?
+    if (Object.keys(update).length === 0) {
+      return res.status(400).json({ message: 'No valid fields to update' });
+    }
+
+    await ref.update(update);
+    const updated = await ref.get();
+    return res.status(200).json({ id: guestId, ...updated.data() });
+  } catch (err) {
+    console.error('Error updating guest:', err);
+    return res.status(500).json({ message: 'Failed to update guest' });
+  }
+};
