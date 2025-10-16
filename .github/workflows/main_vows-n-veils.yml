@@ -32,13 +32,14 @@ jobs:
           npm test -- --coverage
 
       - name: Upload backend coverage to Codecov
+        if: always()
         uses: codecov/codecov-action@v4
         with:
-          files: coverage/lcov.info
+          files: ./backend/coverage/lcov.info
           flags: backend
-          root_dir: backend
-          config: .codecov.yml
           token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: true
+          verbose: true
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
