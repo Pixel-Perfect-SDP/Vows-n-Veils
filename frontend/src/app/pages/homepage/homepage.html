@@ -66,15 +66,27 @@
     <!-- Sidebar -->
     <nav class="sidebar">
       <ul>
-        <li><a routerLink="/story" routerLinkActive="active">Our Story</a></li>
         <li>
-          <a href="#" [class.active]="activeTab==='guests'" (click)="switchToGuests($event)">Guest List</a>
+          <a href="#"
+            [class.active]="activeTab==='dashboard'"
+            (click)="switchToDashboard($event)">
+            Dashboard
+          </a>
         </li>
+        <li>
+          <a href="#"
+            [class.active]="activeTab==='guests'"
+            (click)="switchToGuests($event)">
+            Guest List
+          </a>
+        </li>
+        <li><a routerLink="/story" routerLinkActive="active">Our Story</a></li>
         <li><a routerLink="/invitations" routerLinkActive="active">Invitations</a></li>
         <li><a routerLink="/venues" routerLinkActive="active">Venues</a></li>
         <li><a routerLink="/vendors-couples" routerLinkActive="active">Vendors</a></li>
       </ul>
     </nav>
+
 
     <!-- Main content column -->
     <section class="main">
@@ -89,70 +101,73 @@
       </header>
 
       <!-- Weather Bar -->
-      <section class="weather-bar" *ngIf="eventData?.VenueID">
-        <!-- Loading -->
-        <ng-container *ngIf="weatherLoading">
+      <section *ngIf="activeTab==='dashboard'">
+        <section class="weather-bar" *ngIf="eventData?.VenueID">
+          <!-- Loading -->
+          <ng-container *ngIf="weatherLoading">
+            <section class="wb-row">
+              <section class="wb-icon-skel"></section>
+              <section class="wb-text-skel"></section>
+              <section class="wb-text-skel short"></section>
+            </section>
+          </ng-container>
+
+          <!-- Error -->
+          <ng-container *ngIf="weatherError && !weatherLoading">
+            <section class="wb-row wb-error">
+              <span>{{ weatherError }}</span>
+            </section>
+          </ng-container>
+
+          <ng-container *ngIf="weather && !weatherLoading && !weatherError">
+            <section class="wb-row">
+              <section class="wb-icon" [ngClass]="getWeatherIconClass(weather.days[0])" aria-hidden="true"></section>
+
+              <section class="wb-col">
+                <section class="wb-title">Wedding Weather</section>
+                <section class="wb-sub">
+                  <strong>{{ weather.resolvedAddress || weather.address }}</strong>
+                  • {{ weather.days[0].datetime }}
+                  <ng-container *ngIf="weather.days[0].description">
+                    • {{ weather.days[0].description }}
+                  </ng-container>
+                  <ng-container *ngIf="!weather.days[0].description">
+                    • {{ getConditionLabel(weather.days[0]) }}
+                  </ng-container>
+                </section>
+              </section>
+
+              <section class="wb-metrics">
+                <section class="wb-chip">
+                  🌡️ {{ (((weather.days[0].temp - 32) * 5) / 9) | number:'1.0-0' }}°C
+                </section>
+                <section class="wb-chip" *ngIf="weather.days[0].humidity !== undefined">
+                  💧 {{ weather.days[0].humidity }}%
+                </section>
+                <section class="wb-chip" *ngIf="getPrecipPercent(weather.days[0]) !== null">
+                  ☔ {{ getPrecipPercent(weather.days[0]) }}%
+                </section>
+              </section>
+            </section>
+          </ng-container>
+        </section>
+
+
+        <!-- If no venue yet -->
+        <section class="weather-bar wb-empty" *ngIf="!eventData?.VenueID">
           <section class="wb-row">
-            <section class="wb-icon-skel"></section>
-            <section class="wb-text-skel"></section>
-            <section class="wb-text-skel short"></section>
-          </section>
-        </ng-container>
-
-        <!-- Error -->
-        <ng-container *ngIf="weatherError && !weatherLoading">
-          <section class="wb-row wb-error">
-            <span>{{ weatherError }}</span>
-          </section>
-        </ng-container>
-
-        <ng-container *ngIf="weather && !weatherLoading && !weatherError">
-          <section class="wb-row">
-            <section class="wb-icon" [ngClass]="getWeatherIconClass(weather.days[0])" aria-hidden="true"></section>
-
+            <section class="wb-icon" aria-hidden="true">⛅</section>
             <section class="wb-col">
-              <section class="wb-title">Wedding Weather</section>
-              <section class="wb-sub">
-                <strong>{{ weather.resolvedAddress || weather.address }}</strong>
-                • {{ weather.days[0].datetime }}
-                <ng-container *ngIf="weather.days[0].description">
-                  • {{ weather.days[0].description }}
-                </ng-container>
-                <ng-container *ngIf="!weather.days[0].description">
-                  • {{ getConditionLabel(weather.days[0]) }}
-                </ng-container>
-              </section>
+              <section class="wb-title">Add a venue to see your wedding weather</section>
+              <section class="wb-sub">We’ll pull the forecast for your exact location & date.</section>
             </section>
-
-            <section class="wb-metrics">
-              <section class="wb-chip">
-                🌡️ {{ (((weather.days[0].temp - 32) * 5) / 9) | number:'1.0-0' }}°C
-              </section>
-              <section class="wb-chip" *ngIf="weather.days[0].humidity !== undefined">
-                💧 {{ weather.days[0].humidity }}%
-              </section>
-              <section class="wb-chip" *ngIf="getPrecipPercent(weather.days[0]) !== null">
-                ☔ {{ getPrecipPercent(weather.days[0]) }}%
-              </section>
-            </section>
-          </section>
-        </ng-container>
-      </section>
-
-      <!-- If no venue yet -->
-      <section class="weather-bar wb-empty" *ngIf="!eventData?.VenueID">
-        <section class="wb-row">
-          <section class="wb-icon" aria-hidden="true">⛅</section>
-          <section class="wb-col">
-            <section class="wb-title">Add a venue to see your wedding weather</section>
-            <section class="wb-sub">We’ll pull the forecast for your exact location & date.</section>
           </section>
         </section>
       </section>
 
 
-
-      <section class="countdown-section">
+      <!-- Countdown tab -->
+      <section class="countdown-section" *ngIf="activeTab==='dashboard'">
         <h2 class=countHead>Time until we tie the knot.....</h2>
         <!-- Countdown -->
         <section class="countdown">
@@ -184,7 +199,7 @@
       </section>
 
       <!-- Event Information Panel -->
-      <section class="event-info-panel" *ngIf="hasEvent && eventData">
+      <section class="event-info-panel" *ngIf="activeTab==='dashboard' && hasEvent && eventData">
         <!-- Loading State -->
         <section class="event-info-loading" *ngIf="eventInfoLoading">
           <section class="loading-spinner"></section>
@@ -294,7 +309,7 @@
       </section>
 
       <!-- Adding checklist-->
-      <section class="table-card" *ngIf="hasEvent && eventData">
+      <section class="table-card" *ngIf="activeTab==='dashboard' && hasEvent && eventData">
         <section class="table-header">
           <section class="table-title">Checklist</section>
           <section style="display:flex; gap:10px;">
@@ -407,13 +422,6 @@
             </tbody>
           </table>
         </section>
-      </section>
-
-
-
-      <!-- Default landing content -->
-      <section class="content" *ngIf="activeTab==='overview'">
-        <!-- your overview content -->
       </section>
 
       <!---------Guest list panel----------->

@@ -81,7 +81,7 @@ export class Homepage {
   public weatherLoading: boolean = false;
   public weatherError: string | null = null;
 
-  activeTab: 'overview' | 'guests' = 'overview';
+  activeTab: 'dashboard' | 'guests' = 'dashboard';
   guests: Guest[] = [];
   guestsLoading = false;
   guestsError: string | null = null;
@@ -552,6 +552,16 @@ export class Homepage {
 
   // modify switchToGuests to also fetch options once
   private filtersLoaded = false;
+
+  async switchToDashboard(e: Event) {
+    e.preventDefault();
+    this.activeTab = 'dashboard';
+
+    // optional tidy-up when leaving Guests
+    this.showAddGuest = false;
+    this.showExport = false;
+    this.showEdit = false;
+  }
 
   async switchToGuests(e: Event) {
     e.preventDefault();
