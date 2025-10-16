@@ -5,6 +5,8 @@ https://mango-mushroom-00c4ce01e.2.azurestaticapps.net/
 [![Frontend Coverage](https://codecov.io/gh/Pixel-Perfect-SDP/Vows-n-Veils/branch/main/graph/badge.svg?flag=frontend)](https://app.codecov.io/gh/Pixel-Perfect-SDP/Vows-n-Veils?flags=frontend)
 [![Backend Coverage](https://codecov.io/gh/Pixel-Perfect-SDP/Vows-n-Veils/branch/main/graph/badge.svg?flag=backend)](https://app.codecov.io/gh/Pixel-Perfect-SDP/Vows-n-Veils?flags=backend)
 
+Testing Coverage: https://app.codecov.io/gh/Pixel-Perfect-SDP/Vows-n-Veils/tree/main
+
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.1.3.
 
 ## Development server
