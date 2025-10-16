@@ -97,29 +97,35 @@ export class DataService {
     return this.http.delete<{ message: string; id: string }>(`${this.apiUrl}/events/${eventId}/guests/${guestId}`);
   }
 
+  // PUT update guest
+  updateGuest(eventId: string, guestId: string, patch: Partial<CreateGuestDto>): Observable<Guest> {
+    return this.http.put<Guest>(`${this.apiUrl}/events/${eventId}/guests/${guestId}`, patch);
+  }
+
+
   // download CSV
-downloadGuestsCsv(eventId: string, opts?: { dietary?: string; allergy?: string; rsvp?: boolean }) {
-  let params = new HttpParams();
-  if (opts?.dietary) params = params.set('dietary', opts.dietary);
-  if (opts?.allergy) params = params.set('allergy', opts.allergy);
-  if (typeof opts?.rsvp === 'boolean') params = params.set('rsvp', String(opts.rsvp));
-  return this.http.get(`${this.apiUrl}/events/${eventId}/guests/export.csv`, {
-    params,
-    responseType: 'blob'
-  });
-}
+  downloadGuestsCsv(eventId: string, opts?: { dietary?: string; allergy?: string; rsvp?: boolean }) {
+    let params = new HttpParams();
+    if (opts?.dietary) params = params.set('dietary', opts.dietary);
+    if (opts?.allergy) params = params.set('allergy', opts.allergy);
+    if (typeof opts?.rsvp === 'boolean') params = params.set('rsvp', String(opts.rsvp));
+    return this.http.get(`${this.apiUrl}/events/${eventId}/guests/export.csv`, {
+      params,
+      responseType: 'blob'
+    });
+  }
 
   // download PDF
-downloadGuestsPdf(eventId: string, opts?: { dietary?: string; allergy?: string; rsvp?: boolean }) {
-  let params = new HttpParams();
-  if (opts?.dietary) params = params.set('dietary', opts.dietary);
-  if (opts?.allergy) params = params.set('allergy', opts.allergy);
-  if (typeof opts?.rsvp === 'boolean') params = params.set('rsvp', String(opts.rsvp));
-  return this.http.get(`${this.apiUrl}/events/${eventId}/guests/export.pdf`, {
-    params,
-    responseType: 'blob'
-  });
-}
+  downloadGuestsPdf(eventId: string, opts?: { dietary?: string; allergy?: string; rsvp?: boolean }) {
+    let params = new HttpParams();
+    if (opts?.dietary) params = params.set('dietary', opts.dietary);
+    if (opts?.allergy) params = params.set('allergy', opts.allergy);
+    if (typeof opts?.rsvp === 'boolean') params = params.set('rsvp', String(opts.rsvp));
+    return this.http.get(`${this.apiUrl}/events/${eventId}/guests/export.pdf`, {
+      params,
+      responseType: 'blob'
+    });
+  }
 
   // download story PDF
   downloadStoryPdf(userId: string) {

@@ -6,7 +6,8 @@ const {
   createGuestForEvent,
   deleteGuestForEvent,
   exportGuestsCsv,
-  exportGuestsPdf
+  exportGuestsPdf,
+  updateGuestForEvent,
 } = require('../controllers/guests.controller');
 /**
  * @swagger
@@ -283,5 +284,43 @@ router.get('/:eventId/guests/export.csv', exportGuestsCsv);
  *         description: Failed to export PDF
  */
 router.get('/:eventId/guests/export.pdf', exportGuestsPdf);
+
+// PUT /events/:eventId/guests/:guestId
+/**
+ * @swagger
+ * /events/{eventId}/guests/{guestId}:
+ *   put:
+ *     summary: Update a guest (partial update)
+ *     tags: [Guests]
+ *     parameters:
+ *       - in: path
+ *         name: eventId
+ *         required: true
+ *         schema: { type: string }
+ *       - in: path
+ *         name: guestId
+ *         required: true
+ *         schema: { type: string }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               Name: { type: string }
+ *               Email: { type: string }
+ *               Dietary: { type: string }
+ *               Allergies: { type: string }
+ *               RSVPstatus: { type: boolean }
+ *               Song: { type: string }
+ *     responses:
+ *       200: { description: Guest updated }
+ *       403: { description: Guest does not belong to this event }
+ *       404: { description: Guest not found }
+ *       500: { description: Failed to update guest }
+ */
+router.put('/:eventId/guests/:guestId', updateGuestForEvent);
+
 
 module.exports = router;

@@ -66,15 +66,27 @@
     <!-- Sidebar -->
     <nav class="sidebar">
       <ul>
-        <li><a routerLink="/story" routerLinkActive="active">Our Story</a></li>
         <li>
-          <a href="#" [class.active]="activeTab==='guests'" (click)="switchToGuests($event)">Guest List</a>
+          <a href="#"
+            [class.active]="activeTab==='dashboard'"
+            (click)="switchToDashboard($event)">
+            Dashboard
+          </a>
         </li>
+        <li>
+          <a href="#"
+            [class.active]="activeTab==='guests'"
+            (click)="switchToGuests($event)">
+            Guest List
+          </a>
+        </li>
+        <li><a routerLink="/story" routerLinkActive="active">Our Story</a></li>
         <li><a routerLink="/invitations" routerLinkActive="active">Invitations</a></li>
         <li><a routerLink="/venues" routerLinkActive="active">Venues</a></li>
         <li><a routerLink="/vendors-couples" routerLinkActive="active">Vendors</a></li>
       </ul>
     </nav>
+
 
     <!-- Main content column -->
     <section class="main">
@@ -89,70 +101,73 @@
       </header>
 
       <!-- Weather Bar -->
-      <section class="weather-bar" *ngIf="eventData?.VenueID">
-        <!-- Loading -->
-        <ng-container *ngIf="weatherLoading">
+      <section *ngIf="activeTab==='dashboard'">
+        <section class="weather-bar" *ngIf="eventData?.VenueID">
+          <!-- Loading -->
+          <ng-container *ngIf="weatherLoading">
+            <section class="wb-row">
+              <section class="wb-icon-skel"></section>
+              <section class="wb-text-skel"></section>
+              <section class="wb-text-skel short"></section>
+            </section>
+          </ng-container>
+
+          <!-- Error -->
+          <ng-container *ngIf="weatherError && !weatherLoading">
+            <section class="wb-row wb-error">
+              <span>{{ weatherError }}</span>
+            </section>
+          </ng-container>
+
+          <ng-container *ngIf="weather && !weatherLoading && !weatherError">
+            <section class="wb-row">
+              <section class="wb-icon" [ngClass]="getWeatherIconClass(weather.days[0])" aria-hidden="true"></section>
+
+              <section class="wb-col">
+                <section class="wb-title">Wedding Weather</section>
+                <section class="wb-sub">
+                  <strong>{{ weather.resolvedAddress || weather.address }}</strong>
+                  • {{ weather.days[0].datetime }}
+                  <ng-container *ngIf="weather.days[0].description">
+                    • {{ weather.days[0].description }}
+                  </ng-container>
+                  <ng-container *ngIf="!weather.days[0].description">
+                    • {{ getConditionLabel(weather.days[0]) }}
+                  </ng-container>
+                </section>
+              </section>
+
+              <section class="wb-metrics">
+                <section class="wb-chip">
+                  🌡️ {{ (((weather.days[0].temp - 32) * 5) / 9) | number:'1.0-0' }}°C
+                </section>
+                <section class="wb-chip" *ngIf="weather.days[0].humidity !== undefined">
+                  💧 {{ weather.days[0].humidity }}%
+                </section>
+                <section class="wb-chip" *ngIf="getPrecipPercent(weather.days[0]) !== null">
+                  ☔ {{ getPrecipPercent(weather.days[0]) }}%
+                </section>
+              </section>
+            </section>
+          </ng-container>
+        </section>
+
+
+        <!-- If no venue yet -->
+        <section class="weather-bar wb-empty" *ngIf="!eventData?.VenueID">
           <section class="wb-row">
-            <section class="wb-icon-skel"></section>
-            <section class="wb-text-skel"></section>
-            <section class="wb-text-skel short"></section>
-          </section>
-        </ng-container>
-
-        <!-- Error -->
-        <ng-container *ngIf="weatherError && !weatherLoading">
-          <section class="wb-row wb-error">
-            <span>{{ weatherError }}</span>
-          </section>
-        </ng-container>
-
-        <ng-container *ngIf="weather && !weatherLoading && !weatherError">
-          <section class="wb-row">
-            <section class="wb-icon" [ngClass]="getWeatherIconClass(weather.days[0])" aria-hidden="true"></section>
-
+            <section class="wb-icon" aria-hidden="true">⛅</section>
             <section class="wb-col">
-              <section class="wb-title">Wedding Weather</section>
-              <section class="wb-sub">
-                <strong>{{ weather.resolvedAddress || weather.address }}</strong>
-                • {{ weather.days[0].datetime }}
-                <ng-container *ngIf="weather.days[0].description">
-                  • {{ weather.days[0].description }}
-                </ng-container>
-                <ng-container *ngIf="!weather.days[0].description">
-                  • {{ getConditionLabel(weather.days[0]) }}
-                </ng-container>
-              </section>
+              <section class="wb-title">Add a venue to see your wedding weather</section>
+              <section class="wb-sub">We’ll pull the forecast for your exact location & date.</section>
             </section>
-
-            <section class="wb-metrics">
-              <section class="wb-chip">
-                🌡️ {{ (((weather.days[0].temp - 32) * 5) / 9) | number:'1.0-0' }}°C
-              </section>
-              <section class="wb-chip" *ngIf="weather.days[0].humidity !== undefined">
-                💧 {{ weather.days[0].humidity }}%
-              </section>
-              <section class="wb-chip" *ngIf="getPrecipPercent(weather.days[0]) !== null">
-                ☔ {{ getPrecipPercent(weather.days[0]) }}%
-              </section>
-            </section>
-          </section>
-        </ng-container>
-      </section>
-
-      <!-- If no venue yet -->
-      <section class="weather-bar wb-empty" *ngIf="!eventData?.VenueID">
-        <section class="wb-row">
-          <section class="wb-icon" aria-hidden="true">⛅</section>
-          <section class="wb-col">
-            <section class="wb-title">Add a venue to see your wedding weather</section>
-            <section class="wb-sub">We’ll pull the forecast for your exact location & date.</section>
           </section>
         </section>
       </section>
 
 
-
-      <section class="countdown-section">
+      <!-- Countdown tab -->
+      <section class="countdown-section" *ngIf="activeTab==='dashboard'">
         <h2 class=countHead>Time until we tie the knot.....</h2>
         <!-- Countdown -->
         <section class="countdown">
@@ -184,7 +199,7 @@
       </section>
 
       <!-- Event Information Panel -->
-      <section class="event-info-panel" *ngIf="hasEvent && eventData">
+      <section class="event-info-panel" *ngIf="activeTab==='dashboard' && hasEvent && eventData">
         <!-- Loading State -->
         <section class="event-info-loading" *ngIf="eventInfoLoading">
           <section class="loading-spinner"></section>
@@ -294,7 +309,7 @@
       </section>
 
       <!-- Adding checklist-->
-      <section class="table-card" *ngIf="hasEvent && eventData">
+      <section class="table-card" *ngIf="activeTab==='dashboard' && hasEvent && eventData">
         <section class="table-header">
           <section class="table-title">Checklist</section>
           <section style="display:flex; gap:10px;">
@@ -409,13 +424,6 @@
         </section>
       </section>
 
-
-
-      <!-- Default landing content -->
-      <section class="content" *ngIf="activeTab==='overview'">
-        <!-- your overview content -->
-      </section>
-
       <!---------Guest list panel----------->
       <section class="content" *ngIf="activeTab==='guests'">
         <h2 class="sr-only">Guest List</h2>
@@ -451,6 +459,10 @@
           </section>
 
           <section class="addGuest">
+            <button type="button" class="btn" style="margin-left:12px" (click)="toggleEdit()">
+              {{ showEdit ? 'Close' : 'Edit Guest' }}
+            </button>
+
             <button type="button" class="btn" (click)="toggleAddGuest()">
               {{ showAddGuest ? 'Close' : 'Add Guest' }}
             </button>
@@ -462,6 +474,74 @@
         </section>
 
         <!-- Actions row -->
+
+        <!-- Edit Guest Card -->
+        <section class="add-card" *ngIf="showEdit">
+          <form [formGroup]="editGuestForm" (ngSubmit)="submitEditGuest()">
+            <strong style="display:block; margin-bottom:8px;">Edit Guest</strong>
+
+            <!-- Select which guest to edit -->
+            <label style="display:block; margin-bottom:10px;">
+              <span>Select Guest</span>
+              <select
+                [(ngModel)]="selectedGuestId"
+                [ngModelOptions]="{ standalone: true }"
+                (ngModelChange)="onSelectEditGuest($event)"
+              >
+                <option [ngValue]="null" disabled>-- choose a guest --</option>
+                <option *ngFor="let g of guests" [ngValue]="g.id">
+                  {{ g.Name }} — {{ g.Email }}
+                </option>
+              </select>
+            </label>
+
+
+            <!-- Only show the form fields once a guest is chosen -->
+            <div class="form-grid" *ngIf="selectedGuestId">
+              <label>
+                <span>Name</span>
+                <input formControlName="Name" placeholder="Full name" />
+              </label>
+
+              <label>
+                <span>Email</span>
+                <input formControlName="Email" type="email" placeholder="email@example.com" />
+              </label>
+
+              <label>
+                <span>Dietary</span>
+                <input formControlName="Dietary" placeholder="e.g. Vegan" />
+              </label>
+
+              <label>
+                <span>Allergies</span>
+                <input formControlName="Allergies" placeholder="e.g. Peanuts" />
+              </label>
+
+              <label>
+                <span>RSVP</span>
+                <select formControlName="RSVPstatus">
+                  <option value="">— leave unchanged —</option>
+                  <option value="true">Attending</option>
+                  <option value="false">Not Attending</option>
+                </select>
+              </label>
+
+              <label class="grid-span-2">
+                <span>Song request</span>
+                <input formControlName="Song" placeholder="Favorite song" />
+              </label>
+            </div>
+
+            <div class="add-card-actions">
+              <button type="button" class="btn btn-secondary" (click)="toggleEdit()">Cancel</button>
+              <button type="submit" class="btn btn-primary" [disabled]="!selectedGuestId || guestsLoading">
+                Save Changes
+              </button>
+            </div>
+          </form>
+        </section>
+
 
         <!-- Add Guest Card -->
         <section class="add-card" *ngIf="showAddGuest">

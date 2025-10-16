@@ -81,7 +81,7 @@ export class Homepage {
   public weatherLoading: boolean = false;
   public weatherError: string | null = null;
 
-  activeTab: 'overview' | 'guests' = 'overview';
+  activeTab: 'dashboard' | 'guests' = 'dashboard';
   guests: Guest[] = [];
   guestsLoading = false;
   guestsError: string | null = null;
@@ -553,6 +553,16 @@ export class Homepage {
   // modify switchToGuests to also fetch options once
   private filtersLoaded = false;
 
+  async switchToDashboard(e: Event) {
+    e.preventDefault();
+    this.activeTab = 'dashboard';
+
+    // optional tidy-up when leaving Guests
+    this.showAddGuest = false;
+    this.showExport = false;
+    this.showEdit = false;
+  }
+
   async switchToGuests(e: Event) {
     e.preventDefault();
     this.activeTab = 'guests';
@@ -701,6 +711,101 @@ export class Homepage {
       alert('Unexpected error. Please try again.');
     }
   }
+
+  /* -------- EDIT guests UI state -------- */
+  showEdit = false;
+  selectedGuestId: string | null = null;
+
+  editGuestForm = this.formBuild.group({
+    Name: [''],
+    Email: ['', [Validators.pattern(/^$|.+@.+\..+/)]],
+    Dietary: [''],
+    Allergies: [''],
+    RSVPstatus: [''], // we'll map to boolean on submit if provided
+    Song: ['']
+  });
+
+  // Toggle the card open/closed
+  toggleEdit() {
+    this.showEdit = !this.showEdit;
+    if (!this.showEdit) {
+      this.selectedGuestId = null;
+      this.editGuestForm.reset({});
+    } else {
+      // when opening, ensure we have the latest list (so dropdown is fresh)
+      this.loadGuests();
+    }
+  }
+
+  // When a guest is chosen from dropdown, seed the form with their values
+  onSelectEditGuest(guestId: string) {
+    this.selectedGuestId = guestId;
+    const g = this.guests.find(x => x.id === guestId);
+    if (!g) return;
+
+    this.editGuestForm.patchValue({
+      Name: g.Name ?? '',
+      Email: g.Email ?? '',
+      Dietary: g.Dietary ?? '',
+      Allergies: g.Allergies ?? '',
+      RSVPstatus: g.RSVPstatus ? 'true' : 'false',
+      Song: g.Song ?? ''
+    });
+  }
+
+  // Submit the partial update
+  async submitEditGuest() {
+    if (!this.selectedGuestId) {
+      alert('Please select a guest to edit.');
+      return;
+    }
+
+    const user = await this.waitForUser();
+    if (!user) return;
+    const eventId = user.uid;
+
+    // Build patch: only include fields the user actually changed / set
+    const raw = this.editGuestForm.getRawValue();
+    const patch: any = {};
+
+    // only send keys that are not undefined or empty strings (optional)
+    for (const key of Object.keys(raw)) {
+      const val: any = (raw as any)[key];
+      if (typeof val !== 'undefined') {
+        // normalize RSVPstatus
+        if (key === 'RSVPstatus' && val !== '') {
+          patch.RSVPstatus = String(val).toLowerCase() === 'true';
+        } else if (key !== 'RSVPstatus') {
+          patch[key] = typeof val === 'string' ? val.trim() : val;
+        }
+      }
+    }
+
+    if (Object.keys(patch).length === 0) {
+      alert('No changes to save.');
+      return;
+    }
+
+    this.guestsLoading = true;
+    this.dataService.updateGuest(eventId, this.selectedGuestId, patch).subscribe({
+      next: async () => {
+        // refresh table + dynamic filters (in case values changed)
+        await this.loadGuests();
+        await this.loadGuestFilterOptions();
+
+        this.guestsLoading = false;
+        alert('Guest updated successfully.');
+        // keep the edit drawer open (so they can edit more), or close if you prefer:
+        // this.toggleEdit();
+      },
+      error: (err) => {
+        console.error('Failed to update guest', err);
+        this.guestsLoading = false;
+        alert('Failed to update guest. Please try again.');
+      }
+    });
+  }
+
 
   /*---------Download files----------*/
   //Export UI toggle
