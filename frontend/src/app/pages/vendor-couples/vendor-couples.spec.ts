@@ -96,13 +96,17 @@ describe('VendorCouples – core & branches', () => {
   });
 
   it('toggleOrders() flips repeatedly without hanging', fakeAsync(async () => {
+    const loadSpy = spyOn<any>(component, 'loadMyOrders').and.returnValue(Promise.resolve());
+    component.orders = [];
     const a = component.showOrders;
     const p1 = component.toggleOrders(); tick(); await p1;
     expect(component.showOrders).toBe(!a);
+    expect(loadSpy).toHaveBeenCalledTimes(1);
     const p2 = component.toggleOrders(); tick(); await p2;
     expect(component.showOrders).toBe(a);
     const p3 = component.toggleOrders(); tick(); await p3;
     expect(component.showOrders).toBe(!a);
+    expect(loadSpy).toHaveBeenCalledTimes(2);
   }));
 
   it('closeOrder() hides form and clears selectedService', () => {
