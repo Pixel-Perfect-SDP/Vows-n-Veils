@@ -8,6 +8,7 @@ describe('Chatbot', () => {
   let component: Chatbot;
   let fixture: ComponentFixture<Chatbot>;
   let httpMock: HttpTestingController;
+  let httpClientSpy: { post: jasmine.Spy };
 
   const mockFAQData = {
     faqs: [
@@ -33,6 +34,8 @@ describe('Chatbot', () => {
   };
 
   beforeEach(async () => {
+    httpClientSpy = jasmine.createSpyObj('HttpClient', ['post']);
+    
     await TestBed.configureTestingModule({
       imports: [Chatbot, HttpClientTestingModule, FormsModule]
     }).compileComponents();
@@ -40,6 +43,9 @@ describe('Chatbot', () => {
     fixture = TestBed.createComponent(Chatbot);
     component = fixture.componentInstance;
     httpMock = TestBed.inject(HttpTestingController);
+    
+    // Override the http property with our spy
+    (component as any).http = httpClientSpy;
     
     // Don't call fixture.detectChanges() here to prevent ngOnInit
   });
@@ -249,14 +255,19 @@ describe('Chatbot', () => {
 
     it('should find best match with high score', () => {
       const userQuestion = 'How to plan wedding?';
+      
+      // Use the spy instead of expecting a real HTTP request
+      httpClientSpy.post.and.returnValue(of({ scores: [0.8, 0.3, 0.2] }));
+      
       component.findAnswerWithAI(userQuestion);
 
-      const req = httpMock.expectOne('http://localhost:3000/api/chatbot/answer');
-      expect(req.request.method).toBe('POST');
-      expect(req.request.body.question).toBe(userQuestion);
-      expect(req.request.body.faqQuestions).toEqual(mockFAQData.faqs.map(f => f.question));
-
-      req.flush({ scores: [0.8, 0.3, 0.2] });
+      expect(httpClientSpy.post).toHaveBeenCalledWith(
+        'https://site--vowsandveils--5dl8fyl4jyqm.code.run/chatbot/answer',
+        {
+          question: userQuestion,
+          faqQuestions: mockFAQData.faqs.map(f => f.question)
+        }
+      );
 
       expect(component.messages[component.messages.length - 1].text)
         .toBe('Sign in using Google and fill in basic wedding details.');
@@ -265,10 +276,19 @@ describe('Chatbot', () => {
 
     it('should return default message when score is below threshold', () => {
       const userQuestion = 'Random question';
+      
+      // Use the spy instead of expecting a real HTTP request
+      httpClientSpy.post.and.returnValue(of({ scores: [0.1, 0.15, 0.2] }));
+      
       component.findAnswerWithAI(userQuestion);
 
-      const req = httpMock.expectOne('http://localhost:3000/api/chatbot/answer');
-      req.flush({ scores: [0.1, 0.15, 0.2] });
+      expect(httpClientSpy.post).toHaveBeenCalledWith(
+        'https://site--vowsandveils--5dl8fyl4jyqm.code.run/chatbot/answer',
+        {
+          question: userQuestion,
+          faqQuestions: mockFAQData.faqs.map(f => f.question)
+        }
+      );
 
       expect(component.messages[component.messages.length - 1].text)
         .toBe("I'm sorry, I couldn't find a relevant answer to your question. Please try rephrasing or contact our support team for assistance.");
@@ -278,10 +298,19 @@ describe('Chatbot', () => {
     it('should handle HTTP error', () => {
       spyOn(console, 'error');
       const userQuestion = 'Test question';
+      
+      // Use the spy instead of expecting a real HTTP request
+      httpClientSpy.post.and.returnValue(throwError(() => new Error('Server Error')));
+      
       component.findAnswerWithAI(userQuestion);
 
-      const req = httpMock.expectOne('http://localhost:3000/api/chatbot/answer');
-      req.error(new ProgressEvent('error'), { status: 500, statusText: 'Server Error' });
+      expect(httpClientSpy.post).toHaveBeenCalledWith(
+        'https://site--vowsandveils--5dl8fyl4jyqm.code.run/chatbot/answer',
+        {
+          question: userQuestion,
+          faqQuestions: mockFAQData.faqs.map(f => f.question)
+        }
+      );
 
       expect(console.error).toHaveBeenCalled();
       expect(component.messages[component.messages.length - 1].text)
@@ -293,24 +322,40 @@ describe('Chatbot', () => {
       spyOn(console, 'error');
       const userQuestion = 'Test question';
       
-      spyOn(component['http'], 'post').and.returnValue(
-        throwError(() => new Error('Subscribe error'))
-      );
-
+      // Use the spy instead of expecting a real HTTP request
+      httpClientSpy.post.and.returnValue(throwError(() => new Error('Subscribe error')));
+      
       component.findAnswerWithAI(userQuestion);
+
+      expect(httpClientSpy.post).toHaveBeenCalledWith(
+        'https://site--vowsandveils--5dl8fyl4jyqm.code.run/chatbot/answer',
+        {
+          question: userQuestion,
+          faqQuestions: mockFAQData.faqs.map(f => f.question)
+        }
+      );
 
       expect(console.error).toHaveBeenCalled();
       expect(component.messages[component.messages.length - 1].text)
-        .toBe('Sorry, I encountered an error. Please try again.');
+        .toBe("I'm having trouble processing your question right now. Please try again or contact support.");
       expect(component.isLoading).toBe(false);
     });
 
     it('should handle exactly threshold score (0.3)', () => {
       const userQuestion = 'Test';
+      
+      // Use the spy instead of expecting a real HTTP request
+      httpClientSpy.post.and.returnValue(of({ scores: [0.3, 0.2, 0.1] }));
+      
       component.findAnswerWithAI(userQuestion);
 
-      const req = httpMock.expectOne('http://localhost:3000/api/chatbot/answer');
-      req.flush({ scores: [0.3, 0.2, 0.1] });
+      expect(httpClientSpy.post).toHaveBeenCalledWith(
+        'https://site--vowsandveils--5dl8fyl4jyqm.code.run/chatbot/answer',
+        {
+          question: userQuestion,
+          faqQuestions: mockFAQData.faqs.map(f => f.question)
+        }
+      );
 
       expect(component.messages[component.messages.length - 1].text)
         .toBe('Sign in using Google and fill in basic wedding details.');
@@ -318,10 +363,19 @@ describe('Chatbot', () => {
 
     it('should find best match when multiple scores are close', () => {
       const userQuestion = 'Test';
+      
+      // Use the spy instead of expecting a real HTTP request
+      httpClientSpy.post.and.returnValue(of({ scores: [0.45, 0.5, 0.48] }));
+      
       component.findAnswerWithAI(userQuestion);
 
-      const req = httpMock.expectOne('http://localhost:3000/api/chatbot/answer');
-      req.flush({ scores: [0.45, 0.5, 0.48] });
+      expect(httpClientSpy.post).toHaveBeenCalledWith(
+        'https://site--vowsandveils--5dl8fyl4jyqm.code.run/chatbot/answer',
+        {
+          question: userQuestion,
+          faqQuestions: mockFAQData.faqs.map(f => f.question)
+        }
+      );
 
       expect(component.messages[component.messages.length - 1].text)
         .toBe('Go to your dashboard and select Guests on the sidebar.');
