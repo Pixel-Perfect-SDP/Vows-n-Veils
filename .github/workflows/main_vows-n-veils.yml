@@ -52,7 +52,7 @@ jobs:
       - name: Run frontend tests with coverage
         run: |
           cd frontend
-          npm test -- --coverage
+          npx ng test --watch=false --browsers=ChromeHeadlessCI --code-coverage
         continue-on-error: true
 
       - name: Upload frontend coverage to Codecov
