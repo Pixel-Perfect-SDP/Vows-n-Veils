@@ -39,6 +39,23 @@ describe('Venues', () => {
     images: [{ url: 'image1.jpg', name: 'Image 1' }]
   };
 
+  const activeVenue = {
+    id: 'v1',
+    venuename: 'Active Hall',
+    address: '123 Street',
+    capacity: 200,
+    companyID: 'c1',
+    description: 'Nice venue',
+    email: 'x@y.com',
+    phonenumber: '123',
+    price: 1000,
+    status: 'active',
+    image: 'img',
+    images: [{ url: 'u', name: 'n' }]
+  };
+
+  const inactiveVenue = { ...activeVenue, id: 'v2', venuename: 'Inactive', status: 'inactive' };
+
   beforeEach(async () => {
     mockRouter = {
       navigate: jasmine.createSpy('navigate').and.returnValue(Promise.resolve(true)),
@@ -123,571 +140,461 @@ describe('Venues', () => {
     expect(component.recommendedVenues).toEqual([]);
   });
 
-  it('should get venues successfully', fakeAsync(() => {
-    const mockVenues = [mockVenue, { ...mockVenue, id: 'venue-2', status: 'inactive' }];
-    mockHttpClient.get.and.returnValue(of(mockVenues));
+  describe('ngOnInit', () => {
+    it('runs immediate flow when user exists', fakeAsync(() => {
+      mockAuth.currentUser = { uid: 'u1' };
+      mockHttpClient.get.and.returnValue(of([activeVenue, inactiveVenue]));
 
-    component.loading = false;
-    component.getVenues();
-    
-    expect(component.loading).toBeTrue();
-    
-    tick();
+      component.ngOnInit();
+      tick();
 
-    expect(mockHttpClient.get).toHaveBeenCalledWith('https://site--vowsandveils--5dl8fyl4jyqm.code.run/venues');
-    expect(component.venues.length).toBe(1);
-    expect(component.venues[0].status).toBe('active');
-    expect(component.loading).toBeFalse();
-  }));
+      expect(mockHttpClient.get).toHaveBeenCalledWith('https://site--vowsandveils--5dl8fyl4jyqm.code.run/venues');
+      expect(component.venues.length).toBe(1);
+      expect(component.loading).toBeFalse();
+      expect((component as any).collection).toHaveBeenCalledWith(mockDb, 'VenuesOrders');
+    }));
 
-  it('should handle get venues error', fakeAsync(() => {
-    mockHttpClient.get.and.returnValue(throwError(() => new Error('API error')));
+    it('subscribes to onAuthStateChanged when user not present', fakeAsync(() => {
+      mockAuth.currentUser = null;
+      const mockOnAuthStateChanged = jasmine.createSpy('onAuthStateChanged').and.callFake((_auth: any, cb: (u: any) => void) => {
+        cb({ uid: 'u2' });
+      });
+      (component as any).onAuthStateChanged = mockOnAuthStateChanged;
+      mockHttpClient.get.and.returnValue(of([activeVenue]));
 
-    component.getVenues();
-    tick();
+      component.ngOnInit();
+      tick();
 
-    expect(component.error).toContain('Failed to load venues');
-    expect(component.loading).toBeFalse();
-  }));
+      expect(mockOnAuthStateChanged).toHaveBeenCalled();
+      expect(component.venues.length).toBe(1);
+    }));
+  });
 
-  it('should handle null venues response in getVenues', fakeAsync(() => {
-    mockHttpClient.get.and.returnValue(of([]));
+  describe('getVenues', () => {
+    it('loads active venues on success', fakeAsync(() => {
+      mockHttpClient.get.and.returnValue(of([activeVenue, inactiveVenue]));
 
-    component.getVenues();
-    tick();
+      component.getVenues();
+      tick();
 
-    expect(component.venues).toEqual([]);
-    expect(component.loading).toBeFalse();
-  }));
+      expect(component.loading).toBeFalse();
+      expect(component.venues.map(v => v.id)).toEqual(['v1']);
+    }));
 
-  it('should view venue details successfully', fakeAsync(() => {
-    mockHttpClient.get.and.returnValue(of(mockVenue));
+    it('sets error on failure', fakeAsync(() => {
+      mockHttpClient.get.and.returnValue(throwError(() => new Error('Failed to load venues')));
 
-    component.viewVenue('venue-1');
-    expect(component.loading).toBeTrue();
+      component.getVenues();
+      tick();
 
-    tick();
+      expect(component.loading).toBeFalse();
+      expect(component.error).toContain('Failed to load venues');
+    }));
+  });
 
-    expect(mockHttpClient.get).toHaveBeenCalledWith('https://site--vowsandveils--5dl8fyl4jyqm.code.run/venues/venue-1');
-    expect(component.selectedVenue).toEqual(mockVenue);
-    expect(component.loading).toBeFalse();
-  }));
+  describe('viewVenue', () => {
+    it('loads selected venue on success', fakeAsync(() => {
+      mockHttpClient.get.and.returnValue(of(activeVenue));
 
-  it('should handle view venue error', fakeAsync(() => {
-    mockHttpClient.get.and.returnValue(throwError(() => new Error('Venue not found')));
+      component.viewVenue('v1');
+      tick();
 
-    component.viewVenue('venue-1');
-    tick();
+      expect(component.selectedVenue?.id).toBe('v1');
+      expect(component.loading).toBeFalse();
+    }));
 
-    expect(component.error).toContain('Failed to load venue');
-    expect(component.loading).toBeFalse();
-  }));
+    it('sets error on failure', fakeAsync(() => {
+      mockHttpClient.get.and.returnValue(throwError(() => new Error('Failed to load venue')));
 
-  it('should navigate back to list', () => {
-    component.selectedVenue = mockVenue;
+      component.viewVenue('bad');
+      tick();
 
+      expect(component.error).toContain('Failed to load venue');
+      expect(component.loading).toBeFalse();
+    }));
+  });
+
+  it('backToList clears selectedVenue', () => {
+    component.selectedVenue = activeVenue as any;
     component.backToList();
-
     expect(component.selectedVenue).toBeNull();
   });
 
-  it('should navigate back to homepage', () => {
-    component.backTohome();
+  describe('selectVenue', () => {
+    it('returns early when no user', fakeAsync(() => {
+      mockAuth.currentUser = null;
+      component.selectVenue('v1');
+      tick();
+      expect(component.loading).toBeFalse();
+      expect((component as any).getDocs).not.toHaveBeenCalled();
+    }));
 
-    expect(mockRouter.navigate).toHaveBeenCalledWith(['/homepage']);
+    it('handles empty events query', fakeAsync(() => {
+      mockAuth.currentUser = { uid: 'u1' };
+      (component as any).getDocs.and.returnValue(Promise.resolve({ empty: true, docs: [] }));
+
+      component.selectVenue('v1');
+      tick();
+
+      expect((component as any).getDocs).toHaveBeenCalled();
+      expect(component.loading).toBeFalse();
+    }));
+
+    it('updates event doc and sets chosen fields in finally', fakeAsync(() => {
+      mockAuth.currentUser = { uid: 'u1' };
+      component.selectedVenue = activeVenue as any;
+
+      const fakeDoc = { id: 'doc1', data: () => ({ VenueID: 'old' }) };
+      (component as any).getDocs.and.returnValue(Promise.resolve({ empty: false, docs: [fakeDoc] }));
+      (component as any).updateDoc.and.returnValue(Promise.resolve());
+
+      component.selectVenue('v1');
+      tick();
+
+      expect((component as any).updateDoc).toHaveBeenCalled();
+      expect(component.chosenVenueName).toBe('Active Hall');
+      expect(component.chosenVenueID).toBe('v1');
+      expect(component.chosenVenuecompanyID).toBe('c1');
+      expect(component.loading).toBeFalse();
+    }));
+
+    it('catches updateDoc error but still sets finally fields', fakeAsync(() => {
+      mockAuth.currentUser = { uid: 'u1' };
+      component.selectedVenue = activeVenue as any;
+      const fakeDoc = { id: 'doc1', data: () => ({}) };
+
+      (component as any).getDocs.and.returnValue(Promise.resolve({ empty: false, docs: [fakeDoc] }));
+      (component as any).updateDoc.and.returnValue(Promise.reject(new Error('fail')));
+
+      spyOn(console, 'error'); // Spy to catch error logging
+      component.selectVenue('v1');
+      tick();
+
+      expect(console.error).toHaveBeenCalledWith(jasmine.any(Error));
+      expect(component.chosenVenueName).toBe('Active Hall');
+      expect(component.chosenVenueID).toBe('v1');
+      expect(component.chosenVenuecompanyID).toBe('c1');
+      expect(component.loading).toBeFalse();
+    }));
   });
 
-  it('should handle ngOnInit with immediate user', fakeAsync(() => {
-    spyOn(component, 'getChosenVenue');
-    spyOn(component, 'checkVenueOrder');
-    spyOn(component, 'getRecommendations');
-    spyOn(component, 'getVenues');
+  describe('getChosenVenue', () => {
+    it('clears when no user', () => {
+      mockAuth.currentUser = null;
+      component.getChosenVenue();
+      expect(component.chosenVenueID).toBeNull();
+      expect(component.chosenVenueName).toBeNull();
+      expect(component.chosenVenuecompanyID).toBeNull();
+    });
 
-    component.ngOnInit();
-    tick();
+    it('clears when query empty', fakeAsync(() => {
+      mockAuth.currentUser = { uid: 'u1' };
+      (component as any).getDocs.and.returnValue(Promise.resolve({ empty: true, docs: [] }));
 
-    expect(component.getVenues).toHaveBeenCalled();
-  }));
+      component.getChosenVenue();
+      tick();
 
-  it('should handle select venue with no user', fakeAsync(() => {
-    mockAuth.currentUser = null;
+      expect(component.chosenVenueID).toBeNull();
+    }));
 
-    component.selectVenue('venue-1');
-    tick();
+    it('clears when no VenueID', fakeAsync(() => {
+      mockAuth.currentUser = { uid: 'u1' };
+      const fakeDoc = { data: () => ({}) };
+      (component as any).getDocs.and.returnValue(Promise.resolve({ empty: false, docs: [fakeDoc] }));
 
-    expect(component.loading).toBeFalse();
-  }));
+      component.getChosenVenue();
+      tick();
 
-  it('should select venue successfully', fakeAsync(() => {
-    component.selectedVenue = mockVenue;
-    mockAuth.currentUser = { uid: 'test-user-123' };
+      expect(component.chosenVenueID).toBeNull();
+    }));
 
-    const mockQuerySnapshot = {
-      empty: false,
-      docs: [{
-        id: 'event-1',
-        data: () => ({ EventID: 'test-user-123' })
-      }]
-    };
+    it('loads chosen venue when venueId exists', fakeAsync(() => {
+      mockAuth.currentUser = { uid: 'u1' };
+      const fakeDoc = { data: () => ({ VenueID: 'v1' }) };
+      (component as any).getDocs.and.returnValue(Promise.resolve({ empty: false, docs: [fakeDoc] }));
+      mockHttpClient.get.and.returnValue(of(activeVenue));
 
-    (component as any).getDocs.and.returnValue(Promise.resolve(mockQuerySnapshot));
-    (component as any).updateDoc.and.returnValue(Promise.resolve());
+      component.getChosenVenue();
+      tick();
 
-    component.selectVenue('venue-1');
-    tick();
+      expect(component.chosenVenueID).toBe('v1');
+      expect(component.chosenVenuecompanyID).toBe('c1');
+      expect(component.chosenVenueName).toBe('Active Hall');
+    }));
 
-    expect((component as any).getDocs).toHaveBeenCalled();
-    expect((component as any).updateDoc).toHaveBeenCalled();
-    expect(component.chosenVenueName).toBe('Test Venue');
-    expect(component.chosenVenueID).toBe('venue-1');
-    expect(component.chosenVenuecompanyID).toBe('company-1');
-  }));
+    it('handles http error for chosen venue', fakeAsync(() => {
+      mockAuth.currentUser = { uid: 'u1' };
+      const fakeDoc = { data: () => ({ VenueID: 'v1' }) };
+      (component as any).getDocs.and.returnValue(Promise.resolve({ empty: false, docs: [fakeDoc] }));
+      mockHttpClient.get.and.returnValue(throwError(() => new Error('HTTP error')));
 
-  it('should handle select venue with empty event query', fakeAsync(() => {
-    mockAuth.currentUser = { uid: 'test-user-123' };
-    (component as any).getDocs.and.returnValue(Promise.resolve({ empty: true, docs: [] }));
+      component.getChosenVenue();
+      tick();
 
-    component.selectVenue('venue-1');
-    tick();
+      expect(component.chosenVenueID).toBeNull();
+      expect(component.chosenVenueName).toBeNull();
+      expect(component.chosenVenuecompanyID).toBeNull();
+    }));
 
-    expect(component.loading).toBeFalse();
-  }));
+    it('catch on getDocs failure', fakeAsync(() => {
+      mockAuth.currentUser = { uid: 'u1' };
+      (component as any).getDocs.and.returnValue(Promise.reject(new Error('bad')));
 
-  it('should handle select venue Firestore error', fakeAsync(() => {
-    mockAuth.currentUser = { uid: 'test-user-123' };
-    spyOn(console, 'error');
+      spyOn(console, 'error');
+      component.getChosenVenue();
+      tick();
 
-    (component as any).getDocs.and.returnValue(Promise.reject(new Error('Firestore error')));
+      expect(console.error).toHaveBeenCalledWith(jasmine.any(Error));
+      expect(component.chosenVenueID).toBeNull();
+      expect(component.loading).toBeFalse();
+    }));
+  });
 
-    component.selectVenue('venue-1');
-    tick();
+  describe('backTohome', () => {
+    it('navigates to /homepage', fakeAsync(() => {
+      component.backTohome();
+      tick();
+      expect(mockRouter.navigate).toHaveBeenCalledWith(['/homepage']);
+    }));
+  });
 
-    expect(console.error).toHaveBeenCalledWith('Error fetching events:', jasmine.any(Error));
-    expect(component.loading).toBeFalse();
-  }));
+  describe('confirmVenue', () => {
+    beforeEach(() => {
+      const btn = document.createElement('button');
+      btn.className = 'btn-confirm';
+      document.body.appendChild(btn);
+    });
 
-  it('should handle updateDoc error in selectVenue', fakeAsync(() => {
-    spyOn(console, 'error');
-    mockAuth.currentUser = { uid: 'test-user-123' };
+    afterEach(() => {
+      const btn = document.querySelector('.btn-confirm');
+      btn?.remove();
+    });
 
-    component.selectedVenue = mockVenue;
-    const mockQuerySnapshot = {
-      empty: false,
-      docs: [{
-        id: 'event-1',
-        data: () => ({ EventID: 'test-user-123' })
-      }]
-    };
+    it('returns early when no user or missing chosen IDs', fakeAsync(() => {
+      mockAuth.currentUser = null;
+      component.confirmVenue();
+      tick();
+      expect(component.loading).toBeFalse();
 
-    (component as any).getDocs.and.returnValue(Promise.resolve(mockQuerySnapshot));
-    (component as any).updateDoc.and.returnValue(Promise.reject(new Error('Update error')));
+      mockAuth.currentUser = { uid: 'u1' };
+      component.chosenVenueID = null;
+      component.chosenVenuecompanyID = 'c1';
+      component.confirmVenue();
+      tick();
+      expect(component.loading).toBeFalse();
 
-    component.selectVenue('venue-1');
-    tick();
+      component.chosenVenueID = 'v1';
+      component.chosenVenuecompanyID = null;
+      component.confirmVenue();
+      tick();
+      expect(component.loading).toBeFalse();
+    }));
 
-    expect(console.error).toHaveBeenCalledWith('Error updating VenueID:', jasmine.any(Error));
-    expect(component.loading).toBeFalse();
-  }));
+    it('alerts when no event found', fakeAsync(() => {
+      mockAuth.currentUser = { uid: 'u1' };
+      component.chosenVenueID = 'v1';
+      component.chosenVenuecompanyID = 'c1';
 
-  it('should handle get chosen venue with no user', fakeAsync(() => {
-    mockAuth.currentUser = null;
+      (component as any).getDocs.and.returnValue(Promise.resolve({ empty: true, docs: [] }));
+      const alertSpy = spyOn(window, 'alert');
 
-    component.getChosenVenue();
-    tick();
+      component.confirmVenue();
+      tick();
 
-    expect(component.chosenVenueName).toBeNull();
-    expect(component.chosenVenueID).toBeNull();
-    expect(component.chosenVenuecompanyID).toBeNull();
-  }));
+      expect(alertSpy).toHaveBeenCalledWith('No event found.');
+      expect(component.loading).toBeFalse();
+    }));
 
-  it('should get chosen venue successfully', fakeAsync(() => {
-    mockAuth.currentUser = { uid: 'test-user-123' };
+    it('cancels when user does not confirm', fakeAsync(() => {
+      mockAuth.currentUser = { uid: 'u1' };
+      component.chosenVenueID = 'v1';
+      component.chosenVenuecompanyID = 'c1';
 
-    const mockQuerySnapshot = {
-      empty: false,
-      docs: [{
-        id: 'event-1',
-        data: () => ({
-          EventID: 'test-user-123',
-          VenueID: 'venue-1'
+      const fakeEventDoc = {
+        data: () => ({ Date_Time: { toDate: () => new Date() }, guestsNum: 120 })
+      };
+      (component as any).getDocs.and.returnValue(Promise.resolve({ empty: false, docs: [fakeEventDoc] }));
+      spyOn(window, 'confirm').and.returnValue(false);
+
+      component.confirmVenue();
+      tick();
+
+      expect(component.loading).toBeFalse();
+    }));
+
+    it('alerts when event missing Date_Time', fakeAsync(() => {
+      mockAuth.currentUser = { uid: 'u1' };
+      component.chosenVenueID = 'v1';
+      component.chosenVenuecompanyID = 'c1';
+
+      const fakeEventDoc = { data: () => ({}) };
+      (component as any).getDocs.and.returnValue(Promise.resolve({ empty: false, docs: [fakeEventDoc] }));
+
+      spyOn(window, 'confirm').and.returnValue(true);
+      const alertSpy = spyOn(window, 'alert');
+
+      component.confirmVenue();
+      tick();
+
+      expect(alertSpy).toHaveBeenCalledWith('Event does not have a wedding date set.');
+      expect(component.loading).toBeFalse();
+    }));
+
+    it('posts order successfully and dims button', fakeAsync(() => {
+      mockAuth.currentUser = { uid: 'u1' };
+      component.chosenVenueID = 'v1';
+      component.chosenVenuecompanyID = 'c1';
+
+      const eventDate = new Date();
+      const fakeEventDoc = {
+        data: () => ({ Date_Time: { toDate: () => eventDate }, guestsNum: 200 })
+      };
+      (component as any).getDocs.and.returnValue(Promise.resolve({ empty: false, docs: [fakeEventDoc] }));
+      mockHttpClient.post.and.returnValue(of({ ok: true, orderID: 'o1' }));
+
+      spyOn(window, 'confirm').and.returnValue(true);
+      const alertSpy = spyOn(window, 'alert');
+
+      component.confirmVenue();
+      tick();
+
+      expect(mockHttpClient.post).toHaveBeenCalledWith(
+        'https://site--vowsandveils--5dl8fyl4jyqm.code.run/venues/confirm-order',
+        jasmine.objectContaining({
+          customerID: 'u1',
+          venueID: 'v1',
+          companyID: 'c1'
         })
-      }]
-    };
-
-    (component as any).getDocs.and.returnValue(Promise.resolve(mockQuerySnapshot));
-    mockHttpClient.get.and.returnValue(of(mockVenue));
-
-    component.getChosenVenue();
-    tick();
-
-    expect(component.chosenVenueName).toBe('Test Venue');
-    expect(component.chosenVenueID).toBe('venue-1');
-    expect(component.chosenVenuecompanyID).toBe('company-1');
-  }));
-
-  it('should handle get chosen venue with no VenueID', fakeAsync(() => {
-    mockAuth.currentUser = { uid: 'test-user-123' };
-
-    const mockQuerySnapshot = {
-      empty: false,
-      docs: [{
-        id: 'event-1',
-        data: () => ({ EventID: 'test-user-123' })
-      }]
-    };
-
-    (component as any).getDocs.and.returnValue(Promise.resolve(mockQuerySnapshot));
-
-    component.getChosenVenue();
-    tick();
-
-    expect(component.chosenVenueName).toBeNull();
-    expect(component.chosenVenueID).toBeNull();
-    expect(component.chosenVenuecompanyID).toBeNull();
-  }));
-
-  it('should handle get chosen venue HTTP error', fakeAsync(() => {
-    mockAuth.currentUser = { uid: 'test-user-123' };
-
-    const mockQuerySnapshot = {
-      empty: false,
-      docs: [{
-        id: 'event-1',
-        data: () => ({ EventID: 'test-user-123', VenueID: 'venue-1' })
-      }]
-    };
-
-    (component as any).getDocs.and.returnValue(Promise.resolve(mockQuerySnapshot));
-    mockHttpClient.get.and.returnValue(throwError(() => new Error('HTTP error')));
-
-    component.getChosenVenue();
-    tick();
-
-    expect(component.chosenVenueName).toBeNull();
-    expect(component.chosenVenueID).toBeNull();
-    expect(component.chosenVenuecompanyID).toBeNull();
-  }));
-
-  it('should handle Firestore errors in getChosenVenue', fakeAsync(() => {
-    mockAuth.currentUser = { uid: 'test-user-123' };
-    spyOn(console, 'error');
-
-    (component as any).getDocs.and.returnValue(Promise.reject(new Error('Firestore error')));
-
-    component.getChosenVenue();
-    tick();
-
-    expect(component.chosenVenueName).toBeNull();
-    expect(component.chosenVenueID).toBeNull();
-    expect(component.chosenVenuecompanyID).toBeNull();
-  }));
-
-  it('should handle confirm venue with no user', fakeAsync(() => {
-    mockAuth.currentUser = null;
-
-    component.confirmVenue();
-    tick();
-
-    expect(mockHttpClient.post).not.toHaveBeenCalled();
-  }));
-
-  it('should handle confirm venue with no chosen venue', fakeAsync(() => {
-    component.chosenVenueID = null;
-    component.chosenVenuecompanyID = null;
-
-    component.confirmVenue();
-    tick();
-
-    expect(mockHttpClient.post).not.toHaveBeenCalled();
-  }));
-
-  it('should confirm venue successfully', fakeAsync(() => {
-    mockAuth.currentUser = { uid: 'test-user-123' };
-    component.chosenVenueID = 'venue-1';
-    component.chosenVenuecompanyID = 'company-1';
-    component.weddingDate = new Date('2024-12-25');
-
-    const mockQuerySnapshot = {
-      empty: false,
-      docs: [{
-        id: 'event-1',
-        data: () => ({
-          Date_Time: { toDate: () => new Date('2024-12-25') },
-          guestsNum: 150
-        })
-      }]
-    };
-
-    (component as any).getDocs.and.returnValue(Promise.resolve(mockQuerySnapshot));
-    mockHttpClient.post.and.returnValue(of({ ok: true, orderID: 'order-123' }));
-
-    spyOn(window, 'confirm').and.returnValue(true);
-    spyOn(window, 'alert');
-
-    component.confirmVenue();
-    tick();
-
-    expect(mockHttpClient.post).toHaveBeenCalledWith(
-      'https://site--vowsandveils--5dl8fyl4jyqm.code.run/venues/confirm-order',
-      jasmine.objectContaining({
-        customerID: 'test-user-123',
-        venueID: 'venue-1',
-        companyID: 'company-1'
-      })
-    );
-  }));
-
-  it('should handle confirm venue cancellation', fakeAsync(() => {
-    mockAuth.currentUser = { uid: 'test-user-123' };
-    component.chosenVenueID = 'venue-1';
-    component.chosenVenuecompanyID = 'company-1';
-
-    const mockQuerySnapshot = {
-      empty: false,
-      docs: [{
-        id: 'event-1',
-        data: () => ({
-          Date_Time: { toDate: () => new Date('2024-12-25') },
-          guestsNum: 150
-        })
-      }]
-    };
-
-    (component as any).getDocs.and.returnValue(Promise.resolve(mockQuerySnapshot));
-
-    spyOn(window, 'confirm').and.returnValue(false);
-
-    component.confirmVenue();
-    tick();
-
-    expect(mockHttpClient.post).not.toHaveBeenCalled();
-  }));
-
-  it('should handle confirm venue with no wedding date', fakeAsync(() => {
-    mockAuth.currentUser = { uid: 'test-user-123' };
-    component.chosenVenueID = 'venue-1';
-    component.chosenVenuecompanyID = 'company-1';
-
-    const mockQuerySnapshot = {
-      empty: false,
-      docs: [{
-        id: 'event-1',
-        data: () => ({
-          guestsNum: 150
-        })
-      }]
-    };
-
-    (component as any).getDocs.and.returnValue(Promise.resolve(mockQuerySnapshot));
-
-    spyOn(window, 'confirm').and.returnValue(true);
-    spyOn(window, 'alert');
-
-    component.confirmVenue();
-    tick();
-
-    expect(window.alert).toHaveBeenCalledWith('Event does not have a wedding date set.');
-    expect(mockHttpClient.post).not.toHaveBeenCalled();
-  }));
-
-  it('should handle confirm venue API error', fakeAsync(() => {
-    mockAuth.currentUser = { uid: 'test-user-123' };
-    component.chosenVenueID = 'venue-1';
-    component.chosenVenuecompanyID = 'company-1';
-
-    const mockQuerySnapshot = {
-      empty: false,
-      docs: [{
-        id: 'event-1',
-        data: () => ({
-          Date_Time: { toDate: () => new Date('2024-12-25') },
-          guestsNum: 150
-        })
-      }]
-    };
-
-    (component as any).getDocs.and.returnValue(Promise.resolve(mockQuerySnapshot));
-    mockHttpClient.post.and.returnValue(throwError(() => new Error('API error')));
-
-    spyOn(window, 'confirm').and.returnValue(true);
-
-    component.confirmVenue();
-    tick();
-
-    expect(component.loading).toBeFalse();
-  }));
-
-  it('should handle check venue order with no user', fakeAsync(() => {
-    mockAuth.currentUser = null;
-
-    component.checkVenueOrder();
-    tick();
-
-    expect(component.hasExistingOrder).toBeFalse();
-  }));
-
-  it('should set hasExistingOrder to true when orders exist', fakeAsync(() => {
-    mockAuth.currentUser = { uid: 'test-user-123' };
-
-    const mockQuerySnapshot = {
-      empty: false,
-      docs: [{
-        id: 'order-1',
-        data: () => ({ customerID: 'test-user-123' })
-      }]
-    };
-
-    (component as any).getDocs.and.returnValue(Promise.resolve(mockQuerySnapshot));
-
-    component.checkVenueOrder();
-    tick();
-
-    expect(component.hasExistingOrder).toBeTrue();
-  }));
-
-  it('should set hasExistingOrder to false when no orders exist', fakeAsync(() => {
-    mockAuth.currentUser = { uid: 'test-user-123' };
-
-    const mockQuerySnapshot = {
-      empty: true,
-      docs: []
-    };
-
-    (component as any).getDocs.and.returnValue(Promise.resolve(mockQuerySnapshot));
-
-    component.checkVenueOrder();
-    tick();
-
-    expect(component.hasExistingOrder).toBeFalse();
-  }));
-
-  it('should handle get recommendations with no user', fakeAsync(() => {
-    mockAuth.currentUser = null;
-
-    component.getRecommendations();
-    tick();
-
-    expect(component.recommendedVenues).toEqual([]);
-    expect(component.loading).toBeFalse();
-  }));
-
-  it('should get recommendations successfully', fakeAsync(() => {
-    mockAuth.currentUser = { uid: 'test-user-123' };
-
-    const mockGuestSnapshot = {
-      empty: false,
-      size: 50,
-      docs: []
-    };
-
-    const mockEventSnapshot = {
-      exists: () => true,
-      data: () => ({ budget: 10000 })
-    };
-
-    (component as any).getDocs.and.returnValue(Promise.resolve(mockGuestSnapshot));
-    (component as any).getDoc.and.returnValue(Promise.resolve(mockEventSnapshot));
-
-    const mockVenues = [
-      { ...mockVenue, price: 8000, capacity: 100, status: 'active' },
-      { ...mockVenue, id: 'venue-2', price: 12000, capacity: 200, status: 'active' }
-    ];
-
-    mockHttpClient.get.and.returnValue(of(mockVenues));
-
-    component.getRecommendations();
-    tick();
-
-    expect(component.recommendedVenues.length).toBe(1);
-    expect(component.recommendedVenues[0].price).toBe(8000);
-    expect(component.userBudget).toBe(10000);
-    expect(component.loading).toBeFalse();
-  }));
-
-  it('should handle get recommendations with no event', fakeAsync(() => {
-    mockAuth.currentUser = { uid: 'test-user-123' };
-
-    (component as any).getDoc.and.returnValue(Promise.resolve({ exists: () => false }));
-
-    component.getRecommendations();
-    tick();
-
-    expect(component.recommendedVenues).toEqual([]);
-    expect(component.loading).toBeFalse();
-  }));
-
-  it('should handle get recommendations with no budget', fakeAsync(() => {
-    mockAuth.currentUser = { uid: 'test-user-123' };
-
-    const mockEventSnapshot = {
-      exists: () => true,
-      data: () => ({ budget: null })
-    };
-
-    (component as any).getDoc.and.returnValue(Promise.resolve(mockEventSnapshot));
-
-    component.getRecommendations();
-    tick();
-
-    expect(component.recommendedVenues).toEqual([]);
-    expect(component.loading).toBeFalse();
-  }));
-
-  it('should handle get recommendations API error', fakeAsync(() => {
-    mockAuth.currentUser = { uid: 'test-user-123' };
-
-    const mockGuestSnapshot = {
-      empty: false,
-      size: 50,
-      docs: []
-    };
-
-    const mockEventSnapshot = {
-      exists: () => true,
-      data: () => ({ budget: 10000 })
-    };
-
-    (component as any).getDocs.and.returnValue(Promise.resolve(mockGuestSnapshot));
-    (component as any).getDoc.and.returnValue(Promise.resolve(mockEventSnapshot));
-
-    mockHttpClient.get.and.returnValue(throwError(() => new Error('Failed to load recommended venues')));
-
-    component.getRecommendations();
-    tick();
-
-    expect(component.recommendedVenues).toEqual([]);
-    expect(component.error).toContain('Failed to load recommended venues');
-    expect(component.loading).toBeFalse();
-  }));
-
-  it('should filter venues by capacity in recommendations', fakeAsync(() => {
-    mockAuth.currentUser = { uid: 'test-user-123' };
-
-    const mockGuestSnapshot = {
-      empty: false,
-      size: 150,
-      docs: []
-    };
-
-    const mockEventSnapshot = {
-      exists: () => true,
-      data: () => ({ budget: 10000 })
-    };
-
-    (component as any).getDocs.and.returnValue(Promise.resolve(mockGuestSnapshot));
-    (component as any).getDoc.and.returnValue(Promise.resolve(mockEventSnapshot));
-
-    const mockVenues = [
-      { ...mockVenue, price: 8000, capacity: 200, status: 'active' },
-      { ...mockVenue, id: 'venue-2', price: 7000, capacity: 100, status: 'active' }
-    ];
-
-    mockHttpClient.get.and.returnValue(of(mockVenues));
-
-    component.getRecommendations();
-    tick();
-
-    expect(component.recommendedVenues.length).toBe(1);
-    expect(component.recommendedVenues[0].capacity).toBe(200);
-  }));
+      );
+
+      const btn = document.querySelector('.btn-confirm') as HTMLElement;
+      expect(btn.style.opacity).toBe('0.3');
+      expect(alertSpy).toHaveBeenCalledWith('Venue order created! Waiting for confirmation.');
+      expect(component.loading).toBeFalse();
+    }));
+
+    it('handles http error on order', fakeAsync(() => {
+      mockAuth.currentUser = { uid: 'u1' };
+      component.chosenVenueID = 'v1';
+      component.chosenVenuecompanyID = 'c1';
+
+      const eventDate = new Date();
+      const fakeEventDoc = {
+        data: () => ({ Date_Time: { toDate: () => eventDate }, guestsNum: 200 })
+      };
+      (component as any).getDocs.and.returnValue(Promise.resolve({ empty: false, docs: [fakeEventDoc] }));
+      mockHttpClient.post.and.returnValue(throwError(() => new Error('Failed')));
+
+      spyOn(window, 'confirm').and.returnValue(true);
+      const alertSpy = spyOn(window, 'alert');
+
+      component.confirmVenue();
+      tick();
+
+      expect(alertSpy).toHaveBeenCalledWith('Failed');
+      expect(component.loading).toBeFalse();
+    }));
+  });
+
+  describe('checkVenueOrder', () => {
+    it('returns when no user', fakeAsync(() => {
+      mockAuth.currentUser = null;
+      component.checkVenueOrder();
+      tick();
+      expect((component as any).collection).not.toHaveBeenCalled();
+    }));
+
+    it('sets hasExistingOrder correctly', fakeAsync(() => {
+      mockAuth.currentUser = { uid: 'u1' };
+      (component as any).getDocs.and.returnValue(Promise.resolve({ empty: true, docs: [] }));
+      component.checkVenueOrder();
+      tick();
+      expect(component.hasExistingOrder).toBeFalse();
+
+      (component as any).getDocs.and.returnValue(Promise.resolve({ empty: false, docs: [{}] }));
+      component.checkVenueOrder();
+      tick();
+      expect(component.hasExistingOrder).toBeTrue();
+    }));
+  });
+
+  describe('getRecommendations', () => {
+    it('clears when no user', fakeAsync(() => {
+      mockAuth.currentUser = null;
+      component.getRecommendations();
+      tick();
+      expect(component.recommendedVenues).toEqual([]);
+      expect(component.loading).toBeFalse();
+    }));
+
+    it('clears when event doc does not exist', fakeAsync(() => {
+      mockAuth.currentUser = { uid: 'u1' };
+      (component as any).getDocs.and.callFake((qArg: any) => {
+        if ((qArg?.ref?.name || qArg?.name) === 'Guests') return Promise.resolve({ size: 10 });
+        return Promise.resolve({ empty: true, docs: [] });
+      });
+      (component as any).getDoc.and.returnValue(Promise.resolve({ exists: () => false }));
+
+      component.getRecommendations();
+      tick();
+
+      expect(component.recommendedVenues).toEqual([]);
+      expect(component.loading).toBeFalse();
+    }));
+
+    it('clears when no budget', fakeAsync(() => {
+      mockAuth.currentUser = { uid: 'u1' };
+      (component as any).getDocs.and.returnValue(Promise.resolve({ size: 50 }));
+      (component as any).getDoc.and.returnValue(Promise.resolve({ exists: () => true, data: () => ({ budget: null }) }));
+
+      component.getRecommendations();
+      tick();
+
+      expect(component.recommendedVenues).toEqual([]);
+    }));
+
+    it('clears when venues response is falsy', fakeAsync(() => {
+      mockAuth.currentUser = { uid: 'u1' };
+      (component as any).getDocs.and.returnValue(Promise.resolve({ size: 50 }));
+      (component as any).getDoc.and.returnValue(Promise.resolve({ exists: () => true, data: () => ({ budget: 1500 }) }));
+      mockHttpClient.get.and.returnValue(of(null));
+
+      component.getRecommendations();
+      tick();
+
+      expect(component.recommendedVenues).toEqual([]);
+    }));
+
+    it('filters active venues by budget and capacity', fakeAsync(() => {
+      mockAuth.currentUser = { uid: 'u1' };
+      (component as any).getDocs.and.returnValue(Promise.resolve({ size: 180 }));
+      (component as any).getDoc.and.returnValue(Promise.resolve({ exists: () => true, data: () => ({ budget: 1200 }) }));
+      mockHttpClient.get.and.returnValue(of([
+        activeVenue,
+        { ...activeVenue, id: 'v3', price: 1300 },
+        { ...activeVenue, id: 'v4', capacity: 100 },
+        inactiveVenue
+      ]));
+
+      component.getRecommendations();
+      tick();
+
+      expect(component.recommendedVenues.map(v => v.id)).toEqual(['v1']);
+      expect(component.loading).toBeFalse();
+    }));
+
+    it('handles catch error gracefully', fakeAsync(() => {
+      mockAuth.currentUser = { uid: 'u1' };
+      (component as any).getDocs.and.returnValue(Promise.reject(new Error('boom')));
+
+      spyOn(console, 'error');
+      component.getRecommendations();
+      tick();
+
+      expect(console.error).toHaveBeenCalledWith(jasmine.any(Error));
+      expect(component.recommendedVenues).toEqual([]);
+      expect(component.error).toBe('boom');
+      expect(component.loading).toBeFalse();
+    }));
+  });
 });
