@@ -20,7 +20,8 @@ jobs:
         with:
           node-version: '22.x'
 
-      - name: Install dependencies and build
+      # Backend
+      - name: Install backend dependencies and build
         run: |
           cd backend
           npm install
@@ -41,11 +42,33 @@ jobs:
           fail_ci_if_error: true
           verbose: true
 
-      - name: Upload artifact for deployment job
+      # Frontend
+      - name: Install frontend dependencies
+        run: |
+          cd frontend
+          npm install
+
+      - name: Run frontend tests with coverage
+        run: |
+          cd frontend
+          npm test -- --coverage
+
+      - name: Upload frontend coverage to Codecov
+        if: always()
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./frontend/coverage/lcov.info
+          flags: frontend
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: true
+          verbose: true
+
+      # Upload artifact for deployment
+      - name: Upload backend artifact for deployment
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: backend  # Upload the built backend folder
+          path: backend
 
   deploy:
     runs-on: ubuntu-latest
@@ -66,8 +89,5 @@ jobs:
         with:
           app-name: 'vows-n-veils'
           slot-name: 'Production'
-          package: ./artifact  
+          package: ./artifact
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_6A566639885F4EC0BE516E1D82B9F385 }}
-
-
-
