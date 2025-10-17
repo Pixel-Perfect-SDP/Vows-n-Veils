@@ -68,7 +68,7 @@ const {
  *         description: Failed to fetch guests
  */
 router.get('/:eventId/guests', listGuestsByEvent);
-
+//
 // GET /events/:eventId/guest-filters
 /**
  * @swagger
