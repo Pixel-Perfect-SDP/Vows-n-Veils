@@ -92,6 +92,16 @@ export class DataService {
     return this.http.get<any>(`${this.apiUrl}/map/nearby`, { params });
   }
 
+  // Get nearby trails for a location (matches backend /trails/near)
+  getTrailsNear(lat: number, lon: number, page: number = 1, limit: number = 10): Observable<any> {
+    const params = new HttpParams()
+      .set('latitude', lat.toString())
+      .set('longitude', lon.toString())
+      .set('page', page.toString())
+      .set('limit', limit.toString());
+    return this.http.get<any>(`${this.apiUrl}/trails/near`, { params });
+  }
+
   // delete guest
   deleteGuest(eventId: string, guestId: string) {
     return this.http.delete<{ message: string; id: string }>(`${this.apiUrl}/events/${eventId}/guests/${guestId}`);
