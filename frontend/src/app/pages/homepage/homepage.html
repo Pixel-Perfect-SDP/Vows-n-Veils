@@ -62,6 +62,9 @@
   <!-- If user DOES have an event -->
   <section class="has-event" *ngIf="hasEvent && eventData">
     <input id="sb-toggle" type="checkbox" class="sb-toggle" aria-label="Toggle sidebar" />
+    <label for="sb-toggle" class="hamburger" title="Toggle sidebar" aria-label="Toggle sidebar">
+          &#9776;
+        </label>
 
     <!-- Sidebar -->
     <nav class="sidebar">
@@ -91,9 +94,7 @@
     <!-- Main content column -->
     <section class="main">
       <header class="event-header">
-        <label for="sb-toggle" class="hamburger" title="Toggle sidebar" aria-label="Toggle sidebar">
-          &#9776;
-        </label>
+        
 
         <section class="event-hero">
           <p class="names">Welcome, {{ eventData.Name1 }} and {{ eventData.Name2 }}</p>
