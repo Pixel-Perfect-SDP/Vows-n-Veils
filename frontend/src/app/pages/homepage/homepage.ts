@@ -81,6 +81,13 @@ export class Homepage {
   public weatherLoading: boolean = false;
   public weatherError: string | null = null;
 
+  // Trails
+  public trails: any[] = [];
+  public trailsLoading = false;
+  public trailsError: string | null = null;
+  // Venue coordinates used for trail search
+  public venueCoordinates: { latitude: number; longitude: number } | null = null;
+
   activeTab: 'dashboard' | 'guests' = 'dashboard';
   guests: Guest[] = [];
   guestsLoading = false;
@@ -95,6 +102,32 @@ export class Homepage {
   });
 
   constructor(private http: HttpClient) { }
+
+  // Fetch nearby trails from backend API. Uses relative /api path so it works with Azure Static Web Apps proxy.
+  async fetchNearbyTrails(latitude?: number, longitude?: number, page = 1, limit = 5) {
+    this.trailsLoading = true;
+    this.trailsError = null;
+    this.trails = [];
+
+    try {
+      const lat = typeof latitude === 'number' ? latitude : -26.1569;
+      const lon = typeof longitude === 'number' ? longitude : 28.0020;
+
+      const res: any = await this.dataService.getTrailsNear(lat, lon, page, limit).toPromise();
+
+      if (res && res.success) {
+        this.trails = res.data || [];
+      } else {
+        this.trailsError = 'No trails returned';
+      }
+
+    } catch (err: any) {
+      console.error('Failed to load trails', err);
+      this.trailsError = err?.message || 'Failed to load trails';
+    } finally {
+      this.trailsLoading = false;
+    }
+  }
 
 
   private waitForUser(): Promise<any> {
@@ -430,6 +463,15 @@ export class Homepage {
           // Get venue details from backend
           this.fetchVenueAndWeather(this.eventData.VenueID, this.eventData.Date_Time);
         }
+        // Load nearby trails for the dashboard (use venue location if available)
+        try {
+          const lat = this.eventData?.VenueLat || undefined;
+          const lon = this.eventData?.VenueLon || undefined;
+          // if venue has coordinates, pass them, otherwise fetch defaults inside method
+          this.fetchNearbyTrails(lat, lon, 1, 5);
+        } catch (e) {
+          // ignore
+        }
       } else {
         this.hasEvent = false;
         this.eventData = null;
@@ -450,6 +492,34 @@ export class Homepage {
       next: (venue: any) => {
         // Get address and format date
         const address = venue?.address || '';
+        // Try to extract coordinates from venue record if present
+        const vLat = venue?.latitude ?? venue?.lat ?? venue?.location?.latitude ?? venue?.location?.lat;
+        const vLon = venue?.longitude ?? venue?.lon ?? venue?.location?.longitude ?? venue?.location?.lon;
+        if (vLat && vLon) {
+          this.venueCoordinates = { latitude: Number(vLat), longitude: Number(vLon) };
+          // load nearby trails using venue coords
+          this.fetchNearbyTrails(this.venueCoordinates.latitude, this.venueCoordinates.longitude, 1, 5);
+        } else if (address) {
+          // fallback: geocode address to get coordinates
+          this.dataService.getMapData(address).subscribe({
+            next: (mapRes: any) => {
+              if (mapRes && (mapRes.lat || mapRes.lon)) {
+                const lat = mapRes.lat ?? mapRes.latitude ?? mapRes.lat;
+                const lon = mapRes.lon ?? mapRes.longitude ?? mapRes.lon;
+                this.venueCoordinates = { latitude: Number(lat), longitude: Number(lon) };
+                this.fetchNearbyTrails(this.venueCoordinates.latitude, this.venueCoordinates.longitude, 1, 5);
+              } else if (mapRes && mapRes.lat === undefined && mapRes.lon === undefined && Array.isArray(mapRes) && mapRes.length) {
+                // nominatim returns an array -- take first
+                const first = mapRes[0];
+                this.venueCoordinates = { latitude: Number(first.lat), longitude: Number(first.lon) };
+                this.fetchNearbyTrails(this.venueCoordinates.latitude, this.venueCoordinates.longitude, 1, 5);
+              }
+            },
+            error: (err) => {
+              console.warn('Failed to geocode venue address for trails', err);
+            }
+          });
+        }
         let dateStr = '';
         if (eventDate) {
           if (eventDate.toDate) {
@@ -463,6 +533,20 @@ export class Homepage {
           next: (weather: any) => {
             this.weather = weather;
             this.weatherLoading = false;
+
+            // If we still don't have venue coordinates, try to extract them from the weather response
+            try {
+              if (!this.venueCoordinates) {
+                const wLat = weather?.latitude ?? weather?.lat ?? weather?.location?.latitude ?? weather?.resolvedLocation?.latitude;
+                const wLon = weather?.longitude ?? weather?.lon ?? weather?.location?.longitude ?? weather?.resolvedLocation?.longitude;
+                if (wLat && wLon) {
+                  this.venueCoordinates = { latitude: Number(wLat), longitude: Number(wLon) };
+                  this.fetchNearbyTrails(this.venueCoordinates.latitude, this.venueCoordinates.longitude, 1, 5);
+                }
+              }
+            } catch (e) {
+              // ignore parsing errors
+            }
           },
           error: (err) => {
             this.weatherError = 'Failed to fetch weather';
