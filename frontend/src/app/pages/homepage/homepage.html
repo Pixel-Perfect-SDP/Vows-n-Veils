@@ -62,9 +62,6 @@
   <!-- If user DOES have an event -->
   <section class="has-event" *ngIf="hasEvent && eventData">
     <input id="sb-toggle" type="checkbox" class="sb-toggle" aria-label="Toggle sidebar" />
-    <label for="sb-toggle" class="hamburger" title="Toggle sidebar" aria-label="Toggle sidebar">
-          &#9776;
-        </label>
 
     <!-- Sidebar -->
     <nav class="sidebar">
@@ -94,7 +91,9 @@
     <!-- Main content column -->
     <section class="main">
       <header class="event-header">
-        
+        <label for="sb-toggle" class="hamburger" title="Toggle sidebar" aria-label="Toggle sidebar">
+          &#9776;
+        </label>
 
         <section class="event-hero">
           <p class="names">Welcome, {{ eventData.Name1 }} and {{ eventData.Name2 }}</p>
@@ -304,6 +303,40 @@
               </section>
               <p class="card-subtitle">{{ eventDisplayInfo.selectedVendors.length }} vendor(s) selected</p>
             </section>
+
+            <!-- Nearby Trail Card -->
+            <section class="info-card nearby-trail" *ngIf="nearbyTrail || nearbyTrailLoading || nearbyTrailError">
+              <section class="card-header">
+                <span class="card-icon">🗺️</span>
+                <h3>A close hiking spot near your venue</h3>
+              </section>
+
+              <ng-container *ngIf="nearbyTrailLoading">
+                <p class="muted">Looking for nearby trails...</p>
+              </ng-container>
+
+              <ng-container *ngIf="nearbyTrailError && !nearbyTrailLoading">
+                <p class="muted">{{ nearbyTrailError }}</p>
+              </ng-container>
+
+              <ng-container *ngIf="nearbyTrail && !nearbyTrailLoading">
+                <section class="trail-row">
+                  <img class="trail-photo" *ngIf="nearbyTrail.photos && nearbyTrail.photos.length" [src]="nearbyTrail.photos[0]" alt="{{ nearbyTrail.name }} photo" />
+
+                  <section class="trail-col">
+                    <h4 class="trail-name">{{ nearbyTrail.name }}</h4>
+                    <p class="trail-desc">{{ nearbyTrail.description }}</p>
+                    <p class="trail-meta">
+                      <strong>Distance:</strong> {{ nearbyTrail.distance }} km &nbsp;•&nbsp;
+                      <strong>Difficulty:</strong> {{ nearbyTrail.difficulty }}
+                    </p>
+                    <a class="trail-link" [href]="getGoogleMapsLink(nearbyTrail)" target="_blank" rel="noreferrer noopener">Open in Google Maps</a>
+                  </section>
+                </section>
+              </ng-container>
+            </section>
+
+            
 
           </section>
         </section>
