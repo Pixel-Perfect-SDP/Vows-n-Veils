@@ -304,6 +304,39 @@
               <p class="card-subtitle">{{ eventDisplayInfo.selectedVendors.length }} vendor(s) selected</p>
             </section>
 
+            <!-- Nearby Trails (only when venue is selected and coordinates are available) -->
+            <section class="info-card trails-info" *ngIf="eventData?.VenueID && venueCoordinates">
+              <section class="card-header">
+                <span class="card-icon">🥾</span>
+                <h3>Nearby Trails</h3>
+              </section>
+
+              <section class="trails-list">
+                <p class="card-subtitle">Showing trails near <strong>{{ eventDisplayInfo.venueName || 'your venue' }}</strong>. These are suggestions — check trail difficulty and distance before planning.</p>
+
+                <ng-container *ngIf="trailsLoading">
+                  <p>Loading trails…</p>
+                </ng-container>
+
+                <ng-container *ngIf="trailsError && !trailsLoading">
+                  <p class="error">{{ trailsError }}</p>
+                </ng-container>
+
+                <ng-container *ngIf="!trailsLoading && !trailsError">
+                  <ul>
+                    <li *ngFor="let t of trails">
+                      <strong>{{ t.name }}</strong>
+                      <div class="trail-meta">{{ t.distance }}m • {{ t.difficulty }} • Elevation {{ t.elevationGain }}m</div>
+                      <div class="trail-desc" *ngIf="t.description">{{ t.description }}</div>
+                      <a *ngIf="t.location" [href]="'https://www.google.com/maps/search/?api=1&query=' + t.location.latitude + ',' + t.location.longitude" target="_blank" rel="noopener">View on map</a>
+                    </li>
+                  </ul>
+
+                  <p *ngIf="!trails || !trails.length" class="empty-state">No trails found within the set radius. Try increasing the search radius on the Trails page.</p>
+                </ng-container>
+              </section>
+            </section>
+
           </section>
         </section>
       </section>
