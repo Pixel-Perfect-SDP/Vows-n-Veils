@@ -110,7 +110,7 @@ export class Admin implements OnInit
                     date: new Date().toISOString(),
                     from:"Admin",
                     to: compID,
-                    message: `Your ${collectionName.slice(0,-1)} application for ${name} has been rejected becuase ${reason||'no reason provided'}.`,
+                    message: `Your ${collectionName.slice(0,-1)} application for ${name} has been rejected because ${reason||'no reason provided'}.`,
                     read: false
 
                 });
