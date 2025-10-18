@@ -1,3 +1,8 @@
+<!--
+<head>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+-->
 <header class="topbar">
   <section class="logo-area">
     <img class="logo-img" src="assets/logo.jpg" alt="Vows & Veils logo" />
@@ -5,10 +10,22 @@
   </section>
 
   <nav class="nav-links">
-     <a (click)="trackorders()" *ngIf="hasVenueCompany"> Track My Orders</a>
+    <section>
+
+      <button type="button" class="notif-btn" (click)="goToNotifications()" *ngIf="hasVenueCompany">
+        <svg xmlns="http://www.w3.org/2000/svg" height="25px" viewBox="0 0 24 24" width="25px" fill="#000000">
+          <path
+            d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z" />
+        </svg>
+
+        <span class="notification-dot" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
+      </button>
+
+    </section>
+    <a (click)="trackorders()" *ngIf="hasVenueCompany"> Track My Orders</a>
     <a (click)="logout()">Log out</a>
-     
-    
+
+
   </nav>
 </header>
 
@@ -22,15 +39,15 @@
 
   <section class="loading-overlay" *ngIf="loading">
     <section class="loading-container" *ngIf="hasVenueCompany === null">
-    <section class="Loading-1"></section>
-    <section class="Loading-2"></section>
-  </section>
+      <section class="Loading-1"></section>
+      <section class="Loading-2"></section>
+    </section>
   </section>
 
 
   <!-- If venue company exists -->
   <section class="has-venue-company" *ngIf="hasVenueCompany && companyVenueData">
-   
+
 
     <section class="venue-company-details">
       <p class="company-name">Welcome, {{ companyVenueData.companyName }}</p>
@@ -41,24 +58,21 @@
   <section class="services" *ngIf="hasVenueCompany && companyVenueData">
     <h3 class="my-venues">My venues:</h3>
     <section class="button-container">
-      <button (click)="select('Venues')"[ngClass]="selected === 'Venues' ? 'yes-style' : 'default-style'">View my venues</button>
-        <button class="add-venue-btn" *ngIf="selected === 'Venues' && !addingVenue && !editingVenue" (click)="AddVenue()">Add Venue</button>
-        <button class="map-toggle-btn" *ngIf="selected === 'Venues'" (click)="toggleMap()">
-          {{ mapVisible ? 'Hide Map' : 'Show Map' }}
-        </button>
+      <button (click)="select('Venues')" [ngClass]="selected === 'Venues' ? 'yes-style' : 'default-style'">View my
+        venues</button>
+      <button class="add-venue-btn" *ngIf="selected === 'Venues' && !addingVenue && !editingVenue"
+        (click)="AddVenue()">Add Venue</button>
+      <button class="map-toggle-btn" *ngIf="selected === 'Venues'" (click)="toggleMap()">
+        {{ mapVisible ? 'Hide Map' : 'Show Map' }}
+      </button>
     </section> <!--button-container-->
 
     <!-- Map Section -->
     <section class="map-section" *ngIf="mapVisible && selected === 'Venues'">
       <!-- Map Search Bar -->
       <section class="map-search-bar">
-        <input 
-          type="text" 
-          [(ngModel)]="searchAddress" 
-          placeholder="Search for a location..." 
-          class="map-search-input"
-          (keyup.enter)="searchLocation()"
-        />
+        <input type="text" [(ngModel)]="searchAddress" placeholder="Search for a location..." class="map-search-input"
+          (keyup.enter)="searchLocation()" />
         <button (click)="searchLocation()" class="map-search-btn" [disabled]="mapLoading">
           {{ mapLoading ? 'Searching...' : 'Search' }}
         </button>
@@ -83,23 +97,21 @@
         <section class="map-display">
           <!-- Real Leaflet Map -->
           <section id="leaflet-map" class="leaflet-map-container"></section>
-          
+
           <!-- Map Info Panel -->
           <section class="map-info-panel">
             <section class="map-info-section" *ngIf="mapPin">
               <h4>📍 Current Location</h4>
               <p class="location-address">{{ mapPin?.address || 'Click on the map to select a location' }}</p>
-              <p class="location-coords" *ngIf="mapPin">{{ mapPin.lat | number:'1.4-4' }}, {{ mapPin.lon | number:'1.4-4' }}</p>
-              
-              <button 
-                *ngIf="(addingVenue || editingVenue) && mapPin" 
-                (click)="useLocationForVenue()" 
-                class="use-location-btn"
-              >
+              <p class="location-coords" *ngIf="mapPin">{{ mapPin.lat | number:'1.4-4' }}, {{ mapPin.lon |
+                number:'1.4-4' }}</p>
+
+              <button *ngIf="(addingVenue || editingVenue) && mapPin" (click)="useLocationForVenue()"
+                class="use-location-btn">
                 Use this address for venue
               </button>
             </section>
-            
+
             <section class="map-info-section" *ngIf="!mapPin && mapVisible">
               <h4>🗺️ Interactive Map</h4>
               <p class="location-address">Click anywhere on the map to select a location</p>
@@ -165,7 +177,8 @@
           <h3>{{ venue.venuename }}</h3>
           <img *ngIf="venue.images && venue.images[0]?.url" [src]="venue.images[0].url" alt="{{venue.venuename}}" />
           <label class="statuslabel">Status: {{venue.status}}</label>
-          <button class="btn" (click)="UpdateVenue(venue)">Update Venue Details</button>
+          <button class="btn" *ngIf="venue.status!== 'rejected'" (click)="UpdateVenue(venue)">Update Venue
+            Details</button>
           <button class="btn delete-btn" (click)="DeleteVenue(venue)">Delete Venue</button>
 
 
@@ -201,7 +214,8 @@
         <!-- Existing images -->
         <section class="image-list" *ngIf="editingVenue.images?.length > 0">
           <section class="image-item" *ngFor="let img of editingVenue.images; let i = index">
-            <img *ngIf="img?.url" [src]="img.url" alt="Venue Image" />
+            <img *ngIf="img?.url" [src]="img.url" alt="Venue Image"
+              style="max-width: 150px; max-height: 150px; object-fit: cover; border-radius: 8px;" />
             <label *ngIf="img">
               <input type="checkbox" [(ngModel)]="updateData.imagesToDelete[i]" />
               Delete

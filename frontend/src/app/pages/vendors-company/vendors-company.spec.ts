@@ -3,6 +3,9 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { of } from 'rxjs';
+import * as firebaseApp from 'firebase/app';
+import * as firestore from 'firebase/firestore';
 
 import { VendorsCompany } from './vendors-company';
 
@@ -366,5 +369,83 @@ describe('VendorsCompany – validation & guards', () => {
     expect(component.getServiceName('s1')).toBe('—');
     expect(component.getServiceName('s2')).toBe('Real Name');
     expect(component.getServiceName('missing')).toBe('—');
+  });
+});
+
+describe('VendorsCompany – data helpers', () => {
+  let fixture: ComponentFixture<VendorsCompany>;
+  let component: VendorsCompany;
+  let fakeFirestore: {
+    getFirestore: jasmine.Spy;
+    doc: jasmine.Spy;
+    getDoc: jasmine.Spy;
+  };
+
+  beforeEach(async () => {
+    const app = firebaseApp.getApps().length ? firebaseApp.getApp() : firebaseApp.initializeApp({ apiKey: 'test', appId: '1:demo:web:demo', projectId: 'demo' });
+    spyOn(firebaseApp, 'getApp').and.returnValue(app);
+    spyOn(firebaseApp, 'getApps').and.returnValue([app]);
+
+    fakeFirestore = {
+      getFirestore: jasmine.createSpy('getFirestore').and.returnValue({} as any),
+      doc: jasmine.createSpy('doc').and.callFake((_db: any, _coll: any, id?: string) => ({ id } as any)),
+      getDoc: jasmine.createSpy('getDoc'),
+    };
+    spyOn(firestore, 'getFirestore').and.callFake(fakeFirestore.getFirestore);
+    spyOn(firestore, 'doc').and.callFake(fakeFirestore.doc);
+    spyOn(firestore, 'getDoc').and.callFake(fakeFirestore.getDoc);
+    await TestBed.configureTestingModule({
+      imports: [VendorsCompany, RouterTestingModule],
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(VendorsCompany);
+    component = fixture.componentInstance;
+  });
+
+  it('loadCompany stores vendor profile data when found', async () => {
+    fakeFirestore.getDoc.and.returnValue(Promise.resolve({
+      exists: () => true,
+      data: () => ({ type: 'vendor', userID: 'comp-1', companyName: 'Studio', email: 'studio@example.com', phoneNumber: '011' }),
+    } as any));
+
+    await (component as any).loadCompany('comp-1');
+
+    expect(component.hasVendorCompany).toBeTrue();
+    expect(component.companyVendorData?.companyName).toBe('Studio');
+  });
+
+  it('addService posts data and refreshes services', async () => {
+    const httpStub = jasmine.createSpyObj('HttpClient', ['post', 'get', 'put', 'delete']);
+    httpStub.post.and.returnValue(of({ id: 'svc-1' }));
+    httpStub.get.and.returnValue(of([{ id: 'svc-1', serviceName: 'Photo', type: 'Photography', price: 2500, capacity: 100, description: '', bookingNotes: '', status: 'active', companyID: 'comp-1', phonenumber: '011' }]));
+    (component as any).http = httpStub;
+
+    component.companyId = 'comp-1';
+    component.companyVendorData = {
+      userID: 'comp-1',
+      companyName: 'Studio',
+      email: 'studio@example.com',
+      phoneNumber: '011',
+      type: 'vendor',
+    };
+
+    component.toggleServiceForm();
+    component.serviceForm.setValue({
+      serviceName: 'Photo',
+      type: 'Photography',
+      price: 2500,
+      capacity: 100,
+      description: 'Full day coverage',
+      bookingNotes: '',
+      phonenumber: '0115551234',
+    });
+
+    await component.addService();
+
+    expect(httpStub.post).toHaveBeenCalled();
+    expect(component.services.length).toBe(1);
+    expect(component.showServiceForm).toBeFalse();
+    expect(component.successMsg).toBe('Service saved!');
   });
 });

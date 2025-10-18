@@ -25,6 +25,14 @@ type ServiceRow = {
   phonenumber: string;
 };
 
+interface Notification {
+  id: string;
+  from: string;
+  to: string;
+  message: string;
+  timestamp: any;
+  read: boolean;
+}
 type OrderStatus = 'pending' | 'accepted' | 'declined' | 'cancelled';
 
 type OrderRow = {
@@ -66,7 +74,7 @@ export class VendorsCompany implements OnDestroy {
   auth = inject(AuthService);
   private fb = inject(FormBuilder);
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   hasVendorCompany: boolean | null = null;
   companyVendorData: CompanyDoc | null = null;
@@ -142,6 +150,10 @@ export class VendorsCompany implements OnDestroy {
   capacityErrorId: string | null = null;
   capacityInlineError = '';
 
+
+  public notifications: Notification[] = [];
+  public unreadCount: number = 0;
+  
   async ngOnInit() {
     const appAuth = getAuth();
     this.authUnsub = onAuthStateChanged(appAuth, async (user: User | null) => {
@@ -554,6 +566,41 @@ export class VendorsCompany implements OnDestroy {
   logout(): void {
     signOut(auth)
       .then(() => { this.router.navigate(['/landing']); })
-      .catch(() => {});
+      .catch(() => { });
   }
+
+  async fetchNotifications() {
+    const user = this.auth.user();
+    if (!user) return;
+
+    try {
+      const apiUrl = `https://site--vowsandveils--5dl8fyl4jyqm.code.run/venues/notifications/${user.uid}`;
+      const response: any = await this.http.get(apiUrl).toPromise();
+
+      this.notifications = (response.notifications || []).map((n: any) => ({
+        uid: n.id,
+        from: n.from || '',
+        to: n.to || '',
+        message: n.message || '',
+        date: n.date || null,
+        read: n.read || false,
+      }));
+
+      this.unreadCount = this.notifications.filter(n => !n.read).length;
+
+      this.notifications.sort((a, b) => Number(a.read) - Number(b.read));
+
+    } catch (err) {
+      console.error('Error fetching notifications from API:', err);
+      this.notifications = [];
+      this.unreadCount = 0;
+    }
+  }
+
+
+
+  goToNotifications() {
+    this.router.navigate(['/notifications'], { state: { from: this.router.url } });
+  }
+
 }

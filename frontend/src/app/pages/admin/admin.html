@@ -19,7 +19,7 @@
     <section class="admin-section">
         <section class="pending-container">
             <h1>Pending Approvals </h1>
-            
+
         </section>
         <section class="pending-column">
         <h2>Venues</h2>
@@ -31,9 +31,19 @@
             <span class="disp-box" *ngFor="let venue of venues">
                 <h3>{{venue.venuename}}</h3>
                 <p>{{venue.address}}</p>
-                <button  (click)="changeStatus('Venues',venue.id,'active')" class="disp-btn">Approve</button>
-                <button (click)="changeStatus('Venues',venue.id,'rejected')" class="disp-btn">Reject</button>
+                <select [(ngModel)]="venue.reason" name="reason" id="reason">
+                    <option value=" disabled selected hidden">Reason for rejection</option>
+                    <option value="Incomplete details">Incomplete details</option>
+                    <option value="Inappropriate content">Inappropriate content</option>
+                    <option value="Low-Quality images">Low-Quality Images</option>
+                    <option value="Unavailable or closed">Venue unavailable or closed</option>
+                </select>
+                <button  (click)="changeStatus('Venues',venue.id,'active')" class="disp-btn" [disabled]="venue.reason">Approve</button>
+                <button (click)="changeStatus('Venues',venue.id,'rejected',venue.reason)" class="disp-btn" [disabled]="!venue.reason">Reject</button>
+
             </span>
+
+
         </section>
         </section>
 
@@ -47,8 +57,17 @@
             <span class="disp-box" *ngFor="let vendor of vendors">
                 <h3>{{vendor.serviceName}}</h3>
                 <p>{{vendor.type}}</p>
-                <button (click)="changeStatus('Vendors',vendor.id,'active')" class="disp-btn">Approve</button>
-                <button (click)="changeStatus('Vendors',vendor.id,'rejected')" class="disp-btn">Reject</button>
+                <select [(ngModel)]="vendor.reason" name="reason" id="reason">
+                    <option value=" disabled selected hidden">Reason for rejection</option>
+                    <option value="Incomplete profile">Incomplete profile</option>
+                    <option value="Inappropriate content">Inappropriate content</option>
+                    <option value="Low-Quality images">Low-Quality Images</option>
+                    <option value="Service Mismatch">Submitted category does not fit offered services</option>
+                    <option value="Negative Reputation">Vendor has poor reviews or complaints</option>
+                </select>
+                <button (click)="changeStatus('Vendors',vendor.id,'active')" class="disp-btn" [disabled]="vendor.reason">Approve</button>
+                <button (click)="changeStatus('Vendors',vendor.id,'rejected',vendor.reason)" class="disp-btn" [disabled]="!vendor.reason">Reject</button>
+
             </span>
         </section>
         </section>

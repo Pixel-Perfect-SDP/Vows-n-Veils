@@ -12,7 +12,7 @@ if (!admin.apps.length) {
       privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
     }),
     storageBucket: process.env.FIREBASE_STORAGE_BUCKET || "ppep-2651c.firebasestorage.app"
-  
+
   });
 }
 
@@ -99,7 +99,7 @@ router.get('/:id', async (req, res) => {
           action: 'read',
           expires: Date.now() + 60 * 60 * 1000,
         });
-        return {url, name: file.name };
+        return { url, name: file.name };
       })
     );
 
@@ -155,18 +155,18 @@ router.get('/:id', async (req, res) => {
 
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 5 * 1024 * 1024 } 
+  limits: { fileSize: 5 * 1024 * 1024 }
 });
 
 router.post('/', upload.array('images', 6), async (req, res) => {
   try {
-    console.log('req.body:', req.body); 
-    console.log('req.files:', req.files); 
-    const venue = JSON.parse(req.body.venue); 
+    console.log('req.body:', req.body);
+    console.log('req.files:', req.files);
+    const venue = JSON.parse(req.body.venue);
 
     if (!venue.venuename || !venue.address || !venue.capacity ||
-        !venue.companyID || !venue.description || !venue.email ||
-        !venue.phonenumber || !venue.price || !venue.status) {
+      !venue.companyID || !venue.description || !venue.email ||
+      !venue.phonenumber || !venue.price || !venue.status) {
       return res.status(400).json({ error: 'Some fields are missing' });
     }
     const ref = await db.collection('Venues').add(venue);
@@ -258,7 +258,7 @@ router.get('/company/:companyID', async (req, res) => {
           files.map(async (file) => {
             const [url] = await file.getSignedUrl({
               action: 'read',
-              expires: Date.now() + 60 * 60 * 1000, 
+              expires: Date.now() + 60 * 60 * 1000,
             });
             return { url, name: file.name };
           })
@@ -306,53 +306,47 @@ router.get('/company/:companyID', async (req, res) => {
  *       200:
  *         description: Images updated successfully
  */
-const multerUpdate = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
 
 router.put('/:id/images', upload.array('images'), async (req, res) => {
   try {
     const venueId = req.params.id;
     const files = req.files;
+    const venueRef = db.collection('Venues').doc(venueId);
 
-    const [existingFiles] = await bucket.getFiles({ prefix: `venues/${venueId}/` });
-    let existingFileNames = existingFiles.map(f => f.name); 
-
+    const venueData = req.body.venueData ? JSON.parse(req.body.venueData) : {};
     const deleteImages = req.body.deleteImages ? JSON.parse(req.body.deleteImages) : [];
+
+    await venueRef.update(venueData);
 
     if (deleteImages.length > 0) {
       await Promise.all(deleteImages.map(fileName => bucket.file(fileName).delete()));
-      existingFileNames = existingFileNames.filter(f => !deleteImages.includes(f));
     }
 
     if (files && files.length > 0) {
       await Promise.all(
         files.map(file => {
           const blob = bucket.file(`venues/${venueId}/${file.originalname}`);
-          return blob.save(file.buffer, {
-            contentType: file.mimetype,
-            public: false
-          });
+          return blob.save(file.buffer, { contentType: file.mimetype, public: false });
         })
       );
-      const [updatedFiles] = await bucket.getFiles({ prefix: `venues/${venueId}/` });
-      existingFileNames = updatedFiles.map(f => f.name);
     }
 
+    const [allFiles] = await bucket.getFiles({ prefix: `venues/${venueId}/` });
     const signedUrls = await Promise.all(
-      existingFileNames.map(async (fileName) => {
-        const [url] = await bucket.file(fileName).getSignedUrl({
-          action: 'read',
-          expires: Date.now() + 60 * 60 * 1000, 
-        });
-        return { url, name: fileName };
+      allFiles.map(async (file) => {
+        const [url] = await file.getSignedUrl({ action: 'read', expires: Date.now() + 60 * 60 * 1000 });
+        return { url, name: file.name };
       })
     );
 
-    res.json({ ok: true, images: signedUrls });
+    res.json({ ok: true, images: signedUrls, venue: { id: venueId, ...venueData } });
+
   } catch (error) {
-    console.error('Error updating venue images:', error);
-    res.status(500).json({ error: 'Error updating venue images' });
+    console.error('Error updating venue:', error);
+    res.status(500).json({ error: 'Error updating venue' });
   }
 });
+
 
 /**
  * @swagger
@@ -418,11 +412,11 @@ router.post('/confirm-order', async (req, res) => {
       const order = doc.data();
 
       const existingStart = order.startAt?.seconds ? new Date(order.startAt.seconds * 1000) : new Date(order.startAt);
-      const existingEnd   = order.endAt?.seconds   ? new Date(order.endAt.seconds * 1000)   : new Date(order.endAt);
+      const existingEnd = order.endAt?.seconds ? new Date(order.endAt.seconds * 1000) : new Date(order.endAt);
 
       if (
-        (startDate >= new Date(existingStart.getTime() - 24*60*60*1000) && startDate <= new Date(existingEnd.getTime() + 24*60*60*1000)) ||
-        (endDate   >= new Date(existingStart.getTime() - 24*60*60*1000) && endDate   <= new Date(existingEnd.getTime() + 24*60*60*1000))
+        (startDate >= new Date(existingStart.getTime() - 24 * 60 * 60 * 1000) && startDate <= new Date(existingEnd.getTime() + 24 * 60 * 60 * 1000)) ||
+        (endDate >= new Date(existingStart.getTime() - 24 * 60 * 60 * 1000) && endDate <= new Date(existingEnd.getTime() + 24 * 60 * 60 * 1000))
       ) {
         conflict = true;
       }
@@ -479,7 +473,7 @@ router.get('/orders/company/:companyID', async (req, res) => {
     if (snap.empty) return res.status(404).json({ error: 'No orders found' });
 
     const orders = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    
+
     orders.sort((a, b) => {
       const orderStatus = { pending: 0, accepted: 1, rejected: 2 };
       return orderStatus[a.status] - orderStatus[b.status];
@@ -529,12 +523,158 @@ router.put('/orders/:orderID/status', async (req, res) => {
       return res.status(400).json({ error: 'Invalid status' });
     }
 
-    await db.collection('VenuesOrders').doc(orderID).update({ status });
+    const dbRef = admin.firestore();
+    const orderRef = dbRef.collection('VenuesOrders').doc(orderID);
+    const orderDoc = await orderRef.get();
 
-    res.json({ ok: true, orderID, status });
+    if (!orderDoc.exists) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+
+    const orderData = orderDoc.data();
+    const customerID = orderData.customerID;
+    const notRef = dbRef.collection('Notifications');
+
+    let messagei = "";
+    if (status === "rejected") {
+      await orderRef.delete();
+      messagei = "Your venue booking has been rejected. Please choose another one. Thank you!";
+    } else {
+      await orderRef.update({ status });
+      messagei = "Your venue booking has been accepted! The company will contact you soon. Thank you!";
+    }
+
+    await notRef.add({
+      date: new Date(),
+      from: "Management",
+      message: messagei,
+      to: customerID, // ✅ correct receiver
+      read: false
+    });
+
+    res.json({ ok: true, orderID, status, to: customerID });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+/**
+ * @swagger
+ * /notifications/{id}:
+ *   get:
+ *     summary: Fetch all notifications for a specific user
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: User ID to fetch notifications for
+ *     responses:
+ *       200:
+ *         description: List of notifications for the user
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 notifications:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                       from:
+ *                         type: string
+ *                       message:
+ *                         type: string
+ *                       date:
+ *                         type: string
+ *                       read:
+ *                         type: boolean
+ *       404:
+ *         description: No notifications found for the user
+ *       500:
+ *         description: Server error
+ */
+
+router.get('/notifications/:id', async (req, res) => {
+  try {
+    const userID = req.params.id;
+    const notificationsRef = db.collection('Notifications');
+    const querySnapshot = await notificationsRef.where('to', '==', userID).get();
+
+    if (querySnapshot.empty) {
+      return res.status(404).json({ error: 'No notifications found' });
+    }
+
+    const notifications = querySnapshot.docs.map(doc => {
+      const data = doc.data();
+      let dateValue = null;
+      if (data.date) {
+        if (typeof data.date.toDate === 'function') {
+          dateValue = data.date.toDate();
+        } else {
+          dateValue = data.date;
+        }
+      }
+
+      return {
+        id: doc.id,
+        ...data,
+        date: dateValue
+      };
+    });
+
+    res.json({ notifications });
+
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-module.exports = router;
+
+/**
+ * @swagger
+ * /notifications/:id:
+ *   put:
+ *     summary: Mark a notification as read
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Notification ID
+ *     responses:
+ *       200:
+ *         description: Notification marked as read
+ *       404:
+ *         description: Notification not found
+ *       500:
+ *         description: Server error
+ */
+router.put('/notifications/:id/read', async (req, res) => {
+  try {
+    const notifId = req.params.id;
+    const notifRef = db.collection('Notifications').doc(notifId);
+
+    const notifDoc = await notifRef.get();
+    if (!notifDoc.exists) {
+      return res.status(404).json({ error: 'Notification not found' });
+    }
+
+    await notifRef.update({ read: true });
+    res.json({ ok: true, id: notifId, message: 'Notification marked as read' });
+  } catch (err) {
+    console.error('Error marking notification as read:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+
+module.exports = router; 

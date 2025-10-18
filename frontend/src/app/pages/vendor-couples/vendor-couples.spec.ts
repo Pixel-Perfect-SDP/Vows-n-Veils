@@ -4,6 +4,9 @@ import { Router } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { of } from 'rxjs';
+import * as firebaseApp from 'firebase/app';
+import * as firestore from 'firebase/firestore';
 
 import { VendorCouples } from './vendor-couples';
 
@@ -96,13 +99,17 @@ describe('VendorCouples – core & branches', () => {
   });
 
   it('toggleOrders() flips repeatedly without hanging', fakeAsync(async () => {
+    const loadSpy = spyOn<any>(component, 'loadMyOrders').and.returnValue(Promise.resolve());
+    component.orders = [];
     const a = component.showOrders;
     const p1 = component.toggleOrders(); tick(); await p1;
     expect(component.showOrders).toBe(!a);
+    expect(loadSpy).toHaveBeenCalledTimes(1);
     const p2 = component.toggleOrders(); tick(); await p2;
     expect(component.showOrders).toBe(a);
     const p3 = component.toggleOrders(); tick(); await p3;
     expect(component.showOrders).toBe(!a);
+    expect(loadSpy).toHaveBeenCalledTimes(2);
   }));
 
   it('closeOrder() hides form and clears selectedService', () => {
@@ -314,5 +321,105 @@ describe('VendorCouples – extra local logic', () => {
     expect(component.selectedCapacityRange.label).toBe('Any');
     expect(component.selectedPriceRange).not.toBe(prevP);
     expect(component.selectedCapacityRange).not.toBe(prevC);
+  });
+});
+
+describe('VendorCouples – data helpers', () => {
+  let fixture: ComponentFixture<VendorCouples>;
+  let component: VendorCouples;
+  let fakeFirestore: {
+    getFirestore: jasmine.Spy;
+    doc: jasmine.Spy;
+    getDoc: jasmine.Spy;
+    getDocs: jasmine.Spy;
+    collection: jasmine.Spy;
+    query: jasmine.Spy;
+    where: jasmine.Spy;
+    orderBy: jasmine.Spy;
+  };
+
+  beforeEach(async () => {
+    const app = firebaseApp.getApps().length ? firebaseApp.getApp() : firebaseApp.initializeApp({ apiKey: 'test', appId: '1:demo:web:demo', projectId: 'demo' });
+    spyOn(firebaseApp, 'getApp').and.returnValue(app);
+    spyOn(firebaseApp, 'getApps').and.returnValue([app]);
+
+    fakeFirestore = {
+      getFirestore: jasmine.createSpy('getFirestore').and.returnValue({} as any),
+      doc: jasmine.createSpy('doc').and.callFake((_db: any, _coll: any, id?: string) => ({ id } as any)),
+      getDoc: jasmine.createSpy('getDoc'),
+      getDocs: jasmine.createSpy('getDocs'),
+      collection: jasmine.createSpy('collection').and.returnValue({} as any),
+      query: jasmine.createSpy('query').and.returnValue({} as any),
+      where: jasmine.createSpy('where').and.returnValue({} as any),
+      orderBy: jasmine.createSpy('orderBy').and.returnValue({} as any),
+    };
+    spyOn(firestore, 'getFirestore').and.callFake(fakeFirestore.getFirestore);
+    spyOn(firestore, 'doc').and.callFake(fakeFirestore.doc);
+    spyOn(firestore, 'getDoc').and.callFake(fakeFirestore.getDoc);
+    spyOn(firestore, 'getDocs').and.callFake(fakeFirestore.getDocs);
+    spyOn(firestore, 'collection').and.callFake(fakeFirestore.collection);
+    spyOn(firestore, 'query').and.callFake(fakeFirestore.query);
+    spyOn(firestore, 'where').and.callFake(fakeFirestore.where);
+    spyOn(firestore, 'orderBy').and.callFake(fakeFirestore.orderBy);
+
+    spyOn(firestore, 'addDoc');
+    spyOn(firestore, 'serverTimestamp').and.returnValue('ts');
+    await setupCouplesTestBed();
+    fixture = TestBed.createComponent(VendorCouples);
+    component = fixture.componentInstance;
+  });
+
+  it('loadAllVendors maps active services and resolves company names', async () => {
+    (component as any).http = { get: () => of([{ id: 'svc-1', status: 'active', type: 'Venue', serviceName: 'Zulu Hall', companyID: 'comp-1', price: 3500, capacity: 200 }]) } as any;
+
+    fakeFirestore.getDoc.and.callFake(async (ref: any) => ({
+      exists: () => ref.id === 'comp-1',
+      data: () => ({ companyName: 'Company One' }),
+    }));
+
+    component.selectedPriceRange = { label: 'Any', min: null, max: null };
+    component.selectedCapacityRange = { label: 'Any', min: null, max: null };
+
+    await component.loadAllVendors();
+
+    expect(component.groups['Venue'][0].companyName).toBe('Company One');
+    expect(component.totalCount).toBe(1);
+    expect(component.loaded).toBeTrue();
+    expect(component.loading).toBeFalse();
+  });
+
+  it('loadMyOrders enriches vendor and company details', async () => {
+    spyOn(component as any, 'waitForUser').and.resolveTo({ uid: 'cust-1' });
+
+    fakeFirestore.getDocs.and.resolveTo({
+      docs: [{
+        id: 'order-1',
+        data: () => ({
+          vendorID: 'vendor-1',
+          companyID: 'company-1',
+          status: 'pending',
+          guestsNum: 75,
+          startAt: { toDate: () => new Date('2025-01-01T10:00:00Z') },
+          endAt: { toDate: () => new Date('2025-01-01T12:00:00Z') },
+        }),
+      }],
+    } as any);
+    fakeFirestore.getDoc.and.callFake(async (ref: any) => {
+      if (ref.id === 'vendor-1') {
+        return { exists: () => true, data: () => ({ serviceName: 'Premium Photo', price: 2500 }) };
+      }
+      if (ref.id === 'company-1') {
+        return { exists: () => true, data: () => ({ companyName: 'Company One' }) };
+      }
+      return { exists: () => false, data: () => ({}) };
+    });
+
+    await (component as any).loadMyOrders();
+
+    expect(component.orders.length).toBe(1);
+    expect(component.orders[0].serviceName).toBe('Premium Photo');
+    expect(component.orders[0].companyName).toBe('Company One');
+    expect(component.loadingOrders).toBeFalse();
+    expect(component.ordersError).toBe('');
   });
 });

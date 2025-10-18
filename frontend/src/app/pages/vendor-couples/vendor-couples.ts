@@ -305,12 +305,44 @@ export class VendorCouples {
 
     try {
       const db = getFirestore(getApp());
-      const ev = await getDoc(doc(db, 'Events', user.uid));
-      if (ev.exists()) {
-        const data = ev.data() as any;
-        this.myEventTitle = (data?.Name1 && data?.Name2)
-          ? `${data.Name1} & ${data.Name2}`
-          : (data?.title || 'Your Event');
+
+      let evData: any = null;
+      let evId: string | null = null;
+
+      const direct = await getDoc(doc(db, 'Events', user.uid));
+      if (direct.exists()) {
+        evData = direct.data();
+        evId = direct.id;
+      } else {
+        const qy = query(collection(db, 'Events'), where('EventID', '==', user.uid));
+        const evs = await getDocs(qy);
+        if (evs.docs.length) {
+          evData = evs.docs[0].data();
+          evId = evs.docs[0].id;
+        }
+      }
+
+      if (evData) {
+        this.myEventId = evId;
+        this.orderForm.patchValue({ eventID: evId as string });
+
+        this.myEventTitle = (evData?.Name1 && evData?.Name2)
+          ? `${evData.Name1} & ${evData.Name2}`
+          : (evData?.title || 'Your Event');
+
+        const rawDT = evData?.Date_Time ?? evData?.dateTime ?? evData?.DateTime ?? null;
+        const dt = rawDT?.toDate ? rawDT.toDate() : (rawDT ? new Date(rawDT) : null);
+        if (dt && !isNaN(dt.getTime())) {
+          const yyyy = String(dt.getFullYear());
+          const mm = String(dt.getMonth() + 1).padStart(2, '0');
+          const dd = String(dt.getDate()).padStart(2, '0');
+          const HH = String(dt.getHours()).padStart(2, '0');
+          const MM = String(dt.getMinutes()).padStart(2, '0');
+          this.orderForm.patchValue({
+            date: `${yyyy}-${mm}-${dd}`,
+            startTime: `${HH}:${MM}`
+          });
+        }
       }
     } catch {}
   }

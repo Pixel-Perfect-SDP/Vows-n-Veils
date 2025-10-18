@@ -1,0 +1,184 @@
+{
+  "faqs": [
+    {
+      "id": 1,
+      "question": "How do I start planning my wedding on Vows & Veils?",
+      "answer": "To get started, sign in using your Google account. Fill in basic wedding details on the provided form including wedding date, couple names, and other essential information. Once completed, you'll have access to your personal dashboard to begin planning.",
+      "keywords": ["start planning", "get started", "begin wedding", "first time", "new user", "create account", "initial setup", "sign in", "register account"]
+    },
+    {
+      "id": 2,
+      "question": "What do I do once I have signed in?",
+      "answer": "After signing in, follow these steps in order for smooth planning: 1) Select a wedding venue, 2) Add your guests to create your guest list, 3) Create and customize your invitations, 4) Choose vendor services such as catering, photography, flowers, or music. Following this sequence ensures everything stays organized.",
+      "keywords": ["after login", "logged in", "next steps", "planning sequence", "recommended order", "what to do", "after sign in"]
+    },
+    {
+      "id": 3,
+      "question": "How do I choose a wedding venue?",
+      "answer": "Go to your dashboard and click 'Venues' on the sidebar. Browse available venue options with photos, capacity, location, and amenities. Click 'View Details' for more info including pricing estimates and availability. Once you find the ideal venue, click 'Select' to reserve it for your wedding.",
+      "keywords": ["choose venue", "select venue", "find venue", "wedding location", "book venue", "reserve location", "dashboard venue", "view details", "find a venue"]
+    },
+    {
+      "id": 4,
+      "question": "Do I have to confirm the venue that I selected?",
+      "answer": "You need to confirm your venue selection before it is finalized with the company. Go to the 'Venue' section in your dashboard and click the 'Confirm' button.",
+      "keywords": ["confirm venue", "finalize venue", "venue final"]
+    },
+    {
+      "id": 5,
+      "question": "Can I change my venue after confirming it?",
+      "answer": "You cannot change your venue after confirming it.",
+      "keywords": ["change venue", "after confirm", "update venue", "confirmed venue"]
+    },
+    {
+      "id": 6,
+      "question": "How do I add guests?",
+      "answer": "Go to your dashboard and select 'Guests' on the sidebar. Click 'Add Guest' and enter their full name (required), email (required), and other optional details. After adding guests, you'll receive a unique RSVP code to share with them for confirming attendance.",
+      "keywords": ["add guests", "guest list", "invite guests", "attendees", "manage attendees", "build guest list"]
+    },
+    {
+      "id": 7,
+      "question": "How does the RSVP code work?",
+      "answer": "The system generates a unique RSVP code when you add guests, which is found on the homepage. Share this code with your guests. They'll enter it on the RSVP page to confirm attendance. This ensures only invited guests can RSVP.",
+      "keywords": ["RSVP code", "unique code", "guest access", "security code", "RSVP process"]
+    },
+    {
+      "id": 8,
+      "question": "What if a guest cannot RSVP online?",
+      "answer": "If a guest cannot RSVP online, you can manually RSVP for them by setting their status to 'Accepted' in your guest list. They will appear on the accepted guests list without using the website themselves.",
+      "keywords": ["manual RSVP", "offline RSVP", "can't RSVP", "guest not able to RSVP", "RSVP problem", "set accepted", "cannot RSVP"]
+    },
+    {
+      "id": 9,
+      "question": "Do I have to fill in all the details when adding a guest?",
+      "answer": "The only required detail is the guest's full name and their email address. Other information like dietary restrictions, allergies, or song request is optional and can be added later.",
+      "keywords": ["required fields", "mandatory info", "guest details", "optional fields", "minimum information"]
+    },
+    {
+      "id": 10,
+      "question": "How do I create an invitation?",
+      "answer": "Go to your dashboard and select 'Invitations'. Choose from various templates, add a personal message, wedding details, and upload a photo if desired. Preview and finalize your invitation before sending.",
+      "keywords": ["create invitation", "design invitation", "invitation template", "customize invite", "add message", "add picture"]
+    },
+    {
+      "id": 11,
+      "question": "How do I send invitations to my guests?",
+      "answer": "Download your completed invitation and send it via email, messaging apps, or print it. Include the unique RSVP code so guests can confirm attendance. Invitations also include a direct link to the RSVP page.",
+      "keywords": ["send invitations", "distribute invite", "email invite", "share invitation","share the invitation","share my invitation", "RSVP link"]
+    },
+    {
+      "id": 12,
+      "question": "How do I choose vendor services?",
+      "answer": "Go to 'Vendors' on your dashboard. Browse categories such as catering, photography, videography, flowers, or music. Each service shows pricing, capacity, and description. Click 'Order' to send an inquiry to the vendor.",
+      "keywords": ["choose vendor", "book services", "order vendor", "vendor selection", "service categories"]
+    },
+    {
+      "id": 13,
+      "question": "How will I know the price of venues and vendor services?",
+      "answer": "The website shows estimated price ranges. Final pricing and payment arrangements are handled directly between you and the vendor. Companies contact you privately to discuss detailed pricing, packages, and payment terms. No transactions occur through the website.",
+      "keywords": ["pricing", "cost", "payment", "vendor price", "venue price", "budget"]
+    },
+    {
+      "id": 14,
+      "question": "How do I RSVP to a wedding as a guest?",
+      "answer": "Enter the invitation code provided by the couple in the RSVP section. Fill in your full name, confirm attendance, note dietary restrictions, and add any special song requests. Submit to complete your RSVP.",
+      "keywords": ["RSVP wedding", "respond invitation", "confirm attendance", "enter code", "guest response"]
+    },
+    {
+      "id": 15,
+      "question": "What if I cannot RSVP on the website?",
+      "answer": "Contact the couple directly via phone, email, or text. They can manually RSVP for you on their guest list.",
+      "keywords": ["RSVP issue", "cannot RSVP", "offline RSVP", "technical problem"]
+    },
+    {
+      "id": 16,
+      "question": "How do I add my company to the website?",
+      "answer": "Sign in using Google and select your company type: Venue Company or Vendor Company. Fill in your company details including name, description, and contact info. If your business offers both venues and vendor services, create separate profiles for each.",
+      "keywords": ["add company", "register company", "venue company", "vendor company", "create profile"]
+    },
+    {
+      "id": 17,
+      "question": "How do I add a venue or vendor service?",
+      "answer": "For venues: Go to your Venue Company dashboard, click 'Add Venue', fill in details, and submit for admin review. For vendor services: Go to Vendor Company dashboard, click 'Add Service', select category, fill in details, and submit. Admin approval usually takes 24-48 hours.",
+      "keywords": ["add venue", "add service", "submit venue", "submit service", "admin review", "listing approval"]
+    },
+    {
+      "id": 18,
+      "question": "Can I edit or delete a venue or vendor service?",
+      "answer": "To edit, go to the respective company dashboard and click 'Edit' next to the listing. To delete, click 'Delete' and confirm. The change will update immediately.",
+      "keywords": ["edit venue", "edit service", "update listing", "delete venue", "delete service", "remove listing"]
+    },
+    {
+      "id": 19,
+      "question": "Can I have multiple types of vendor services in one company?",
+      "answer": "You can offer multiple service categories under one Vendor Company profile. When adding a new service, select the appropriate category to organize your offerings.",
+      "keywords": ["multiple services", "different categories", "service types", "various offerings"]
+    },
+    {
+      "id": 20,
+      "question": "How do I know if my venue or vendor service has been approved?",
+      "answer": "Check the status next to your listing in the dashboard. 'Active' means approved and live on the website, 'Pending' means awaiting review. Approval usually takes 24-48 hours.",
+      "keywords": ["approval status", "active", "pending", "admin approval", "listing status"]
+    },
+    {
+      "id": 21,
+      "question": "What if my venue or vendor service is not approved?",
+      "answer": "If not approved, the listing won't be visible to couples. Review feedback from the admin, update your listing with better details or photos, and resubmit for approval.",
+      "keywords": ["not approved", "rejected", "denied", "resubmit", "reapply", "failed review"]
+    },
+    {
+      "id": 22,
+      "question": "How do I accept or decline a couple's request for my service?",
+      "answer": "Go to your company dashboard to view pending orders. Select 'Accept' or 'Decline' next to the pending order. The couple will be notified automatically.",
+      "keywords": ["accept request", "decline request", "booking management", "order response"]
+    },
+    {
+      "id": 23,
+      "question": "How do payments work?",
+      "answer": "All payments are arranged directly between the couple and the service provider. The website does not process transactions. Discuss deposits, schedules, and accepted payment methods privately.",
+      "keywords": ["payment", "billing", "financial arrangement", "transaction", "pay vendor"]
+    },
+    {
+      "id": 24,
+      "question": "What is the countdown timer for?",
+      "answer": "The countdown timer shows the number of days remaining until your wedding day.",
+      "keywords": ["countdown", "timer", "wedding date", "special day", "big day countdown"]
+    },
+    {
+      "id": 25,
+      "question": "Where can I find my RSVP code?",
+      "answer": "Your wedding RSVP code is displayed on the homepage below the countdown timer, titled 'Wedding Code'. Copy it and share with your guests.",
+      "keywords": ["RSVP code", "find code", "share code", "guest code"]
+    },
+    {
+      "id": 26,
+      "question": "Where can I find a summary of my wedding details?",
+      "answer": "Below the countdown timer on the homepage, you'll find an overview of your chosen venue, vendors, wedding day details, budget, and RSVP information.",
+      "keywords": ["wedding summary", "overview", "details summary", "homepage summary"]
+    },
+    {
+      "id": 27,
+      "question": "What is the checklist for and how do I use it?",
+      "answer": "The checklist helps track all tasks before your wedding day. Add tasks using 'Add Task', mark them complete with checkboxes, delete tasks if needed, and sort by completed or incomplete items. The checklist is located below your wedding summary on the homepage.",
+      "keywords": ["checklist", "tasks", "add task", "mark complete", "delete task", "sort tasks", "manage checklist"]
+    },
+    {
+      "id": 28,
+      "question": "What is the 'Our Story' page for and how do I manage it?",
+      "answer": "'Our Story' lets you share your love story, proposal, and milestones with guests. Go to your dashboard → 'Our Story' to add, edit, or reorder milestones. Milestones can be redordered by dragging and dropping. Guests with your RSVP code can view it. Save your story using the 'Want to save this?' button.",
+      "keywords": ["our story", "love story", "relationship milestones", "edit story", "reorder milestones", "save story", "share story"]
+    },
+    {
+      "id": 29,
+      "question": "Greetings and casual chat",
+      "answer": "Hello! How can I assist you today with your wedding planning?",
+      "keywords": ["hi", "hello", "hey", "good morning", "good afternoon", "good evening"]
+    },
+    {
+      "id": 30,
+      "question": "How are you?",
+      "answer": "I am good! How can I help you with your wedding planning today?",
+      "keywords": ["how are you", "how's it going", "how do you do"]
+    }
+  ]
+}

@@ -38,7 +38,7 @@
 
 .nav-links a {
   text-decoration: none;
-  font-size: 1rem;
+  font-size: 1.2rem;
   font-weight: 500;
   color: #333;
   transition: color 0.3s ease, border-bottom 0.3s ease;
@@ -818,3 +818,28 @@
   .button-container { gap: 8px; }
   .button-container button { padding: 8px 12px; font-size: 0.9rem; }
 }
+
+.notif-btn {
+  background: none;
+  border: none;
+  position: relative;
+  cursor: pointer;
+}
+.notification-dot {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background-color: red;
+  color: white;
+  font-size: 10px;
+  font-weight: bold;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  padding: 0;
+}
+

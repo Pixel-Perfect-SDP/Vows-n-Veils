@@ -25,17 +25,28 @@ jobs:
           cd frontend
           npm install
       
+      # .github/workflows/frontend.yml  (your Static Web Apps workflow)
       - name: Run Tests with Coverage
         run: |
           cd frontend
-          npx ng test --watch=false --browsers=ChromeHeadless --code-coverage
-        continue-on-error: true
+          npx ng test --watch=false --browsers=ChromeHeadlessCI --code-coverage || true
 
-      - name: Upload coverage to Codecov
+      # Always run the upload step, even if tests fail, so you can see missing-file errors.
+      - name: Upload frontend coverage to Codecov
+        if: always()
         uses: codecov/codecov-action@v4
         with:
-          files: frontend/coverage/frontend/lcov.info
+          files: ./frontend/coverage/lcov.info   # 👈 full path from repo root
+          flags: frontend
           token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: true
+          verbose: true
+
+      # Optional: debug if it still fails
+      - name: Debug coverage tree
+        if: always()
+        run: ls -R frontend/coverage || true
+
 
 
       - name: Build Angular App
@@ -64,6 +75,7 @@ jobs:
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_MANGO_MUSHROOM_00C4CE01E }}
           action: close
+
 
 
 

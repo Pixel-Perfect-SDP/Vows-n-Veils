@@ -40,7 +40,7 @@
 
 .nav-links a {
   text-decoration: none;
-  font-size: 1rem;
+  font-size: 1.2rem;
   font-weight: 500;
   color: #333;
   transition: color 0.3s ease, border-bottom 0.3s ease;
@@ -305,3 +305,193 @@
   }
 }
 
+
+
+/*couple story*/
+.story-display {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  width: 100%;
+  max-width: 600px; 
+  margin: 0 auto;
+    margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+    padding: 2rem;
+}
+
+.story-title {
+  font-family: Georgia, 'Times New Roman', Times, serif; 
+  font-weight: 700;
+  font-style: italic; 
+  font-size: 2.2rem;
+  color: #000000; 
+  margin: 0 0 15px 0;
+  text-align: center;
+  margin-bottom: 2rem;
+  padding-bottom: 0.5rem;
+  position: relative;
+
+}
+
+
+.story-title::before {
+  content: "";
+  position: absolute;
+  top: 100%; 
+  left: 50%;
+  transform: translateX(-50%);
+  width: 50rem;
+  max-width: 90%; 
+  height: 3px;
+  background: linear-gradient(90deg, #d4af37, #f5e6a0);
+  border-radius: 2px;
+  z-index: 0;
+}
+
+/* Heart on the line */
+.story-title::after {
+  content: "❤";
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  transform: translate(-50%, -50%);
+  font-size: 1.4rem;
+  color: #e75480;
+  z-index: 1;
+}
+
+.preview-subheading {
+  font-family: "Georgia", serif;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #e75480;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.preview-content {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-size: 1rem;
+  color: #333;
+  line-height: 1.5;
+  margin: 0;
+}
+
+
+
+.timeline-container.preview {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  padding-left: 2rem; 
+  position: relative;
+}
+
+.timeline-box:nth-child(odd) {
+  align-self: flex-start;
+}
+
+.timeline-box:nth-child(even) {
+  align-self: flex-end;
+}
+
+
+.timeline-box {
+  background: linear-gradient(135deg, #ffe6f0, #fff0f5);
+  border-radius: 16px;
+  padding: 1.2rem;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+  position: relative;
+  transition: all 0.3s ease;
+  gap: 2rem;
+  margin-bottom: 1rem;
+   width: 80%; 
+  max-width: 500px; 
+  min-width: 250px;
+}
+
+
+
+.timeline-box:hover {
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+
+.timeline-title {
+  font-family: 'Dancing Script', cursive;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #000000;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.timeline-title::after {
+  content: "";
+  display: block;
+  width: 40px;
+  height: 3px;
+  margin: 0.3rem auto 0;  
+ background: linear-gradient(135deg, #f497b9, #f4c2d7);
+  border-radius: 2px;
+}
+
+
+
+.timeline-title:focus {
+  outline: none;
+  border-color: #f497b9;
+  box-shadow: 0 0 5px rgba(244, 151, 185, 0.4);
+}
+
+.timeline-description {
+  font-family: 'Arial', sans-serif;
+  font-size: 0.85rem;
+  padding: 0.4rem 0.5rem;
+  border: 1px solid #f4c2d7;
+  border-radius: 8px;
+  background-color: #fff5f9;
+  resize: none;
+}
+
+.timeline-description:focus {
+  outline: none;
+  border-color: #f497b9;
+  box-shadow: 0 0 5px rgba(244, 151, 185, 0.4);
+}
+
+
+
+
+.timeline-box::before {
+  content: '';
+  position: absolute;
+  top: 0;               
+  left: -1.1rem;       
+  width: 12px;
+  height: 12px;
+  background-color: #f497b9;
+  border-radius: 50%;
+  border: 2px solid white;
+  z-index: 2;
+}
+
+/* connecting line */
+.timeline-box::after {
+  content: '';
+  position: absolute;
+  top: 12px;          
+  left: -0.7rem;      
+  width: 2.5px;      
+  height: calc(100%); 
+  background-color: #f497b9;
+  z-index: 1;
+}
+
+.timeline-box:last-child::after {
+  display: none;
+}

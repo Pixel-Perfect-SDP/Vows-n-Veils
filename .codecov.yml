@@ -1,0 +1,46 @@
+coverage:
+  status:
+    project:
+      default: false
+      frontend:
+        flags: [frontend]
+        target: auto
+      backend:
+        flags: [backend]
+        target: auto
+    patch:
+      default: false
+      frontend:
+        flags: [frontend]
+        target: auto
+      backend:
+        flags: [backend]
+        target: auto
+
+component_management:
+  individual_components: true
+  default_rules:
+    statuses:
+      - type: project
+        target: auto
+
+components:
+  - name: backend
+    paths:
+      - backend/**
+    statuses:
+      - type: project
+        target: auto
+
+  - name: frontend
+    paths:
+      - frontend/src/**
+    statuses:
+      - type: project
+        target: auto
+
+ignore:
+  - frontend/dist/**
+  - frontend/public/**
+  - backend/coverage/**
+  - "**/*.d.ts"

@@ -2,7 +2,7 @@ import { Component, inject, OnInit, OnDestroy, PLATFORM_ID, NgZone, ChangeDetect
 import { isPlatformBrowser, CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import { Firestore, collection, addDoc, doc, getDoc, setDoc, serverTimestamp, getDocs, query, where } from 'firebase/firestore';
+import { Firestore, collection, addDoc, doc, getDoc, setDoc, serverTimestamp, getDocs, query, where, updateDoc, deleteDoc } from 'firebase/firestore';
 import { AuthService } from '../../core/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getApp } from 'firebase/app';
@@ -10,16 +10,37 @@ import { FormGroup, FormControl, FormsModule } from '@angular/forms';
 import { DataService, Guest } from '../../core/data.service';
 import { auth } from '../firebase/firebase-config';
 import { signOut } from 'firebase/auth';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
+
+
+interface Notification {
+  id: string;
+  from: string;
+  to: string;
+  message: string;
+  timestamp: any;
+  read: boolean;
+}
+
+//Add checklist
+type ChecklistTask = {
+  id: string;
+  title: string;
+  dueDate?: any;
+  assignee?: string;
+  done: boolean;
+  createdAt?: any;
+  priority?: 'high' | 'medium' | 'low';
+};
 
 @Component({
   selector: 'app-homepage',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, FormsModule, HttpClientModule],
   templateUrl: './homepage.html',
   styleUrls: ['./homepage.css']
 })
-export class Homepage
-{
+export class Homepage {
   router = inject(Router);
   auth = inject(AuthService);
   private formBuild = inject(FormBuilder);
@@ -27,6 +48,9 @@ export class Homepage
 
   public hasEvent: boolean | null = null;
   public eventData: any = null;
+  //notificaton data 
+  public notifications: Notification[] = [];
+  public unreadCount: number = 0;
 
   // Event Display Data
   public eventDisplayInfo: {
@@ -36,18 +60,18 @@ export class Homepage
     budget: number | null;
     totalGuests: number | null;
     confirmedRSVPs: number | null;
-    selectedVendors: Array<{companyID: string, serviceName: string, orderDate?: any, status?: string}> | null;
-    rsvpCode:string|null;
+    selectedVendors: Array<{ companyID: string, serviceName: string, orderDate?: any, status?: string }> | null;
+    rsvpCode: string | null;
   } = {
-    weddingTitle: null,
-    venueName: null,
-    weddingTime: null,
-    budget: null,
-    totalGuests: null,
-    confirmedRSVPs: null,
-    selectedVendors: null,
-    rsvpCode:null
-  };
+      weddingTitle: null,
+      venueName: null,
+      weddingTime: null,
+      budget: null,
+      totalGuests: null,
+      confirmedRSVPs: null,
+      selectedVendors: null,
+      rsvpCode: null
+    };
 
   public eventInfoLoading: boolean = false;
   public eventInfoError: string | null = null;
@@ -57,7 +81,7 @@ export class Homepage
   public weatherLoading: boolean = false;
   public weatherError: string | null = null;
 
-  activeTab: 'overview' | 'guests' = 'overview';
+  activeTab: 'dashboard' | 'guests' = 'dashboard';
   guests: Guest[] = [];
   guestsLoading = false;
   guestsError: string | null = null;
@@ -70,7 +94,10 @@ export class Homepage
     budget: ['', [Validators.required, Validators.min(0)]]
   });
 
-    private waitForUser(): Promise<any> {
+  constructor(private http: HttpClient) { }
+
+
+  private waitForUser(): Promise<any> {
     return new Promise((resolve) => {
       const user = this.auth.user();
       if (user) resolve(user);
@@ -177,21 +204,18 @@ export class Homepage
       }
 
       //getting wedding code
-      try
-      {
-        const codeDoc=await getDoc(doc(db,'Events',eventId));
+      try {
+        const codeDoc = await getDoc(doc(db, 'Events', eventId));
 
-        if (codeDoc.exists())
-        {
-          this.eventDisplayInfo.rsvpCode = codeDoc.data()?.['RSVPcode']||null;
+        if (codeDoc.exists()) {
+          this.eventDisplayInfo.rsvpCode = codeDoc.data()?.['RSVPcode'] || null;
           console.log("RSVP Code found:", this.eventDisplayInfo.rsvpCode);
         }
-        else{
+        else {
           console.log("No RSVP Code found for EventID:", eventId);
         }
       }
-      catch(error)
-      {
+      catch (error) {
         console.error("Error fetching RSVP Code:", error);
       }
 
@@ -237,11 +261,11 @@ export class Homepage
 
         console.log('Orders query result - number of docs:', ordersSnapshot.size);
 
-        const selectedVendors: Array<{companyID: string, serviceName: string, orderDate?: any, status?: string}> = [];
+        const selectedVendors: Array<{ companyID: string, serviceName: string, orderDate?: any, status?: string }> = [];
 
         // Get all company IDs from orders, excluding declined orders
         const companyIds: Set<string> = new Set();
-        const orderDetails: {[key: string]: any} = {};
+        const orderDetails: { [key: string]: any } = {};
 
         ordersSnapshot.forEach((doc) => {
           const orderData = doc.data();
@@ -282,9 +306,9 @@ export class Homepage
               console.log(`Vendor data for companyID ${companyID}:`, vendorData);
 
               let serviceName = vendorData?.['serviceName'] ||
-                               vendorData?.['service_name'] ||
-                               vendorData?.['name'] ||
-                               `Service ${companyID}`;
+                vendorData?.['service_name'] ||
+                vendorData?.['name'] ||
+                `Service ${companyID}`;
 
               const orderStatus = orderDetails[companyID]?.status;
 
@@ -368,14 +392,11 @@ export class Homepage
   /*------------------------------End Event Data API--------------------------*/
 
   //copy RSVP code to clipboard
-  copyToClipboard(code: string): void
-  {
-    navigator.clipboard.writeText(code).then(() =>
-    {
+  copyToClipboard(code: string): void {
+    navigator.clipboard.writeText(code).then(() => {
       console.log('RSVP Code copied:', code);
       // optional: show a toast or alert to user
-    }).catch(err =>
-      {
+    }).catch(err => {
       console.error('Failed to copy RSVP Code:', err);
     });
   }
@@ -393,9 +414,12 @@ export class Homepage
       if (docSnap.exists()) {
         this.hasEvent = true;
         this.eventData = docSnap.data();
-
         // Get comprehensive event display data
         await this.getEventDataForDisplay();
+
+        //Checklist added
+        await this.loadChecklist();
+        await this.fetchNotifications();
 
         //countdown
         this.updateCountdown();
@@ -491,8 +515,7 @@ export class Homepage
   }
 
 
-  ngOnDestroy()
-  {
+  ngOnDestroy() {
     if (this.countDownInerval) clearInterval(this.countDownInerval);
   }
 
@@ -529,6 +552,16 @@ export class Homepage
 
   // modify switchToGuests to also fetch options once
   private filtersLoaded = false;
+
+  async switchToDashboard(e: Event) {
+    e.preventDefault();
+    this.activeTab = 'dashboard';
+
+    // optional tidy-up when leaving Guests
+    this.showAddGuest = false;
+    this.showExport = false;
+    this.showEdit = false;
+  }
 
   async switchToGuests(e: Event) {
     e.preventDefault();
@@ -586,7 +619,7 @@ export class Homepage
   // form for new guest
   addGuestForm = this.formBuild.group({
     Name: ['', [Validators.required]],
-    Email:['', [Validators.pattern(/^$|.+@.+\..+/)]],
+    Email: ['', [Validators.pattern(/^$|.+@.+\..+/)]],
     Dietary: ['None'],
     Allergies: ['None'],
     RSVPstatus: ['false'],            // default to attending (string here, convert later)
@@ -600,8 +633,7 @@ export class Homepage
     if (!this.showAddGuest) this.addGuestForm.reset({ Name: '' }); //was RSVPstatus,'true'
   }
 
-  async submitAddGuest()
-  {
+  async submitAddGuest() {
     if (this.addGuestForm.invalid) return;
 
     const user = await this.waitForUser();
@@ -610,7 +642,7 @@ export class Homepage
     const eventId = user.uid;
     const raw = this.addGuestForm.getRawValue();
 
-    const dto :any= {
+    const dto: any = {
       Name: raw.Name?.trim() ?? '',
       Email: raw.Email?.trim() ? raw.Email?.trim() : '',
       Dietary: raw.Dietary?.trim() ?? 'None',
@@ -679,6 +711,101 @@ export class Homepage
       alert('Unexpected error. Please try again.');
     }
   }
+
+  /* -------- EDIT guests UI state -------- */
+  showEdit = false;
+  selectedGuestId: string | null = null;
+
+  editGuestForm = this.formBuild.group({
+    Name: [''],
+    Email: ['', [Validators.pattern(/^$|.+@.+\..+/)]],
+    Dietary: [''],
+    Allergies: [''],
+    RSVPstatus: [''], // we'll map to boolean on submit if provided
+    Song: ['']
+  });
+
+  // Toggle the card open/closed
+  toggleEdit() {
+    this.showEdit = !this.showEdit;
+    if (!this.showEdit) {
+      this.selectedGuestId = null;
+      this.editGuestForm.reset({});
+    } else {
+      // when opening, ensure we have the latest list (so dropdown is fresh)
+      this.loadGuests();
+    }
+  }
+
+  // When a guest is chosen from dropdown, seed the form with their values
+  onSelectEditGuest(guestId: string) {
+    this.selectedGuestId = guestId;
+    const g = this.guests.find(x => x.id === guestId);
+    if (!g) return;
+
+    this.editGuestForm.patchValue({
+      Name: g.Name ?? '',
+      Email: g.Email ?? '',
+      Dietary: g.Dietary ?? '',
+      Allergies: g.Allergies ?? '',
+      RSVPstatus: g.RSVPstatus ? 'true' : 'false',
+      Song: g.Song ?? ''
+    });
+  }
+
+  // Submit the partial update
+  async submitEditGuest() {
+    if (!this.selectedGuestId) {
+      alert('Please select a guest to edit.');
+      return;
+    }
+
+    const user = await this.waitForUser();
+    if (!user) return;
+    const eventId = user.uid;
+
+    // Build patch: only include fields the user actually changed / set
+    const raw = this.editGuestForm.getRawValue();
+    const patch: any = {};
+
+    // only send keys that are not undefined or empty strings (optional)
+    for (const key of Object.keys(raw)) {
+      const val: any = (raw as any)[key];
+      if (typeof val !== 'undefined') {
+        // normalize RSVPstatus
+        if (key === 'RSVPstatus' && val !== '') {
+          patch.RSVPstatus = String(val).toLowerCase() === 'true';
+        } else if (key !== 'RSVPstatus') {
+          patch[key] = typeof val === 'string' ? val.trim() : val;
+        }
+      }
+    }
+
+    if (Object.keys(patch).length === 0) {
+      alert('No changes to save.');
+      return;
+    }
+
+    this.guestsLoading = true;
+    this.dataService.updateGuest(eventId, this.selectedGuestId, patch).subscribe({
+      next: async () => {
+        // refresh table + dynamic filters (in case values changed)
+        await this.loadGuests();
+        await this.loadGuestFilterOptions();
+
+        this.guestsLoading = false;
+        alert('Guest updated successfully.');
+        // keep the edit drawer open (so they can edit more), or close if you prefer:
+        // this.toggleEdit();
+      },
+      error: (err) => {
+        console.error('Failed to update guest', err);
+        this.guestsLoading = false;
+        alert('Failed to update guest. Please try again.');
+      }
+    });
+  }
+
 
   /*---------Download files----------*/
   //Export UI toggle
@@ -755,7 +882,7 @@ export class Homepage
     }
 
     console.log('📤 Sending invitation directly to API...');
-    
+
     // Send invitation with exact format and order as required
     const inviteData = {
       guestEmail: guest.Email,
@@ -782,8 +909,7 @@ export class Homepage
 
   /*------------------------------user has NO event--------------------------*/
   //allow user to create one
-  async createEvent()
-  {
+  async createEvent() {
     if (this.form.invalid) {
       return;
     }
@@ -799,19 +925,18 @@ export class Homepage
     const dateTime = new Date(`${date}T${time}`);
 
     //generating a code for RSVP
-    let num=0;
+    let num = 0;
     let strNum;
-    let temp='';
-    for (let i =0;i<3;i++)
-    {
-      num=Math.floor(Math.random() * 9) + 1;
-      strNum=String(num);
-      temp+=strNum;
+    let temp = '';
+    for (let i = 0; i < 3; i++) {
+      num = Math.floor(Math.random() * 9) + 1;
+      strNum = String(num);
+      temp += strNum;
     }
-    const RSVPCode = (name1 && name2) ? name1.substring(0, 3).toUpperCase() + name2.substring(0, 3).toUpperCase()+temp: '';
+    const RSVPCode = (name1 && name2) ? name1.substring(0, 3).toUpperCase() + name2.substring(0, 3).toUpperCase() + temp : '';
 
     try {
-        await setDoc(docRef, {
+      await setDoc(docRef, {
         Name1: this.form.value.name1,
         Name2: this.form.value.name2,
         Date_Time: dateTime,
@@ -836,8 +961,7 @@ export class Homepage
 
   }//createEvent
 
-  logout(): void
-  {
+  logout(): void {
     signOut(auth)
       .then(() => {
         console.log('User signed out successfully');
@@ -860,44 +984,39 @@ export class Homepage
 
   private countDownInerval: any;
 
-  private updateCountdown()
-  {
+  private updateCountdown() {
     if (!this.eventData?.Date_Time) return;
 
-    const eventTime= this.eventData.Date_Time.toDate() ? this.eventData.Date_Time.toDate() : this.eventData.Date_Time;
+    const eventTime = this.eventData.Date_Time.toDate() ? this.eventData.Date_Time.toDate() : this.eventData.Date_Time;
     const now = new Date();
 
-    if (eventTime <= now)
-    {
-      this.months= this.days=this.hours=this.minutes=0;
+    if (eventTime <= now) {
+      this.months = this.days = this.hours = this.minutes = 0;
       return;
     }
 
-    let yearDiff= eventTime.getFullYear()- now.getFullYear();
-    let monthsDiff = eventTime.getMonth() - now.getMonth() + yearDiff*12;
-    let daysDiff = eventTime.getDate()-now.getDate();
+    let yearDiff = eventTime.getFullYear() - now.getFullYear();
+    let monthsDiff = eventTime.getMonth() - now.getMonth() + yearDiff * 12;
+    let daysDiff = eventTime.getDate() - now.getDate();
     let hoursDiff = eventTime.getHours() - now.getHours();
     let minDiff = eventTime.getMinutes() - now.getMinutes();
 
     // if the any values are negative
 
-    if (minDiff <0)
-    {
-      minDiff+=60;
-      hoursDiff-=1;
+    if (minDiff < 0) {
+      minDiff += 60;
+      hoursDiff -= 1;
     }
 
-    if (hoursDiff <0)
-    {
-      hoursDiff+=24;
-      daysDiff-=1;
+    if (hoursDiff < 0) {
+      hoursDiff += 24;
+      daysDiff -= 1;
     }
 
-    if(daysDiff <0)
-    {
-      const lastMonth = new Date(now.getFullYear(), now.getMonth()+1,0).getDate();
-      daysDiff+=lastMonth;
-      monthsDiff-=1;
+    if (daysDiff < 0) {
+      const lastMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+      daysDiff += lastMonth;
+      monthsDiff -= 1;
     }
 
     this.months = monthsDiff;
@@ -906,4 +1025,178 @@ export class Homepage
     this.minutes = minDiff;
 
   }
- }
+
+  async fetchNotifications() {
+    const user = this.auth.user();
+
+    if (!user) return;
+
+    try {
+      const apiUrl = `https://site--vowsandveils--5dl8fyl4jyqm.code.run/venues/notifications/${user.uid}`;
+      const response: any = await this.http.get(apiUrl).toPromise();
+
+      this.notifications = (response.notifications || []).map((n: any) => ({
+        uid: n.id,
+        from: n.from || '',
+        to: n.to || '',
+        message: n.message || '',
+        date: n.date || null,
+        read: n.read || false,
+      }));
+
+      this.unreadCount = this.notifications.filter(n => !n.read).length;
+      console.log("fetched this many notifications", this.unreadCount);
+      this.notifications.sort((a, b) => Number(a.read) - Number(b.read));
+
+    } catch (err) {
+      console.error('Error fetching notifications from API:', err);
+      this.notifications = [];
+      this.unreadCount = 0;
+    }
+  }
+
+
+
+  goToNotifications() {
+    this.router.navigate(['/notifications'], { state: { from: this.router.url } });
+  }
+
+
+
+  checklist: ChecklistTask[] = [];
+  checklistLoading = false;
+  showAddTask = false;
+  sortDoneLast = false;
+
+  addTaskForm = this.formBuild.group({
+    title: ['', [Validators.required]],
+    dueDate: [''],
+    assignee: [''],
+    priority: ['medium']
+  });
+
+  private async getChecklistColRef() {
+    const user = await this.waitForUser();
+    if (!user) throw new Error('No authenticated user.');
+    const db = getFirestore(getApp());
+    return collection(db, `Events/${user.uid}/Checklist`);
+  }
+
+  async loadChecklist() {
+    try {
+      this.checklistLoading = true;
+      const colRef = await this.getChecklistColRef();
+      const snap = await getDocs(colRef);
+
+      const items: ChecklistTask[] = [];
+      snap.forEach(d => {
+        const data: any = d.data();
+        items.push({
+          id: d.id,
+          title: data?.title ?? '',
+          dueDate: data?.dueDate ?? null,
+          assignee: data?.assignee ?? '',
+          done: !!data?.done,
+          createdAt: data?.createdAt ?? null,
+          priority: (data?.priority as 'high' | 'medium' | 'low') ?? 'medium'
+        });
+      });
+
+      items.sort((a, b) => {
+        const ad = a.dueDate?.toDate ? a.dueDate.toDate() : (a.dueDate ? new Date(a.dueDate) : null);
+        const bd = b.dueDate?.toDate ? b.dueDate.toDate() : (b.dueDate ? new Date(b.dueDate) : null);
+        if (ad && bd) return ad.getTime() - bd.getTime();
+        if (ad && !bd) return -1;
+        if (!ad && bd) return 1;
+        return 0;
+      });
+
+      this.checklist = items;
+    } catch (e) {
+      console.error('Failed to load checklist', e);
+    } finally {
+      this.checklistLoading = false;
+    }
+  }
+
+  get checklistSorted(): ChecklistTask[] {
+    if (!this.sortDoneLast) return this.checklist;
+    const open = this.checklist.filter(t => !t.done);
+    const done = this.checklist.filter(t => t.done);
+    return open.concat(done);
+  }
+
+  toggleAddTask() {
+    this.showAddTask = !this.showAddTask;
+    if (!this.showAddTask) this.addTaskForm.reset({ title: '' });
+  }
+
+  async submitAddTask() {
+    if (this.addTaskForm.invalid) return;
+
+    try {
+      this.checklistLoading = true;
+      const colRef = await this.getChecklistColRef();
+      const raw = this.addTaskForm.getRawValue();
+
+      let due: any = undefined;
+      if (raw.dueDate) {
+        due = new Date(raw.dueDate as string);
+      }
+
+      await addDoc(colRef, {
+        title: (raw.title || '').toString().trim(),
+        dueDate: due ?? null,
+        assignee: (raw.assignee || '').toString().trim() || null,
+        done: false,
+        createdAt: serverTimestamp(),
+        priority: (raw.priority as 'high' | 'medium' | 'low') || 'medium'
+      });
+
+      await this.loadChecklist();
+      this.toggleAddTask();
+    } catch (e) {
+      console.error('Failed to add task', e);
+      alert('Failed to add task. Please try again.');
+    } finally {
+      this.checklistLoading = false;
+    }
+  }
+
+  async toggleTaskDone(t: ChecklistTask) {
+    try {
+      this.checklistLoading = true;
+      const db = getFirestore(getApp());
+      const user = await this.waitForUser();
+      if (!user) throw new Error('No authenticated user.');
+      await updateDoc(doc(db, `Events/${user.uid}/Checklist/${t.id}`), {
+        done: !t.done
+      });
+      await this.loadChecklist();
+    } catch (e) {
+      console.error('Failed to update task', e);
+      alert('Failed to update task.');
+    } finally {
+      this.checklistLoading = false;
+    }
+  }
+
+  async deleteTask(t: ChecklistTask) {
+    const sure = window.confirm(`Delete "${t.title}"?`);
+    if (!sure) return;
+
+    try {
+      this.checklistLoading = true;
+      const db = getFirestore(getApp());
+      const user = await this.waitForUser();
+      if (!user) throw new Error('No authenticated user.');
+      await deleteDoc(doc(db, `Events/${user.uid}/Checklist/${t.id}`));
+      await this.loadChecklist();
+    } catch (e) {
+      console.error('Failed to delete task', e);
+      alert('Failed to delete task.');
+    } finally {
+      this.checklistLoading = false;
+    }
+  }
+}

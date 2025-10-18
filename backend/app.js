@@ -12,6 +12,7 @@ const allowedOrigins = [
 
 
 const vendorsRoutes = require('./routes/vendors.routes'); //add in for vendor API
+const storyRoutes = require('./routes/story.routes');
 
 // Middleware
 app.use(cors({
@@ -32,6 +33,7 @@ app.use(cors({
 app.use(express.json());
 
 app.use('/vendors', vendorsRoutes);  //added in for vendor API
+app.use('/story', storyRoutes);
 
 // Swagger UI with CORS-friendly configuration
 app.use('/api-docs', cors({
@@ -67,9 +69,15 @@ app.use('/weather-crossing', weatherCrossingRoutes);
 const mapRoutes = require('./routes/map.routes');
 app.use('/map', mapRoutes);
 
+
+
+
 app.get('/', (req, res) => {
   res.send('Backend is up ');
 });
+
+const chatbotRoutes = require('./routes/chatbot.routes'); 
+app.use('/chatbot', chatbotRoutes);
 
 module.exports = app;
 

@@ -5,7 +5,7 @@
   </section>
 
   <nav class="nav-links">
-    <!-- <a routerLink="/landing">Back</a> -->
+     <a routerLink="/landing">Back</a> 
   </nav>
 </header>
 
@@ -87,10 +87,45 @@
         
         </section>
 
-<section class="sub-container">
+
+
+      <section class="sub-container">
             <button (click)="onSubmit()">Submit Details</button>
 
         </section>
+
+
+
+          <section *ngIf="storyData" class="story-display">
+            <h2 class="story-title">Our Story</h2>
+
+            <img *ngIf="storyData.photoURL" [src]="storyData.photoURL" alt="Our Story Photo" class="story-img"/>
+
+            <section class="story-section">
+                <h3 class="preview-subheading">How We Met</h3>
+                <p class="preview-content">{{ storyData.howWeMet }}</p>
+            </section>
+
+            <section class="story-section">
+                <h3 class="preview-subheading">The Proposal</h3>
+                <p class="preview-content">{{ storyData.proposal }}</p>
+            </section>
+
+            <!-- Timeline -->
+            <section *ngIf="storyData.timeline?.length" class="timeline-container preview">
+                <h3 class="preview-subheading">Our Journey</h3>
+                <section class="timeline">
+                <section *ngFor="let step of storyData.timeline" class="timeline-box">
+                    <section class="timeline-dot"></section>
+                    <section class="timeline-content">
+                    <h4 class="timeline-title">{{ step.title }}</h4>
+                    <p class="timeline-description">{{ step.description }}</p>
+                    </section>
+                </section>
+                </section>
+            </section>
+
+            </section>
        
 
         

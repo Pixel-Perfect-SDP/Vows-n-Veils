@@ -256,4 +256,119 @@ describe('Homepage – Event display API (Firestore reads)', () => {
       }),
     ]);
   });
+
+  it('sets venueName to "Venue not found" when venue document is missing', async () => {
+    getDocSpy.withArgs(jasmine.objectContaining({ _col: 'Events', _id: 'U1' }))
+      .and.resolveTo(mkDocSnap(true, { Name1: 'A', Name2: 'B', VenueID: 'V1', Date_Time: new Date() }));
+    getDocSpy.withArgs(jasmine.objectContaining({ _col: 'Venues', _id: 'V1' }))
+      .and.resolveTo(mkDocSnap(false));
+
+    // Guests + orders empty to short circuit vendor loops
+    getDocsSpy.and.returnValue(mkQuerySnap([]) as any);
+
+    await comp.getEventDataForDisplay();
+
+    expect(comp.eventDisplayInfo.venueName).toBe('Venue not found');
+  });
+
+  it('sets venueName to "Unable to load venue" when venue fetch throws', async () => {
+    getDocSpy.withArgs(jasmine.objectContaining({ _col: 'Events', _id: 'U1' }))
+      .and.resolveTo(mkDocSnap(true, { Name1: 'A', Name2: 'B', VenueID: 'V1', Date_Time: new Date() }));
+    getDocSpy.withArgs(jasmine.objectContaining({ _col: 'Venues', _id: 'V1' }))
+      .and.callFake(() => Promise.reject(new Error('venue boom')));
+
+    getDocsSpy.and.returnValue(mkQuerySnap([]) as any);
+    spyOn(console, 'error');
+
+    await comp.getEventDataForDisplay();
+
+    expect(console.error).toHaveBeenCalled();
+    expect(comp.eventDisplayInfo.venueName).toBe('Unable to load venue');
+  });
+
+  it('keeps budget and RSVP code null when not present', async () => {
+    let eventDocCalls = 0;
+    getDocSpy.and.callFake((ref: any) => {
+      if (ref._col === 'Events' && ref._id === 'U1') {
+        eventDocCalls += 1;
+        if (eventDocCalls === 1) {
+          return Promise.resolve(mkDocSnap(true, { Name1: 'A', Name2: 'B', Date_Time: new Date() }));
+        }
+        // second call for RSVP code -> missing doc
+        return Promise.resolve(mkDocSnap(false));
+      }
+      return Promise.resolve(mkDocSnap(false));
+    });
+    getDocsSpy.and.returnValue(mkQuerySnap([]) as any);
+
+    await comp.getEventDataForDisplay();
+
+    expect(comp.eventDisplayInfo.budget).toBeNull();
+    expect(comp.eventDisplayInfo.rsvpCode).toBeNull();
+  });
+
+  it('logs RSVP fetch error and keeps rsvpCode null', async () => {
+    spyOn(console, 'error');
+    let eventDocCalls = 0;
+    getDocSpy.and.callFake((ref: any) => {
+      if (ref._col === 'Events' && ref._id === 'U1') {
+        eventDocCalls += 1;
+        if (eventDocCalls === 1) {
+          return Promise.resolve(mkDocSnap(true, { Name1: 'A', Name2: 'B', Date_Time: new Date() }));
+        }
+        return Promise.reject(new Error('RSVP fail'));
+      }
+      return Promise.resolve(mkDocSnap(false));
+    });
+    getDocsSpy.and.returnValue(mkQuerySnap([]) as any);
+
+    await comp.getEventDataForDisplay();
+
+    expect(console.error).toHaveBeenCalled();
+    expect(comp.eventDisplayInfo.rsvpCode).toBeNull();
+  });
+
+  it('sets guest counts to 0 when guest query fails', async () => {
+    getDocSpy.withArgs(jasmine.objectContaining({ _col: 'Events', _id: 'U1' }))
+      .and.resolveTo(mkDocSnap(true, { Name1: 'A', Name2: 'B', Date_Time: new Date() }));
+    let docsCall = 0;
+    getDocsSpy.and.callFake(() => {
+      docsCall += 1;
+      if (docsCall === 1) {
+        throw new Error('Guests error');
+      }
+      return mkQuerySnap([]) as any;
+    });
+    spyOn(console, 'error');
+
+    await comp.getEventDataForDisplay();
+
+    expect(console.error).toHaveBeenCalled();
+    expect(comp.eventDisplayInfo.totalGuests).toBe(0);
+    expect(comp.eventDisplayInfo.confirmedRSVPs).toBe(0);
+  });
+
+  it('sets selectedVendors null when vendor query throws generic error', async () => {
+    const eventDate = new Date('2030-05-10T15:30:00Z');
+    getDocSpy.withArgs(jasmine.objectContaining({ _col: 'Events', _id: 'U1' }))
+      .and.resolveTo(mkDocSnap(true, { Name1: 'A', Name2: 'B', Date_Time: eventDate, Budget: 1, VenueID: 'V1' }));
+    getDocSpy.withArgs(jasmine.objectContaining({ _col: 'Venues', _id: 'V1' }))
+      .and.resolveTo(mkDocSnap(true, { name: 'Venue' }));
+
+    const guestsSnap = mkQuerySnap([{ RSVPstatus: true }]);
+    const ordersSnap = mkQuerySnap([{ companyID: 'C1', status: 'accepted' }]);
+    let docsCall = 0;
+    getDocsSpy.and.callFake(() => {
+      docsCall += 1;
+      if (docsCall === 1) return guestsSnap as any;
+      if (docsCall === 2) return ordersSnap as any;
+      throw new Error('Vendor read failed');
+    });
+    spyOn(console, 'error');
+
+    await comp.getEventDataForDisplay();
+
+    expect(console.error).toHaveBeenCalled();
+    expect(comp.eventDisplayInfo.selectedVendors).toBeNull();
+  });
 });
