@@ -96,6 +96,91 @@ export class Homepage {
 
   constructor(private http: HttpClient) { }
 
+  // Nearby trail data (from hardcoded API)
+  public nearbyTrailLoading: boolean = false;
+  public nearbyTrailError: string | null = null;
+  public nearbyTrail: any = null; // will contain the first trail object or null
+
+  // (fetchNearbyTrail will be invoked from the main ngOnInit below)
+
+  /**
+   * Fetches the nearby trails from the hardcoded API and stores the first result
+   * The URL is intentionally hardcoded as requested by the user.
+   */
+  public fetchNearbyTrail(): void {
+    const url = 'https://orion-api-qeyv.onrender.com/api/trails/near?latitude=-26.000&longitude=28.000';
+    this.nearbyTrailLoading = true;
+    this.nearbyTrailError = null;
+    this.nearbyTrail = null;
+
+    this.http.get(url).subscribe({
+      next: (res: any) => {
+  // (response logged during development)
+
+        try {
+          if (res && res.success && Array.isArray(res.data) && res.data.length > 0) {
+            const raw = res.data[0];
+
+            // Normalise common misspellings and varied shapes from upstream API
+            const locationRaw = raw.location || raw.loation || raw.loc || null;
+
+            // Ensure location object has predictable fields
+            let location: any = null;
+            if (locationRaw) {
+              const lat = locationRaw._latitude ?? locationRaw.latitude ?? locationRaw.lat ?? null;
+              const lng = locationRaw._longitude ?? locationRaw.longitude ?? locationRaw.lng ?? null;
+              if (lat !== null && lng !== null) {
+                location = { _latitude: lat, _longitude: lng, latitude: lat, longitude: lng };
+              } else {
+                location = locationRaw; // fallback to whatever was provided
+              }
+            }
+
+            const photos = Array.isArray(raw.photos) ? raw.photos : (Array.isArray(raw.images) ? raw.images : []);
+
+            const normalized = {
+              id: raw.id || raw._id || null,
+              name: raw.name || raw.title || 'Trail',
+              description: raw.description || raw.desc || '',
+              distance: raw.distance ?? raw.distanceFromLocation ?? raw.dist ?? null,
+              difficulty: raw.difficulty || raw.level || 'Unknown',
+              photos: photos,
+              location: location,
+              raw: raw // keep full raw object for debugging if needed
+            };
+
+            this.nearbyTrail = normalized;
+            // nearbyTrail normalized and assigned
+          } else {
+            this.nearbyTrailError = 'No nearby trails found';
+          }
+        } catch (e) {
+          console.error('Error parsing trail response', e);
+          this.nearbyTrailError = 'Failed to parse trail data';
+        }
+        this.nearbyTrailLoading = false;
+      },
+      error: (err) => {
+        console.error('Error fetching nearby trail:', err);
+        this.nearbyTrailError = 'Failed to fetch nearby trail';
+        this.nearbyTrailLoading = false;
+      }
+    });
+  }
+
+  /**
+   * Builds a Google Maps URL centered on the trail coordinates.
+   * Expects `trail.location._latitude` and `trail.location._longitude` to be present.
+   */
+  public getGoogleMapsLink(trail: any): string {
+    if (!trail || !trail.location) return 'https://maps.google.com';
+    const lat = trail.location._latitude ?? trail.location.latitude ?? null;
+    const lng = trail.location._longitude ?? trail.location.longitude ?? null;
+    if (lat === null || lng === null) return 'https://maps.google.com';
+    // Use Google Maps place search URL centered on coordinates
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(lat + ',' + lng)}`;
+  }
+
 
   private waitForUser(): Promise<any> {
     return new Promise((resolve) => {
@@ -403,6 +488,13 @@ export class Homepage {
 
   //check if user has an existing event
   async ngOnInit() {
+    // Trigger nearby trail fetch as soon as the component initializes
+    try {
+      this.fetchNearbyTrail();
+    } catch (e) {
+      // non-fatal: log and continue
+      console.error('Error initiating nearby trail fetch', e);
+    }
     try {
       const user = await this.waitForUser();
       if (!user) {
