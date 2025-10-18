@@ -69,6 +69,10 @@ app.use('/weather-crossing', weatherCrossingRoutes);
 const mapRoutes = require('./routes/map.routes');
 app.use('/map', mapRoutes);
 
+// Trails API (nearby trails)
+const trailsRoutes = require('./routes/trails.routes');
+app.use('/trails', trailsRoutes);
+
 
 
 
