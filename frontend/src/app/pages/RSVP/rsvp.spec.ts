@@ -1,293 +1,412 @@
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { ReactiveFormsModule } from '@angular/forms';
+import { ActivatedRoute, Router, UrlTree } from '@angular/router';
+import { of } from 'rxjs';
 import { Rsvp } from './rsvp';
-import { Router } from '@angular/router';
-import { Firestore } from '@angular/fire/firestore';
 import { AuthService } from '../../core/auth';
+import { Firestore, collection, doc, getDocs, updateDoc, query, where } from '@angular/fire/firestore';
+import { convertToParamMap } from '@angular/router';
 
-// Create a proper mock for Firestore that mimics the actual API
-class MockFirestore {
-  private mockCollections = new Map<string, any>();
+// Create proper mock objects
+const mockQuerySnapshot = (data: any[] = []) => ({
+  docs: data.map(item => ({
+    id: item.id || 'mock-id',
+    data: () => item.data || item
+  })),
+  empty: data.length === 0
+});
 
-  collection(collectionName: string) {
-    if (!this.mockCollections.has(collectionName)) {
-      this.mockCollections.set(collectionName, new MockCollectionReference());
-    }
-    return this.mockCollections.get(collectionName);
-  }
-}
+const mockDocRef = {
+  id: 'mock-doc-id'
+};
 
-class MockCollectionReference {
-  private mockDocuments = new Map<string, any>();
-  private mockQueries: any[] = [];
+// Mock UrlTree
+const mockUrlTree = {
+  toString: () => '/landing'
+} as UrlTree;
 
-  where(field: string, operator: string, value: any) {
-    const mockQuery = new MockQuery(this, field, operator, value);
-    this.mockQueries.push(mockQuery);
-    return mockQuery;
-  }
-
-  doc(documentPath: string) {
-    if (!this.mockDocuments.has(documentPath)) {
-      this.mockDocuments.set(documentPath, new MockDocumentReference());
-    }
-    return this.mockDocuments.get(documentPath);
-  }
-
-  // For getDocs simulation
-  async get() {
-    return {
-      empty: this.mockQueries.length > 0 ? this.mockQueries[0].isEmpty() : true,
-      docs: this.mockQueries.length > 0 ? this.mockQueries[0].getDocs() : []
-    };
-  }
-}
-
-class MockQuery {
-  private results: any[] = [];
-
-  constructor(private collection: MockCollectionReference, private field: string, private operator: string, private value: any) {}
-
-  isEmpty() {
-    return this.results.length === 0;
-  }
-
-  getDocs() {
-    return this.results.map((data, index) => ({
-      id: `doc-${index}`,
-      data: () => data
-    }));
-  }
-
-  // Simulate query execution
-  async get() {
-    return {
-      empty: this.isEmpty(),
-      docs: this.getDocs()
-    };
-  }
-}
-
-class MockDocumentReference {
-  async update(data: any) {
-    return Promise.resolve();
-  }
-
-  async set(data: any) {
-    return Promise.resolve();
-  }
-}
-
-describe('Rsvp Component', () => {
+describe('Rsvp', () => {
   let component: Rsvp;
-  let router: jasmine.SpyObj<Router>;
-  let mockFirestore: MockFirestore;
-  let authService: jasmine.SpyObj<AuthService>;
+  let fixture: ComponentFixture<Rsvp>;
+  let mockRouter: jasmine.SpyObj<Router>;
+  let mockAuth: jasmine.SpyObj<AuthService>;
+  let mockFirestore: jasmine.SpyObj<any>;
+  let mockGetDocs: jasmine.Spy;
+  let mockUpdateDoc: jasmine.Spy;
+  let mockCollection: jasmine.Spy;
+  let mockDoc: jasmine.Spy;
+  let mockQuery: jasmine.Spy;
+  let mockWhere: jasmine.Spy;
 
-  beforeEach(() => {
-    const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
-    mockFirestore = new MockFirestore();
-    const authServiceSpy = jasmine.createSpyObj('AuthService', ['getUser']);
+  beforeEach(async () => {
+    // Create a complete Router spy with all required methods
+    mockRouter = jasmine.createSpyObj('Router', [
+      'navigate',
+      'navigateByUrl',
+      'createUrlTree',
+      'serializeUrl'
+    ], [
+      'url',
+      'events'
+    ]);
 
-    TestBed.configureTestingModule({
+    mockRouter.navigate.and.returnValue(Promise.resolve(true));
+    mockRouter.navigateByUrl.and.returnValue(Promise.resolve(true));
+    mockRouter.createUrlTree.and.returnValue(mockUrlTree);
+    mockRouter.serializeUrl.and.returnValue('/landing');
+    (Object.getOwnPropertyDescriptor(mockRouter, 'url')?.get as jasmine.Spy).and.returnValue('/');
+    (Object.getOwnPropertyDescriptor(mockRouter, 'events')?.get as jasmine.Spy).and.returnValue(of());
+
+    mockAuth = jasmine.createSpyObj('AuthService', ['user']);
+    mockAuth.user.and.returnValue({ uid: 'test-user-id' } as any);
+
+    // Create spies for Firestore functions
+    mockGetDocs = jasmine.createSpy('getDocs').and.returnValue(Promise.resolve(mockQuerySnapshot()));
+    mockUpdateDoc = jasmine.createSpy('updateDoc').and.returnValue(Promise.resolve());
+    mockCollection = jasmine.createSpy('collection').and.returnValue('mock-collection');
+    mockDoc = jasmine.createSpy('doc').and.returnValue(mockDocRef);
+    mockQuery = jasmine.createSpy('query').and.returnValue('mock-query');
+    mockWhere = jasmine.createSpy('where').and.returnValue('mock-where');
+
+    mockFirestore = jasmine.createSpyObj('Firestore', [], {
+      collection: mockCollection,
+      doc: mockDoc
+    });
+
+    await TestBed.configureTestingModule({
+      imports: [ReactiveFormsModule, Rsvp],
       providers: [
-        Rsvp,
-        { provide: Router, useValue: routerSpy },
-        { provide: Firestore, useValue: mockFirestore as any },
-        { provide: AuthService, useValue: authServiceSpy },
-      ],
-    });
-
-    component = TestBed.inject(Rsvp);
-    router = TestBed.inject(Router) as jasmine.SpyObj<Router>;
-    authService = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;
-
-    // Mock alert
-    spyOn(window, 'alert');
-  });
-
-  afterEach(() => {
-    if (jasmine.clock()) {
-      jasmine.clock().uninstall();
-    }
-  });
-
-  describe('Component Initialization', () => {
-    it('should create the component', () => {
-      expect(component).toBeTruthy();
-    });
-
-    it('should initialize with default values', () => {
-      expect(component.formData.Name).toBe('');
-      expect(component.formData.Surname).toBe('');
-      expect(component.formData.Attending).toBe('');
-      expect(component.formData.Diet).toBe('None');
-      expect(component.formData.Allergy).toBe('None');
-      expect(component.message).toBe('');
-      expect(component.eventId).toBe('');
-      expect(component.eventIdEntered).toBeFalse();
-      expect(component.eventCode).toBe('');
-      expect(component.storyData).toBeNull();
-    });
-  });
-
-  describe('Form Data Processing Logic', () => {
-    it('should correctly process full name with surname', () => {
-      component.formData.Name = 'John';
-      component.formData.Surname = 'Doe';
-
-      const fullname = component.formData.Surname.trim()
-        ? component.formData.Name.trim() + ' ' + component.formData.Surname.trim()
-        : component.formData.Name.trim();
-
-      expect(fullname).toBe('John Doe');
-    });
-
-    it('should correctly process full name without surname', () => {
-      component.formData.Name = 'John';
-      component.formData.Surname = '';
-
-      const fullname = component.formData.Surname.trim()
-        ? component.formData.Name.trim() + ' ' + component.formData.Surname.trim()
-        : component.formData.Name.trim();
-
-      expect(fullname).toBe('John');
-    });
-
-    it('should set attendance to true for "Yes"', () => {
-      component.formData.Attending = 'Yes';
-      const attendance = component.formData.Attending == "Yes";
-      expect(attendance).toBeTrue();
-    });
-
-    it('should set attendance to false for "No"', () => {
-      component.formData.Attending = 'No';
-      const attendance = component.formData.Attending == "Yes";
-      expect(attendance).toBeFalse();
-    });
-
-    it('should use custom diet when provided', () => {
-      component.formData.Diet = 'Vegetarian';
-      component.formData.otherDiet = 'Custom Vegan Diet';
-
-      const finalDiet = component.formData.otherDiet.trim()
-        ? component.formData.otherDiet
-        : component.formData.Diet;
-
-      expect(finalDiet).toBe('Custom Vegan Diet');
-    });
-
-    it('should use default diet when no custom diet provided', () => {
-      component.formData.Diet = 'Vegetarian';
-      component.formData.otherDiet = '';
-
-      const finalDiet = component.formData.otherDiet.trim()
-        ? component.formData.otherDiet
-        : component.formData.Diet;
-
-      expect(finalDiet).toBe('Vegetarian');
-    });
-  });
-
-  describe('Validation Logic', () => {
-    it('should validate empty full name', async () => {
-      // Test the validation logic directly
-      component.formData.Name = '';
-      component.formData.Surname = '';
-
-      const fullname = component.formData.Surname.trim()
-        ? component.formData.Name.trim() + ' ' + component.formData.Surname.trim()
-        : component.formData.Name.trim();
-
-      expect(fullname.trim()).toBe('');
-    });
-
-    it('should validate empty first name with surname', async () => {
-      component.formData.Name = '';
-      component.formData.Surname = 'Doe';
-
-      const fullname = component.formData.Surname.trim()
-        ? component.formData.Name.trim() + ' ' + component.formData.Surname.trim()
-        : component.formData.Name.trim();
-
-      expect(fullname.trim()).toBe('Doe');
-    });
-
-    it('should validate empty event code', async () => {
-      component.eventCode = '';
-      expect(!component.eventCode.trim()).toBeTrue();
-    });
-
-    it('should validate event code with only spaces', async () => {
-      component.eventCode = '   ';
-      expect(!component.eventCode.trim()).toBeTrue();
-    });
-  });
-
-  describe('Error Handling', () => {
-    it('should handle Firestore errors in onSubmit', async () => {
-      // We can't easily test the actual Firestore calls, but we can test the error handling structure
-      // This test ensures the try-catch block exists and handles errors
-      component.formData.Name = 'John';
-      component.formData.Surname = 'Doe';
-      component.eventId = 'test-event';
-
-      // Since we can't properly mock Firestore, we'll test that the component has the error handling structure
-      expect(component.onSubmit).toBeDefined();
-      expect(async () => {
-        try {
-          await component.onSubmit();
-        } catch (error) {
-          // This shows the component has error handling
-          expect(error).toBeDefined();
+        { provide: Router, useValue: mockRouter },
+        { provide: AuthService, useValue: mockAuth },
+        { provide: Firestore, useValue: mockFirestore },
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            paramMap: of(convertToParamMap({})),
+            queryParamMap: of(convertToParamMap({})),
+            snapshot: {
+              paramMap: convertToParamMap({}),
+              queryParamMap: convertToParamMap({})
+            }
+          }
         }
-      }).toBeDefined();
-    });
+      ]
+    })
+    .overrideProvider(getDocs, { useValue: mockGetDocs })
+    .overrideProvider(updateDoc, { useValue: mockUpdateDoc })
+    .overrideProvider(collection, { useValue: mockCollection })
+    .overrideProvider(doc, { useValue: mockDoc })
+    .overrideProvider(query, { useValue: mockQuery })
+    .overrideProvider(where, { useValue: mockWhere })
+    .compileComponents();
 
-    it('should handle Firestore errors in submitEventCode', async () => {
-      component.eventCode = 'test-code';
+    fixture = TestBed.createComponent(Rsvp);
+    component = fixture.componentInstance;
 
-      expect(component.submitEventCode).toBeDefined();
-      expect(async () => {
-        try {
-          await component.submitEventCode();
-        } catch (error) {
-          expect(error).toBeDefined();
+    fixture.detectChanges();
+  });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+
+  it('should initialize with default values', () => {
+    const f = component.formData;
+    expect(f.guestID).toBe('');
+    expect(f.Name).toBe('');
+    expect(f.Surname).toBe('');
+    expect(f.Email).toBe('');
+    expect(f.Attending).toBe('');
+    expect(f.Diet).toBe('None');
+    expect(f.otherDiet).toBe('');
+    expect(f.Allergy).toBe('None');
+    expect(f.Song).toBe('');
+    expect(component.message).toBe('');
+    expect(component.eventId).toBe('');
+    expect(component.eventIdEntered).toBeFalse();
+    expect(component.eventCode).toBe('');
+    expect(component.storyData).toBeNull();
+  });
+
+  // --- Form Submission Tests ---
+  it('should show error when submitting with empty name', async () => {
+    const alertSpy = spyOn(window, 'alert');
+    component.formData.Name = '';
+    component.formData.Surname = '';
+    component.eventId = 'test-event-id';
+
+    await component.onSubmit();
+
+    expect(alertSpy).toHaveBeenCalledWith('Name field cannot be empty ❌');
+    expect(component.message).toBe('Please enter your full name ❌');
+  });
+
+  it('should show error when guest not found', async () => {
+    const alertSpy = spyOn(window, 'alert');
+    component.formData.Name = 'John';
+    component.formData.Surname = 'Doe';
+    component.eventId = 'test-event-id';
+
+    // Mock empty result
+    mockGetDocs.and.returnValue(Promise.resolve(mockQuerySnapshot()));
+
+    await component.onSubmit();
+
+    expect(component.message).toBe('Guest not apart of wedding party ❌');
+    expect(alertSpy).toHaveBeenCalledWith('The name you entered is not apart of the wedding party❌');
+  });
+
+  it('should update RSVP successfully when guest exists', async () => {
+    const alertSpy = spyOn(window, 'alert');
+    component.formData.Name = 'John';
+    component.formData.Surname = 'Doe';
+    component.formData.Email = 'john@example.com';
+    component.formData.Attending = 'Yes';
+    component.formData.Diet = 'Vegetarian';
+    component.formData.otherDiet = '';
+    component.formData.Allergy = 'None';
+    component.formData.Song = 'Test Song';
+    component.eventId = 'test-event-id';
+
+    // Mock guest found
+    const mockGuestData = [
+      {
+        id: 'guest-123',
+        data: {
+          Name: 'John Doe',
+          EventID: 'test-event-id'
         }
-      }).toBeDefined();
+      }
+    ];
+    mockGetDocs.and.returnValue(Promise.resolve(mockQuerySnapshot(mockGuestData)));
+
+    await component.onSubmit();
+
+    expect(mockUpdateDoc).toHaveBeenCalledWith(mockDocRef, {
+      Email: 'john@example.com',
+      Dietary: 'Vegetarian',
+      Allergies: 'None',
+      Song: 'Test Song',
+      RSVPstatus: true
+    });
+    expect(component.message).toBe('RSVP updated successfully ✅');
+    expect(alertSpy).toHaveBeenCalledWith('You are successfully RSVPed ✅');
+  });
+
+  it('should use otherDiet when provided instead of Diet', async () => {
+    component.formData.Name = 'John';
+    component.formData.Surname = 'Doe';
+    component.formData.Email = 'john@example.com';
+    component.formData.Attending = 'Yes';
+    component.formData.Diet = 'Other';
+    component.formData.otherDiet = 'Custom Vegan Diet';
+    component.formData.Allergy = 'Peanuts';
+    component.formData.Song = '';
+    component.eventId = 'test-event-id';
+
+    const mockGuestData = [
+      {
+        id: 'guest-123',
+        data: {
+          Name: 'John Doe',
+          EventID: 'test-event-id'
+        }
+      }
+    ];
+    mockGetDocs.and.returnValue(Promise.resolve(mockQuerySnapshot(mockGuestData)));
+
+    await component.onSubmit();
+
+    expect(mockUpdateDoc).toHaveBeenCalledWith(mockDocRef, jasmine.objectContaining({
+      Dietary: 'Custom Vegan Diet',
+      Allergies: 'Peanuts'
+    }));
+  });
+
+  it('should handle "No" for attendance correctly', async () => {
+    component.formData.Name = 'John';
+    component.formData.Surname = 'Doe';
+    component.formData.Attending = 'No';
+    component.eventId = 'test-event-id';
+
+    const mockGuestData = [
+      {
+        id: 'guest-123',
+        data: {
+          Name: 'John Doe',
+          EventID: 'test-event-id'
+        }
+      }
+    ];
+    mockGetDocs.and.returnValue(Promise.resolve(mockQuerySnapshot(mockGuestData)));
+
+    await component.onSubmit();
+
+    expect(mockUpdateDoc).toHaveBeenCalledWith(mockDocRef, jasmine.objectContaining({
+      RSVPstatus: false
+    }));
+  });
+
+  it('should handle errors during form submission', async () => {
+    component.formData.Name = 'John';
+    component.formData.Surname = 'Doe';
+    component.formData.Attending = 'Yes';
+    component.eventId = 'test-event-id';
+
+    mockGetDocs.and.returnValue(Promise.reject(new Error('Database error')));
+
+    await component.onSubmit();
+
+    expect(component.message).toBe('Something went wrong ❌');
+  });
+
+  // --- Event Code Submission Tests ---
+  it('should alert when event code is empty', async () => {
+    const alertSpy = spyOn(window, 'alert');
+    component.eventCode = '';
+
+    await component.submitEventCode();
+
+    expect(alertSpy).toHaveBeenCalledWith('Please enter a valid Event Code ');
+    expect(component.eventIdEntered).toBeFalse();
+  });
+
+  it('should set eventIdEntered and fetch story when valid code is found', async () => {
+    component.eventCode = 'VALID123';
+
+    const mockEventData = [
+      {
+        id: 'event-123',
+        data: {
+          RSVPcode: 'VALID123',
+          EventID: 'event-user-id'
+        }
+      }
+    ];
+
+    const mockStoryData = [
+      {
+        data: {
+          title: 'Our Love Story',
+          content: 'We met in college and fell in love...'
+        }
+      }
+    ];
+
+    let callCount = 0;
+    mockGetDocs.and.callFake(() => {
+      callCount++;
+      return callCount === 1
+        ? Promise.resolve(mockQuerySnapshot(mockEventData))
+        : Promise.resolve(mockQuerySnapshot(mockStoryData));
+    });
+
+    await component.submitEventCode();
+
+    expect(component.eventIdEntered).toBeTrue();
+    expect(component.message).toBe('');
+    expect(component.storyData).toEqual({
+      title: 'Our Love Story',
+      content: 'We met in college and fell in love...'
     });
   });
 
-  describe('Component Methods', () => {
-    it('should return router instance', () => {
-      expect(component.getRouter()).toBe(router);
+  it('should handle no story found for event', async () => {
+    component.eventCode = 'VALID123';
+
+    const mockEventData = [
+      {
+        id: 'event-123',
+        data: {
+          RSVPcode: 'VALID123',
+          EventID: 'event-user-id'
+        }
+      }
+    ];
+
+    let callCount = 0;
+    mockGetDocs.and.callFake(() => {
+      callCount++;
+      return callCount === 1
+        ? Promise.resolve(mockQuerySnapshot(mockEventData))
+        : Promise.resolve(mockQuerySnapshot([])); // Empty story
     });
 
-    it('should return firestore instance', () => {
-      expect(component.getDBforTesting()).toBe(mockFirestore as any);
-    });
+    await component.submitEventCode();
+
+    expect(component.eventIdEntered).toBeTrue();
+    expect(component.storyData).toBeNull();
   });
 
-  describe('Integration Style Tests', () => {
-    it('should show alert for empty event code', async () => {
-      component.eventCode = '';
-      await component.submitEventCode();
-      expect(window.alert).toHaveBeenCalledWith('Please enter a valid Event Code ');
-    });
+  it('should handle event code not found', async () => {
+    const alertSpy = spyOn(window, 'alert');
+    component.eventCode = 'INVALID123';
 
-    it('should process whitespace in names correctly', () => {
-      component.formData.Name = '  John  ';
-      component.formData.Surname = '  Doe  ';
+    mockGetDocs.and.returnValue(Promise.resolve(mockQuerySnapshot([])));
 
-      const fullname = component.formData.Surname.trim()
-        ? component.formData.Name.trim() + ' ' + component.formData.Surname.trim()
-        : component.formData.Name.trim();
+    await component.submitEventCode();
 
-      expect(fullname).toBe('John Doe');
-    });
+    expect(alertSpy).toHaveBeenCalledWith('Event Code not found. Please try again');
+    expect(component.eventIdEntered).toBeFalse();
+    expect(component.message).toBe('Event Code not found ❌');
+  });
 
-    it('should handle special characters in event code validation', () => {
-      component.eventCode = 'CODE-123_ABC';
-      expect(component.eventCode.trim()).toBe('CODE-123_ABC');
-    });
+  it('should handle errors during event code submission', async () => {
+    component.eventCode = 'TEST123';
+
+    mockGetDocs.and.returnValue(Promise.reject(new Error('Network error')));
+
+    await component.submitEventCode();
+
+    expect(component.eventIdEntered).toBeFalse();
+    expect(component.message).toBe('Error checking Event Code ❌');
+  });
+
+  // --- Navigation Tests ---
+  it('should navigate to landing page after successful RSVP', fakeAsync(async () => {
+    component.formData.Name = 'John';
+    component.formData.Surname = 'Doe';
+    component.formData.Attending = 'Yes';
+    component.eventId = 'test-event-id';
+
+    const mockGuestData = [
+      {
+        id: 'guest-123',
+        data: {
+          Name: 'John Doe',
+          EventID: 'test-event-id'
+        }
+      }
+    ];
+    mockGetDocs.and.returnValue(Promise.resolve(mockQuerySnapshot(mockGuestData)));
+
+    await component.onSubmit();
+    tick(2000);
+
+    expect(mockRouter.navigate).toHaveBeenCalledWith(['/landing']);
+  }));
+
+  // --- Getter Tests ---
+  it('should return router instance', () => {
+    const router = component.getRouter();
+    expect(router).toBe(mockRouter);
+  });
+
+  it('should return firestore instance', () => {
+    const db = component.getDBforTesting();
+    expect(db).toBe(mockFirestore);
+  });
+
+  // --- Edge Case Tests ---
+  it('should handle name with only spaces as empty', async () => {
+    const alertSpy = spyOn(window, 'alert');
+    component.formData.Name = '   ';
+    component.formData.Surname = '   ';
+    component.eventId = 'test-event-id';
+
+    await component.onSubmit();
+
+    expect(alertSpy).toHaveBeenCalledWith('Name field cannot be empty ❌');
+    expect(component.message).toBe('Please enter your full name ❌');
   });
 });
