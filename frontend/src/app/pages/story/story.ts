@@ -31,7 +31,12 @@ export class Story {
 
   public hasStory : boolean | null = null;
   public storyData: any = null;
-   private originalStory: any = null; 
+  public originalStory: any = null;
+
+   public get TestoriginalStory():any
+  {
+    return this.originalStory
+  }
 
     uploadingImage = false;
 
@@ -47,7 +52,7 @@ export class Story {
       return this.form.get('timeline') as FormArray;
     }
 
-        
+
     addTimelineEntry() {
       if (this.timeline.length >= 5) {
         alert("You can only have 5 milestones.");
@@ -119,7 +124,7 @@ private async saveTimelineOrder(timelineData: { title: string; description: stri
       setTimeout(() => {
         clearInterval(check);
         resolve(null);
-      }, 5000); 
+      }, 5000);
     });
   }
 
@@ -156,7 +161,7 @@ private async saveTimelineOrder(timelineData: { title: string; description: stri
 
         this.originalStory = { ...this.storyData };
 
-        
+
       }
       else {
         this.hasStory = false;
@@ -209,7 +214,7 @@ private async saveTimelineOrder(timelineData: { title: string; description: stri
       const snap = await getDoc(docRef);
       this.storyData = snap.data();
 
-      this.originalStory = { ...this.storyData }; 
+      this.originalStory = { ...this.storyData };
 
       alert("Story saved successfully!");
     }
@@ -260,6 +265,6 @@ private async saveTimelineOrder(timelineData: { title: string; description: stri
 
 
 
-  
+
 
 }
