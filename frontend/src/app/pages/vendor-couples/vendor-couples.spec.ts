@@ -287,7 +287,7 @@ describe('VendorCouples – extra local logic', () => {
     await setupCouplesTestBed();
     fixture = TestBed.createComponent(VendorCouples);
     component = fixture.componentInstance;
-    component.fs = makeFs() as any;     // <—— stubbed fs
+    component.fs = makeFs() as any;     //stub
   });
 
   it('toggle() also works for unknown/new types', () => {
@@ -641,7 +641,7 @@ describe('VendorCouples – high-yield coverage (in-file)', () => {
         id: 'o-iso',
         data: () => ({
           vendorID: 'v1',
-          companyID: 'c1',
+          companyID:'c1',
           status: 'accepted',
           guestsNum: 50,
           startAt: '2025-08-10T10:00:00',
