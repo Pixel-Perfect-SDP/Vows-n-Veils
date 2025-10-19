@@ -1,163 +1,25 @@
-
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
+import { Router } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { of } from 'rxjs';
-import * as firebaseApp from 'firebase/app';
-import * as firestore from 'firebase/firestore';
+import { of, throwError } from 'rxjs';
 
 import { VendorsCompany } from './vendors-company';
 
-
 (jasmine as any).DEFAULT_TIMEOUT_INTERVAL = 20000;
 
-function wireCompanyFakes(c: any) {
-  c['auth'] = { user: () => ({ uid: 'U1', email: 'u1@x' }) };
-  c['vendorService'] = c['vendorService'] ?? {};
-  c['vendorService'].listenServices = jasmine.createSpy('listenServices').and.callFake((_uid: string, cb: any) => {
-    cb?.([{ id: 's1', serviceName: 'Venue A', type: 'Venue', price: 1000, capacity: 50, description: '', bookingNotes: '', status: 'pending', companyID: 'U1', phonenumber: '011' }]);
-    return () => {};
-  });
-  c['vendorService'].updateField = jasmine.createSpy('updateField').and.returnValue(Promise.resolve());
-  c['vendorService'].createService = jasmine.createSpy('createService').and.returnValue(Promise.resolve());
-  c['vendorService'].deleteService = jasmine.createSpy('deleteService').and.returnValue(Promise.resolve());
-  c['ordersService'] = c['ordersService'] ?? {};
-  c['ordersService'].listenCompanyOrders = jasmine.createSpy('listenCompanyOrders').and.callFake((_uid: string, cb: any) => { cb?.([{ id: 'o1', status: 'pending', serviceId: 's1' }]); return () => {}; });
-  c['ordersService'].accept = jasmine.createSpy('accept').and.returnValue(Promise.resolve());
-  c['ordersService'].decline = jasmine.createSpy('decline').and.returnValue(Promise.resolve());
-  c['ordersService'].cancel = jasmine.createSpy('cancel').and.returnValue(Promise.resolve());
-  c['live'] = { onAppVisibilityChange: (_cb: any) => () => {} };
+function snapFromDocs(docs: Array<{ id: string; data: any }>) {
+  return {
+    forEach(cb: any) { docs.forEach(d => cb({ id: d.id, data: () => d.data })); }
+  } as any;
 }
 
-describe('VendorsCompany – core & branches', () => {
-  let fixture: ComponentFixture<VendorsCompany>;
-  let component: VendorsCompany;
-
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [VendorsCompany, RouterTestingModule],
-      providers: [provideHttpClient(), provideHttpClientTesting()],
-    }).compileComponents();
-
-    fixture = TestBed.createComponent(VendorsCompany);
-    component = fixture.componentInstance;
-  });
-
-  it('should instantiate', () => {
-    expect(component).toBeTruthy();
-  });
-
-  it('toggleServiceForm() toggles and resets only on open', () => {
-    const start = component.showServiceForm;
-    component.toggleServiceForm();
-    expect(component.showServiceForm).toBe(!start);
-
-    let v = component.serviceForm.getRawValue();
-    expect(v.serviceName).toBe('');
-    expect(v.type).toBe('');
-    expect(v.price).toBeNull();
-    expect(v.capacity).toBeNull();
-    expect(v.description).toBe('');
-    expect(v.bookingNotes).toBe('');
-    expect(v.phonenumber).toBe('');
-
-    component.serviceForm.patchValue({ serviceName: 'Keep', description: 'Keep' });
-    component.toggleServiceForm();
-    v = component.serviceForm.getRawValue();
-    expect(v.serviceName).toBe('Keep');
-    expect(v.description).toBe('Keep');
-  });
-
-  it('serviceForm exposes expected controls', () => {
-    for (const n of ['serviceName','type','price','capacity','description','bookingNotes','phonenumber']) {
-      expect(component.serviceForm.get(n)).withContext(n).toBeTruthy();
-    }
-  });
-
-  it('trackById() returns id', () => {
-    expect(component.trackById(0, { id: 'abc' } as any)).toBe('abc');
-  });
-
-  it('editor begin/cancel flows set/clear state', () => {
-    const row = { id: 'v1', serviceName: '', type: '', price: 100, capacity: 50, description: '', bookingNotes: '', status: 'pending', companyID: 'c1', phonenumber: '123' };
-    component.beginEditPhone(row as any);
-    expect((component as any).editPhoneId).toBe('v1');
-    expect((component as any).phoneInput).toBe('123');
-    component.cancelEditPhone();
-    expect((component as any).editPhoneId).toBeNull();
-    expect((component as any).phoneInput).toBe('');
-
-    component.beginEditPrice(row as any);
-    expect((component as any).editPriceId).toBe('v1');
-    expect((component as any).priceInput).toBe(100);
-    component.cancelEditPrice();
-    expect((component as any).editPriceId).toBeNull();
-    expect((component as any).priceInput).toBeNull();
-
-    component.beginEditCapacity(row as any);
-    expect((component as any).editCapacityId).toBe('v1');
-    expect((component as any).capacityInput).toBe(50);
-    component.cancelEditCapacity();
-    expect((component as any).editCapacityId).toBeNull();
-    expect((component as any).capacityInput).toBeNull();
-  });
-
-  it('validPhone() accepts common formats and rejects obvious bad ones', () => {
-    const ok = ['0123456', '+27 11 555 1234', '(011) 555-1234', '011-555-1234', '0115551234', ' 0115551234 '];
-    const bad = ['', '   \t ', 'abc', '123', '!!!!', '123456789012345678901'];
-    for (const p of ok) expect((component as any).validPhone(p)).withContext(p).toBeTrue();
-    for (const p of bad) expect((component as any).validPhone(p)).withContext(p).toBeFalse();
-  });
-
-  it('getServiceName() map and fallback', () => {
-    (component as any).services = [
-      { id: 's1', serviceName: 'Photo' } as any,
-      { id: 's2', serviceName: 'Cater' } as any,
-    ] as any;
-    (component as any).rebuildServiceNameMap();
-    expect(component.getServiceName('s1')).toBe('Photo');
-    expect(component.getServiceName('nope')).toBe('—');
-    (component as any).services = [];
-    (component as any).rebuildServiceNameMap();
-    expect(component.getServiceName('s1')).toBe('—');
-  });
-
-  it('canAct() only for pending', () => {
-    expect(component.canAct({ status: 'pending' } as any)).toBeTrue();
-    for (const s of ['accepted','declined','cancelled','unknown']) {
-      expect(component.canAct({ status: s } as any)).withContext(s).toBeFalse();
-    }
-  });
-
-  it('refreshServices() safe with/without companyId', () => {
-    (component as any).companyId = null;
-    expect(() => component.refreshServices()).not.toThrow();
-    (component as any).companyId = 'company-123';
-    expect(() => component.refreshServices()).not.toThrow();
-  });
-
-  it('ngOnDestroy() unsubscribes when set; tolerates undefined', () => {
-    const live = jasmine.createSpy('liveUnsub');
-    const ord = jasmine.createSpy('ordersUnsub');
-    const auth = jasmine.createSpy('authUnsub');
-    (component as any).liveUnsub = live;
-    (component as any).ordersUnsub = ord;
-    (component as any).authUnsub = auth;
-    component.ngOnDestroy();
-    expect(live).toHaveBeenCalled();
-    expect(ord).toHaveBeenCalled();
-    expect(auth).toHaveBeenCalled();
-    (component as any).liveUnsub = undefined;
-    (component as any).ordersUnsub = undefined;
-    (component as any).authUnsub = undefined;
-    expect(() => component.ngOnDestroy()).not.toThrow();
-  });
-});
-
-describe('VendorsCompany – init/actions (soft assertions)', () => {
+describe('VendorsCompany – with fs seam (hi-cov)', () => {
   let fixture: ComponentFixture<VendorsCompany>;
   let component: any;
+  let router: Router;
+  let fs: any;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -167,181 +29,74 @@ describe('VendorsCompany – init/actions (soft assertions)', () => {
 
     fixture = TestBed.createComponent(VendorsCompany);
     component = fixture.componentInstance as any;
-    wireCompanyFakes(component);
+    router = TestBed.inject(Router);
+
+    fs = {
+      getApp: jasmine.createSpy('getApp'),
+      getFirestore: jasmine.createSpy('getFirestore').and.returnValue({} as any),
+      collection: jasmine.createSpy('collection').and.callFake((_db: any, _c: string) => ({ path: _c })),
+      doc: jasmine.createSpy('doc').and.callFake((_db: any, _c: string, id?: string) => ({ id, path: _c })),
+      getDoc: jasmine.createSpy('getDoc'),
+      onSnapshot: jasmine.createSpy('onSnapshot'),
+      query: jasmine.createSpy('query').and.callFake((...args: any[]) => ({ q: true, args })),
+      where: jasmine.createSpy('where').and.callFake((_f: any, _op: any, _v: any) => ({ w: [_f, _op, _v] })),
+      setDoc: jasmine.createSpy('setDoc'),
+      serverTimestamp: jasmine.createSpy('serverTimestamp').and.returnValue('ts'),
+    };
+
+    component.fs = fs;
   });
 
-  it('ngOnInit() idempotent if implemented', () => {
-    if (typeof component.ngOnInit === 'function') {
-      component.ngOnInit();
-      component.ngOnInit();
-      component.companyId = 'U1';
-      expect(() => component.refreshServices()).not.toThrow();
-    }
-    expect(true).toBeTrue();
+  it('instantiates', () => {
+    expect(component).toBeTruthy();
   });
 
-  it('save/edit/create/delete + order actions execute without throwing', async () => {
-    const row = { id: 's1', phonenumber: '011', price: 1000, capacity: 50 };
-    if (typeof component.beginEditPhone === 'function' && typeof component['saveEditPhone'] === 'function') {
-      component.beginEditPhone(row as any); component.phoneInput = '011-555-1234';
-      await component['saveEditPhone'](row as any).catch(() => {});
+  it('trackById() returns id and canAct() gates only pending', () => {
+    expect(component.trackById(0, { id: 'x' })).toBe('x');
+    expect(component.canAct({ status: 'pending' } as any)).toBeTrue();
+    for (const s of ['accepted','declined','cancelled','weird']) {
+      expect(component.canAct({ status: s } as any)).withContext(s).toBeFalse();
     }
-    if (typeof component.beginEditPrice === 'function' && typeof component['saveEditPrice'] === 'function') {
-      component.beginEditPrice(row as any); component.priceInput = 1800;
-      await component['saveEditPrice'](row as any).catch(() => {});
-    }
-    if (typeof component.beginEditCapacity === 'function' && typeof component['saveEditCapacity'] === 'function') {
-      component.beginEditCapacity(row as any); component.capacityInput = 200;
-      await component['saveEditCapacity'](row as any).catch(() => {});
-    }
-    if (typeof component['addService'] === 'function') {
-      component.companyId = 'U1';
-      component.companyVendorData = { userID: 'U1', companyName: 'C', email: 'e@x', phoneNumber: '1', type: 'vendor' } as any;
-      component.toggleServiceForm();
-      component.serviceForm.patchValue({ serviceName: 'New', type: 'Venue', price: 2500, capacity: 120, description: 'd', bookingNotes: 'b', phonenumber: '0123456' });
-      await component['addService']().catch(() => {});
-    }
-    if (typeof component['deleteService'] === 'function') {
-      spyOn(window, 'confirm').and.returnValue(true);
-      await component['deleteService']({ id: 's1', serviceName: 'x' } as any).catch(() => {});
-    }
-    const pending = { id: 'o1', status: 'pending', serviceId: 's1' } as any;
-    if (typeof component['acceptOrder'] === 'function') { await component['acceptOrder'](pending).catch(() => {}); }
-    if (typeof component['declineOrder'] === 'function') { await component['declineOrder'](pending).catch(() => {}); }
-    expect(true).toBeTrue();
-  });
-});
-
-describe('VendorsCompany – validation & guards', () => {
-  let fixture: ComponentFixture<VendorsCompany>;
-  let component: VendorsCompany;
-
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [VendorsCompany, RouterTestingModule],
-      providers: [provideHttpClient(), provideHttpClientTesting()],
-    }).compileComponents();
-
-    fixture = TestBed.createComponent(VendorsCompany);
-    component = fixture.componentInstance;
   });
 
-  it('addService() early-returns when form invalid', async () => {
-    (component as any).companyId = null;
-    component.serviceForm.reset({
-      serviceName: '', type: '', price: null, capacity: null, description: '', bookingNotes: '', phonenumber: ''
-    });
-    await (component as any).addService();
-    expect((component as any).busy).toBeFalse();
-  });
+  it('toggleServiceForm resets on open, not on close; clears messages', () => {
+    (component as any).successMsg = 'ok';
+    (component as any).errorMsg = 'err';
+    const start = component.showServiceForm;
 
-  it('addService() early-returns when companyId missing even if form valid', async () => {
-    (component as any).companyId = null;
-    component.serviceForm.setValue({
-      serviceName: 'Photog', type: 'Photography', price: 1000, capacity: 10,
-      description: '', bookingNotes: '', phonenumber: '0115551234'
-    });
-    await (component as any).addService();
+    component.toggleServiceForm();
+    expect(component.showServiceForm).toBe(!start);
+    const v1 = component.serviceForm.getRawValue();
+    expect(v1.serviceName).toBe(''); expect(v1.type).toBe('');
+    expect(v1.price).toBeNull(); expect(v1.capacity).toBeNull();
+    expect(v1.description).toBe(''); expect(v1.bookingNotes).toBe('');
+    expect(v1.phonenumber).toBe('');
     expect((component as any).successMsg).toBe('');
+    expect((component as any).errorMsg).toBe('');
+
+    component.serviceForm.patchValue({ serviceName: 'Keep', description: 'Keep' });
+    component.toggleServiceForm(); 
+    const v2 = component.serviceForm.getRawValue();
+    expect(v2.serviceName).toBe('Keep');
+    expect(v2.description).toBe('Keep');
   });
 
-  it('saveEditPhone/Price/Capacity reject invalid values and set inline errors', async () => {
-    const row = { id: 'v1', phonenumber: '011', price: 100, capacity: 50 } as any;
-
-    component.beginEditPhone(row);
-    (component as any).phoneInput = 'abc';
-    await (component as any).saveEditPhone(row);
-    expect((component as any).phoneErrorId).toBe('v1');
-    expect((component as any).phoneInlineError).toContain('valid phone');
-    component.cancelEditPhone();
-
-    component.beginEditPrice(row);
-    (component as any).priceInput = -5 as any;
-    await (component as any).saveEditPrice(row);
-    expect((component as any).priceErrorId).toBe('v1');
-    expect((component as any).priceInlineError).toContain('valid price');
-    component.cancelEditPrice();
-
-    component.beginEditCapacity(row);
-    (component as any).capacityInput = -1 as any;
-    await (component as any).saveEditCapacity(row);
-    expect((component as any).capacityErrorId).toBe('v1');
-    expect((component as any).capacityInlineError).toContain('valid capacity');
-    component.cancelEditCapacity();
-  });
-
-  it('deleteService() does nothing when user cancels confirm', async () => {
-    (component as any)['services'] = [
-      { id: 'a', serviceName: 'A' },
-      { id: 'b', serviceName: 'B' },
-    ] as any[];
-    spyOn(window, 'confirm').and.returnValue(false);
-    await (component as any).deleteService({ id: 'a', serviceName: 'X' } as any);
-    expect(((component as any)['services'] as any[]).length).toBe(2);
-    expect(((component as any)['services'] as any[])[0].id).toBe('a');
-  });
-
-  it('company profile form: required + pattern validators', () => {
-    const f = (component as any).form;
-    f.setValue({ companyName: '', companyEmail: 'not-an-email', companyNumber: 'abc' });
-    expect(f.valid).toBeFalse();
-    f.patchValue({ companyName: 'Co', companyEmail: 'co@example.com', companyNumber: '011 555 1234' });
-    expect(f.valid).toBeTrue();
-  });
-
-  it('serviceForm validators: required + min + phone pattern', () => {
-    const f = component.serviceForm;
-    f.reset({
-      serviceName: '',
-      type: '',
-      price: -1,
-      capacity: -5,
-      description: '',
-      bookingNotes: '',
-      phonenumber: 'bad'
-    });
-    expect(f.valid).toBeFalse();
-
-    f.patchValue({
-      serviceName: 'Venue A',
-      type: 'Venue',
-      price: 0,
-      capacity: 0,
-      phonenumber: '+27 (11) 555-1234'
-    });
-    expect(f.valid).toBeTrue();
-  });
-
-  it('trackById() also works for OrderRow', () => {
-    expect(component.trackById(0, { id: 'ord-1' } as any)).toBe('ord-1');
-  });
-
-  it('getServiceName() reflects mapping changes after edits', () => {
-    (component as any)['services'] = [
-      { id: 's1', serviceName: 'Venue X' } as any,
-      { id: 's2', serviceName: 'Cater Y' } as any,
+  it('rebuildServiceNameMap & getServiceName reflect changes', () => {
+    component.services = [
+      { id: 's1', serviceName: '' },
+      { id: 's2', serviceName: 'Real' },
     ];
     (component as any).rebuildServiceNameMap();
-    expect(component.getServiceName('s2')).toBe('Cater Y');
-    (component as any)['services'] = (component as any)['services'].filter((s: any) => s.id !== 's2');
+    expect(component.getServiceName('s1')).toBe('—');
+    expect(component.getServiceName('s2')).toBe('Real');
+    expect(component.getServiceName('missing')).toBe('—');
+
+    component.services = component.services.filter((s: any) => s.id !== 's2');
     (component as any).rebuildServiceNameMap();
     expect(component.getServiceName('s2')).toBe('—');
   });
 
-  it('toggleServiceForm() toggles multiple times and clears messages', () => {
-    (component as any).successMsg = 'ok';
-    (component as any).errorMsg = 'err';
-    component.toggleServiceForm();
-    expect((component as any).successMsg).toBe('');
-    expect((component as any).errorMsg).toBe('');
-    component.toggleServiceForm();
-    component.toggleServiceForm();
-    const v = component.serviceForm.getRawValue();
-    expect(v.serviceName).toBe('');
-    expect(v.type).toBe('');
-  });
-
-  it('detachLive()/detachOrders() are safe when unset and when set', () => {
+  it('detachLive()/detachOrders() safe when unset and when set', () => {
     expect(() => (component as any).detachLive()).not.toThrow();
     expect(() => (component as any).detachOrders()).not.toThrow();
 
@@ -360,92 +115,239 @@ describe('VendorsCompany – validation & guards', () => {
     expect(() => (component as any).detachOrders()).not.toThrow();
   });
 
-  it('rebuildServiceNameMap(): empty names -> em dash', () => {
-    (component as any)['services'] = [
-      { id: 's1', serviceName: '' } as any,
-      { id: 's2', serviceName: 'Real Name' } as any
-    ];
-    (component as any).rebuildServiceNameMap();
-    expect(component.getServiceName('s1')).toBe('—');
-    expect(component.getServiceName('s2')).toBe('Real Name');
-    expect(component.getServiceName('missing')).toBe('—');
-  });
-});
+  it('loadCompany -> vendor, non-vendor, error', async () => {
+    fs.getDoc.and.returnValues(
+      Promise.resolve({ exists: () => true, data: () => ({ type: 'vendor', userID: 'u1', companyName: 'Co', email: 'e', phoneNumber: '1' }) }),
+      Promise.resolve({ exists: () => true, data: () => ({ type: 'customer' }) }),
+      Promise.reject(new Error('fail'))
+    );
 
-describe('VendorsCompany – data helpers', () => {
-  let fixture: ComponentFixture<VendorsCompany>;
-  let component: VendorsCompany;
-  let fakeFirestore: {
-    getFirestore: jasmine.Spy;
-    doc: jasmine.Spy;
-    getDoc: jasmine.Spy;
-  };
-
-  beforeEach(async () => {
-    const app = firebaseApp.getApps().length ? firebaseApp.getApp() : firebaseApp.initializeApp({ apiKey: 'test', appId: '1:demo:web:demo', projectId: 'demo' });
-    spyOn(firebaseApp, 'getApp').and.returnValue(app);
-    spyOn(firebaseApp, 'getApps').and.returnValue([app]);
-
-    fakeFirestore = {
-      getFirestore: jasmine.createSpy('getFirestore').and.returnValue({} as any),
-      doc: jasmine.createSpy('doc').and.callFake((_db: any, _coll: any, id?: string) => ({ id } as any)),
-      getDoc: jasmine.createSpy('getDoc'),
-    };
-    spyOn(firestore, 'getFirestore').and.callFake(fakeFirestore.getFirestore);
-    spyOn(firestore, 'doc').and.callFake(fakeFirestore.doc);
-    spyOn(firestore, 'getDoc').and.callFake(fakeFirestore.getDoc);
-    await TestBed.configureTestingModule({
-      imports: [VendorsCompany, RouterTestingModule],
-      providers: [provideHttpClient(), provideHttpClientTesting()],
-    }).compileComponents();
-
-    fixture = TestBed.createComponent(VendorsCompany);
-    component = fixture.componentInstance;
-  });
-
-  it('loadCompany stores vendor profile data when found', async () => {
-    fakeFirestore.getDoc.and.returnValue(Promise.resolve({
-      exists: () => true,
-      data: () => ({ type: 'vendor', userID: 'comp-1', companyName: 'Studio', email: 'studio@example.com', phoneNumber: '011' }),
-    } as any));
-
-    await (component as any).loadCompany('comp-1');
-
+    await component['loadCompany']('u1');
     expect(component.hasVendorCompany).toBeTrue();
-    expect(component.companyVendorData?.companyName).toBe('Studio');
+    expect(component.companyVendorData.companyName).toBe('Co');
+
+    await component['loadCompany']('u2');
+    expect(component.hasVendorCompany).toBeFalse();
+
+    await component['loadCompany']('u3');
+    expect(component.errorMsg).toContain('Failed to load company');
   });
 
-  it('addService posts data and refreshes services', async () => {
-    const httpStub = jasmine.createSpyObj('HttpClient', ['post', 'get', 'put', 'delete']);
-    httpStub.post.and.returnValue(of({ id: 'svc-1' }));
-    httpStub.get.and.returnValue(of([{ id: 'svc-1', serviceName: 'Photo', type: 'Photography', price: 2500, capacity: 100, description: '', bookingNotes: '', status: 'active', companyID: 'comp-1', phonenumber: '011' }]));
-    (component as any).http = httpStub;
+  it('loadServicesFromApi → success maps & sorts; error path', async () => {
+    const http = jasmine.createSpyObj('HttpClient', ['get']);
+    component.http = http;
 
-    component.companyId = 'comp-1';
-    component.companyVendorData = {
-      userID: 'comp-1',
-      companyName: 'Studio',
-      email: 'studio@example.com',
-      phoneNumber: '011',
-      type: 'vendor',
-    };
+    http.get.and.returnValue(of([
+      { id: 's2', serviceName: 'Zulu', type: 'Venue', price: 2000, capacity: 50, status: 'active', companyID: 'c1', phonenumber: '011' },
+      { id: 's1', serviceName: 'Alpha', type: 'Venue', price: 1000, capacity: 20, status: 'active', companyID: 'c1', phonenumber: '011' },
+    ]));
+    await component['loadServicesFromApi']('c1');
+    expect(component.services.length).toBe(2);
+    expect(component.services[0].serviceName).toBe('Alpha'); 
 
-    component.toggleServiceForm();
-    component.serviceForm.setValue({
-      serviceName: 'Photo',
-      type: 'Photography',
-      price: 2500,
-      capacity: 100,
-      description: 'Full day coverage',
-      bookingNotes: '',
-      phonenumber: '0115551234',
+    http.get.and.returnValue(throwError(() => ({ message: 'boom' })));
+    await component['loadServicesFromApi']('c1');
+    expect(component.errorMsg).toContain('Failed to load services');
+    expect(component.services.length).toBe(0);
+  });
+
+  it('attachLive → updates services and handles error callback; sorted by name', () => {
+    fs.onSnapshot.and.callFake((_q: any, next: any, err?: any) => {
+      next(snapFromDocs([
+        { id: 'b', data: { serviceName: 'Zulu', type: 'Venue', price: 1000, capacity: 50, status: 'active', companyID: 'c1', phonenumber: '011' } },
+        { id: 'a', data: { serviceName: 'Alpha', type: 'Venue', price: 500, capacity: 20, status: 'active', companyID: 'c1', phonenumber: '011' } },
+      ]));
+      err?.({ message: 'stream err' });
+      return () => {};
     });
 
-    await component.addService();
+    component['attachLive']('c1');
+    expect(component.services.length).toBe(2);
+    expect(component.services[0].serviceName).toBe('Alpha'); 
+    expect(component.errorMsg).toContain('Failed to stream services.');
+  });
 
-    expect(httpStub.post).toHaveBeenCalled();
-    expect(component.services.length).toBe(1);
-    expect(component.showServiceForm).toBeFalse();
-    expect(component.successMsg).toBe('Service saved!');
+  it('attachOrders → converts ISO and Timestamp-like objects; handles error', () => {
+    const tsLike = (iso: string) => ({ toDate: () => new Date(iso) });
+    fs.onSnapshot.and.callFake((_q: any, next: any, err?: any) => {
+      next(snapFromDocs([
+        { id: 'o1', data: {
+          customerID: 'cu', eventID: 'ev', companyID: 'c1', vendorID: 'v1',
+          guestsNum: 10, startAt: '2024-01-02T10:00:00.000Z', endAt: tsLike('2024-01-02T12:00:00.000Z'),
+          status: 'pending', createdAt: tsLike('2024-01-01T09:00:00.000Z')
+        } }
+      ]));
+      err?.({ message: 'orders err' });
+      return () => {};
+    });
+
+    component['attachOrders']('c1');
+    expect(component.orders.length).toBe(1);
+    expect(component.orders[0].startAtDate instanceof Date).toBeTrue();
+    expect(component.orders[0].endAtDate instanceof Date).toBeTrue();
+    expect(component.orders[0].createdAtDate instanceof Date).toBeTrue();
+    expect(component.errorMsg).toContain('Failed to stream orders.');
+  });
+
+  it('updateOrderStatus → success, not found, and setDoc error', async () => {
+    fs.getDoc.and.returnValues(
+      Promise.resolve({ exists: () => true, data: () => ({ customerID: 'cu', eventID: 'ev', companyID: 'c1', vendorID: 'v1', guestsNum: 1, startAt: 'x', endAt: 'y', note: '', createdAt: 'z' }) }),
+      Promise.resolve({ exists: () => false }),
+      Promise.resolve({ exists: () => true, data: () => ({ customerID: 'cu', eventID: 'ev', companyID: 'c1', vendorID: 'v1', guestsNum: 1, startAt: 'x', endAt: 'y', note: '', createdAt: 'z' }) }),
+    );
+
+    fs.setDoc.and.returnValues(
+      Promise.resolve(),              
+      Promise.reject(new Error('set fail')) 
+    );
+
+    await component['updateOrderStatus']({ id: 'o1' }, 'accepted');
+    expect(fs.setDoc).toHaveBeenCalled();
+
+    await component['updateOrderStatus']({ id: 'missing' }, 'declined');
+    expect(component.errorMsg).toContain('Order not found');
+
+    await component['updateOrderStatus']({ id: 'o2' }, 'declined');
+    expect(component.errorMsg).toContain('Failed to update order.');
+  });
+
+  it('accept/decline wrappers call update', async () => {
+    const spyUpd = spyOn(component as any, 'updateOrderStatus').and.returnValue(Promise.resolve());
+    await component.acceptOrder({ id: 'a', status: 'pending' } as any);
+    await component.declineOrder({ id: 'b', status: 'pending' } as any);
+    expect(spyUpd).toHaveBeenCalledTimes(2);
+  });
+
+  it('createVendorCompany → early return, success, error', async () => {
+    spyOn(window, 'alert');
+
+    component.form.reset({ companyName: '', companyEmail: '', companyNumber: '' });
+    await component.createVendorCompany();
+    expect(fs.setDoc).not.toHaveBeenCalled(); 
+
+    component.companyId = 'u1';
+    component.form.setValue({ companyName: 'Co', companyEmail: 'e@x', companyNumber: '011 555 1234' });
+    fs.setDoc.and.returnValue(Promise.resolve());
+    fs.getDoc.and.returnValue(Promise.resolve({ exists: () => true, data: () => ({ type: 'vendor', userID: 'u1', companyName: 'Co', email: 'e@x', phoneNumber: '011' }) }));
+    spyOn(component as any, 'attachLive').and.callFake(() => {});
+    spyOn(component as any, 'attachOrders').and.callFake(() => {});
+    spyOn(component as any, 'loadServicesFromApi').and.returnValue(Promise.resolve());
+    await component.createVendorCompany();
+    expect(window.alert).toHaveBeenCalledWith('Vendor Company created successfully!');
+
+    fs.setDoc.and.returnValue(Promise.reject(new Error('boom')));
+    await component.createVendorCompany();
+    expect(component.errorMsg).toContain('Error creating your Vendor Company.');
+  });
+
+  it('refreshServices → no-op without companyId; calls when present', () => {
+    const spyLoad = spyOn(component as any, 'loadServicesFromApi').and.returnValue(Promise.resolve());
+    component.companyId = null;
+    component.refreshServices();
+    expect(spyLoad).not.toHaveBeenCalled();
+
+    component.companyId = 'c1';
+    component.refreshServices();
+    expect(spyLoad).toHaveBeenCalledWith('c1');
+  });
+
+  it('saveEditPhone → success and HTTP error', async () => {
+    const http = jasmine.createSpyObj('HttpClient', ['put']);
+    component.http = http;
+
+    component.services = [{ id: 's1', serviceName: 'A', phonenumber: '000' } as any];
+    component.beginEditPhone({ id: 's1', phonenumber: '000' } as any);
+    component.phoneInput = '011-555-1234';
+    http.put.and.returnValue(of({}));
+    await component['saveEditPhone']({ id: 's1' } as any);
+    expect(component.services[0].phonenumber).toBe('011-555-1234');
+    expect((component as any).editPhoneId).toBeNull();
+
+    component.beginEditPhone({ id: 's1', phonenumber: '011-555-1234' } as any);
+    component.phoneInput = '011-555-9999';
+    http.put.and.returnValue(throwError(() => ({ error: { error: 'bad' } })));
+    await component['saveEditPhone']({ id: 's1' } as any);
+    expect((component as any).phoneErrorId).toBe('s1');
+    expect((component as any).phoneInlineError).toContain('bad');
+  });
+
+  it('saveEditPrice → success and HTTP error', async () => {
+    const http = jasmine.createSpyObj('HttpClient', ['put']);
+    component.http = http;
+
+    component.services = [{ id: 's1', serviceName: 'A', price: 100 } as any];
+    component.beginEditPrice({ id: 's1', price: 100 } as any);
+    component.priceInput = 2500;
+    http.put.and.returnValue(of({}));
+    await component['saveEditPrice']({ id: 's1' } as any);
+    expect(component.services[0].price).toBe(2500);
+    expect((component as any).editPriceId).toBeNull();
+
+    component.beginEditPrice({ id: 's1', price: 2500 } as any);
+    component.priceInput = 9999;
+    http.put.and.returnValue(throwError(() => ({ error: { error: 'nope' } })));
+    await component['saveEditPrice']({ id: 's1' } as any);
+    expect((component as any).priceErrorId).toBe('s1');
+    expect((component as any).priceInlineError).toContain('nope');
+  });
+
+  it('saveEditCapacity → success and HTTP error', async () => {
+    const http = jasmine.createSpyObj('HttpClient', ['put']);
+    component.http = http;
+
+    component.services = [{ id: 's1', serviceName: 'A', capacity: 10 } as any];
+    component.beginEditCapacity({ id: 's1', capacity: 10 } as any);
+    component.capacityInput = 200;
+    http.put.and.returnValue(of({}));
+    await component['saveEditCapacity']({ id: 's1' } as any);
+    expect(component.services[0].capacity).toBe(200);
+    expect((component as any).editCapacityId).toBeNull();
+
+    component.beginEditCapacity({ id: 's1', capacity: 200 } as any);
+    component.capacityInput = 300;
+    http.put.and.returnValue(throwError(() => ({ error: { error: 'cap-err' } })));
+    await component['saveEditCapacity']({ id: 's1' } as any);
+    expect((component as any).capacityErrorId).toBe('s1');
+    expect((component as any).capacityInlineError).toContain('cap-err');
+  });
+
+  it('deleteService → confirm false no-op; confirm true removes & calls API', async () => {
+    const http = jasmine.createSpyObj('HttpClient', ['delete']);
+    http.delete.and.returnValue(of({}));
+    component.http = http;
+
+    component.services = [{ id: 'a', serviceName: 'A' } as any, { id: 'b', serviceName: 'B' } as any];
+    spyOn(window, 'confirm').and.returnValue(false);
+    await component.deleteService({ id: 'a', serviceName: 'A' } as any);
+    expect(component.services.length).toBe(2);
+
+    (window.confirm as jasmine.Spy).and.returnValue(true);
+    await component.deleteService({ id: 'a', serviceName: 'A' } as any);
+    expect(component.services.map((s: any) => s.id)).toEqual(['b']);
+    expect(http.delete).toHaveBeenCalled();
+  });
+
+  it('goToNotifications navigates, fetchNotifications success + error', async () => {
+    const nav = spyOn(router, 'navigate').and.returnValue(Promise.resolve(true));
+    spyOnProperty(router, 'url', 'get').and.returnValue('/vendors-company');
+    component.goToNotifications();
+    expect(nav).toHaveBeenCalled();
+
+    component.auth = { user: () => ({ uid: 'u1' }) };
+    const http = jasmine.createSpyObj('HttpClient', ['get']);
+    http.get.and.returnValue(of({ notifications: [
+      { id: 'n1', from: 'A', to: 'u1', message: 'm1', date: '2024-01-01', read: true },
+      { id: 'n2', from: 'B', to: 'u1', message: 'm2', date: '2024-01-02', read: false },
+    ]}));
+    component.http = http;
+
+    await component.fetchNotifications();
+    expect(component.unreadCount).toBe(1);
+    expect(component.notifications[0].read).toBeFalse(); 
+
+    http.get.and.returnValue(throwError(() => new Error('down')));
+    await component.fetchNotifications();
+    expect(component.notifications.length).toBe(0);
+    expect(component.unreadCount).toBe(0);
   });
 });

@@ -64,6 +64,19 @@ type CompanyDoc= {
 
 const API_BASE= `${environment.apiUrl}/vendors`;
 
+type FirestoreOps= {
+  getApp: typeof getApp;
+  getFirestore: typeof getFirestore;
+  collection: typeof collection;
+  doc: typeof doc;
+  getDoc: typeof getDoc;
+  onSnapshot: typeof onSnapshot;
+  query: typeof query;
+  where: typeof where;
+  setDoc: typeof setDoc;
+  serverTimestamp: typeof serverTimestamp;
+};
+
 @Component({
   selector:'app-vendors-company',
   standalone:true,
@@ -77,6 +90,19 @@ export class  VendorsCompany implements OnDestroy {
   private fb= inject(FormBuilder);
 
   constructor(private http: HttpClient) {}
+
+  public fs: FirestoreOps= {
+    getApp,
+    getFirestore,
+    collection,
+    doc,
+    getDoc,
+    onSnapshot,
+    query,
+    where,
+    setDoc,
+    serverTimestamp
+  };
 
   hasVendorCompany: boolean|null=null;
   companyVendorData: CompanyDoc|null= null;
@@ -195,9 +221,9 @@ export class  VendorsCompany implements OnDestroy {
   private async loadCompany(uid: string){
     this.errorMsg= '';
     try{
-      const db= getFirestore(getApp());
-      const ref= doc(db, 'Companies', uid);
-      const snap= await getDoc(ref);
+      const db= this.fs.getFirestore(this.fs.getApp());
+      const ref= this.fs.doc(db, 'Companies', uid);
+      const snap= await this.fs.getDoc(ref);
       if (!snap.exists()){
         this.companyVendorData= null;
         this.hasVendorCompany= false;
@@ -249,10 +275,10 @@ export class  VendorsCompany implements OnDestroy {
   }
 
   private attachLive(uid: string) {
-    const db= getFirestore(getApp());
-    const qy= query(collection(db, 'Vendors'), where('companyID','==', uid));
+    const db= this.fs.getFirestore(this.fs.getApp());
+    const qy= this.fs.query(this.fs.collection(db, 'Vendors'), this.fs.where('companyID','==', uid));
     this.detachLive();
-    this.liveUnsub= onSnapshot(
+    this.liveUnsub= this.fs.onSnapshot(
       qy,
       snap=>{
         const byId= new Map(this.services.map(s =>[s.id, s]));
@@ -443,11 +469,11 @@ export class  VendorsCompany implements OnDestroy {
   }
 
   private attachOrders(uid: string){
-    const db= getFirestore(getApp());
-    const qy= query(collection(db, 'Orders'), where('companyID', '==', uid));
+    const db= this.fs.getFirestore(this.fs.getApp());
+    const qy= this.fs.query(this.fs.collection(db, 'Orders'), this.fs.where('companyID', '==', uid));
     this.detachOrders();
     this.loadingOrders= true;
-    this.ordersUnsub= onSnapshot(
+    this.ordersUnsub= this.fs.onSnapshot(
       qy,
       snap =>{
         const rows: OrderRow[]=[];
@@ -497,9 +523,9 @@ export class  VendorsCompany implements OnDestroy {
     this.orderBusyId= o.id;
     this.orderBusyAction= newStatus  === 'accepted'?'accept': 'decline';
     try{
-      const db= getFirestore(getApp()) ;
-      const ref= doc(db, 'Orders',  o.id);
-      const snap= await getDoc(ref);
+      const db= this.fs.getFirestore(this.fs.getApp()) ;
+      const ref= this.fs.doc(db, 'Orders',  o.id);
+      const snap= await this.fs.getDoc(ref);
       if (!snap.exists()) throw new Error('Order not found.');
       const data= snap.data() as any;
       const payload= {
@@ -515,7 +541,7 @@ export class  VendorsCompany implements OnDestroy {
         createdAt: data.createdAt  ?? null,
       };
 
-      await setDoc(ref, payload,{ merge: false });
+      await this.fs.setDoc(ref, payload,{ merge: false });
     } catch (e: any) {
       this.errorMsg = e?.message ??'Failed to update order.';
     } finally {
@@ -552,16 +578,16 @@ export class  VendorsCompany implements OnDestroy {
     if (this.form.invalid) return;
     const uid= this.companyId;
     if (!uid){ this.errorMsg = 'Please sign in again.';return; }
-    const db= getFirestore(getApp());
-    const ref= doc(db, 'Companies', uid);
+    const db= this.fs.getFirestore(this.fs.getApp());
+    const ref= this.fs.doc(db, 'Companies', uid);
     try{
-      await setDoc(ref, {
+      await this.fs.setDoc(ref, {
         userID: uid,
         companyName:this.form.value.companyName,
         email: this.form.value.companyEmail,
         phoneNumber: this.form.value.companyNumber,
         type: 'vendor',
-        createdAt: serverTimestamp(),
+        createdAt: this.fs.serverTimestamp(),
       });
 
       await this.loadCompany(uid);
