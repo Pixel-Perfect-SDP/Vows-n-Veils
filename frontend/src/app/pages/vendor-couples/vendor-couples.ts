@@ -45,6 +45,20 @@ type OrderRow={
 
 const API_BASE= `${environment.apiUrl}/vendors`;
 
+type FirestoreOps={
+  getApp: typeof getApp;
+  getFirestore: typeof getFirestore;
+  doc: typeof doc;
+  getDoc: typeof getDoc;
+  getDocs: typeof getDocs;
+  addDoc: typeof addDoc;
+  collection: typeof collection;
+  query: typeof query;
+  where: typeof where;
+  orderBy: typeof orderBy;
+  serverTimestamp: typeof serverTimestamp;
+};
+
 @Component({
   selector:'app-vendor-couples',
   standalone:true,
@@ -55,6 +69,20 @@ const API_BASE= `${environment.apiUrl}/vendors`;
 export class VendorCouples {
   private fb= inject(FormBuilder);
   private auth= inject(AuthService);
+
+  public fs: FirestoreOps={
+    getApp,
+    getFirestore,
+    doc,
+    getDoc,
+    getDocs,
+    addDoc,
+    collection,
+    query,
+    where,
+    orderBy,
+    serverTimestamp,
+  };
 
   constructor(private router: Router, private http: HttpClient) {
     this.serviceTypes.forEach(t => this.expanded[t]= true);
@@ -173,11 +201,11 @@ export class VendorCouples {
 
       const onlyActive= services.filter(s => (s.status||'').toLowerCase()==='active');
 
-      const db= getFirestore(getApp());
+      const db= this.fs.getFirestore(this.fs.getApp());
       const ids= Array.from(new Set(onlyActive.map(s =>s.companyID).filter(Boolean) as string[]));
       const nameById= new Map<string, string>();
       await Promise.all(ids.map(async uid => {
-        const cSnap= await getDoc(doc(db, 'Companies', uid));
+        const cSnap= await this.fs.getDoc(this.fs.doc(db, 'Companies', uid));
         if (cSnap.exists()) nameById.set(uid, (cSnap.data() as any)?.companyName || 'Unknown company');
       }));
 
@@ -203,7 +231,7 @@ export class VendorCouples {
         );
       }
 
-      const ordered:  Record<string, ServiceWithCompany[]>={};
+      const ordered:  Record<string, ServiceWithCompany[]>= {};
       this.serviceTypes.forEach(k =>{ if(tmp[k]?.length) ordered[k]= tmp[k]; });
       for (const k of Object.keys(tmp)) if (!ordered[k]) ordered[k]= tmp[k];
 
@@ -232,13 +260,13 @@ export class VendorCouples {
       const user= await this.waitForUser();
       if (!user) { this.ordersError=  'Please sign in to view your orders.'; return; }
 
-      const db= getFirestore(getApp());
-      const qy= query(
-        collection(db,'Orders'),
-        where('customerID',  '==', user.uid),
-        orderBy('createdAt','desc')
+      const db= this.fs.getFirestore(this.fs.getApp());
+      const qy= this.fs.query(
+        this.fs.collection(db,'Orders'),
+        this.fs.where('customerID',  '==', user.uid),
+        this.fs.orderBy('createdAt','desc')
       );
-      const os= await getDocs(qy);
+      const os= await this.fs.getDocs(qy);
       const rows: OrderRow[]= os.docs.map(d =>{
         const x= d.data() as any;
         const startAt = x.startAt?.toDate ? x.startAt.toDate() : new Date(x.startAt);
@@ -263,11 +291,11 @@ export class VendorCouples {
 
       await Promise.all([
         ...vendorIds.map(async  id => {
-          const s= await getDoc(doc(getFirestore(getApp()), 'Vendors', id));
+          const s= await this.fs.getDoc(this.fs.doc(this.fs.getFirestore(this.fs.getApp()), 'Vendors', id));
           if  (s.exists()) vendorMap.set(id, s.data());
         }),
         ...companyIds.map(async id =>{
-          const c= await getDoc(doc(getFirestore(getApp()), 'Companies', id));
+          const c= await this.fs.getDoc(this.fs.doc(this.fs.getFirestore(this.fs.getApp()), 'Companies', id));
           if (c.exists()) companyMap.set(id, c.data());
         })
       ]);
@@ -305,18 +333,18 @@ export class VendorCouples {
     this.orderForm.patchValue({eventID: user.uid });
 
     try{
-      const db=getFirestore(getApp());
+      const db= this.fs.getFirestore(this.fs.getApp());
 
       let evData:any= null;
       let evId: string|null = null;
 
-      const direct= await getDoc(doc(db,'Events', user.uid));
+      const direct= await this.fs.getDoc(this.fs.doc(db,'Events', user.uid));
       if (direct.exists()){
         evData= direct.data();
-        evId= direct.id;
+        evId= (direct as any).id ?? user.uid;
       } else{
-        const qy= query(collection(db, 'Events'),where('EventID', '==', user.uid));
-        const evs= await getDocs(qy);
+        const qy= this.fs.query(this.fs.collection(db, 'Events'),this.fs.where('EventID', '==', user.uid));
+        const evs= await this.fs.getDocs(qy);
         if (evs.docs.length) {
           evData= evs.docs[0].data();
           evId =evs.docs[0].id;
@@ -390,9 +418,9 @@ export class VendorCouples {
 
     try{
 
-      const db= getFirestore(getApp());
+      const db= this.fs.getFirestore(this.fs.getApp());
 
-      await addDoc(collection(db, 'Orders'), {
+      await this.fs.addDoc(this.fs.collection(db, 'Orders'), {
         customerID:user.uid,
         eventID: String(eventID),
         companyID: this.selectedService.companyID ?? '',
@@ -403,7 +431,7 @@ export class VendorCouples {
         endAt,
         note: note ?? '',
         status: 'pending',
-        createdAt:serverTimestamp(),
+        createdAt:this.fs.serverTimestamp(),
       });
 
 
