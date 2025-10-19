@@ -1,0 +1,82 @@
+[
+  {
+    "test": "Homepage - notifications & checklist fetchNotifications handles HTTP failure",
+    "errors": [
+      "Error: Expected one matching request for criteria \"Match URL: https://site--vowsandveils--5dl8fyl4jyqm.code.run/venues/notifications/U1\", found none."
+    ]
+  },
+  {
+    "test": "Homepage - notifications & checklist fetchNotifications maps response and counts unread",
+    "errors": [
+      "Error: Expected one matching request for criteria \"Match URL: https://site--vowsandveils--5dl8fyl4jyqm.code.run/venues/notifications/U1\", found none."
+    ]
+  },
+  {
+    "test": "Homepage (Guests tab) onDeleteGuest: confirm path -> deletes, refreshes, and alerts success",
+    "errors": [
+      "Expected spy alert to have been called with:",
+      "[ 'Guest deleted successfully.' ]",
+      "but it was never called."
+    ]
+  },
+  {
+    "test": "Homepage (Guests tab) submitAddGuest: happy path posts, refreshes, and closes form",
+    "errors": [
+      "Expected true to be false."
+    ]
+  },
+  {
+    "test": "Homepage - lifecycle & countdown ngOnInit (has event): sets hasEvent, eventData, calls getEventDataForDisplay and sets interval",
+    "errors": [
+      "Error: Uncaught (in promise): Error: Cannot make XHRs from within a fake async test. Request URL: https://site--vowsandveils--5dl8fyl4jyqm.code.run/venues/notifications/U1",
+      "Error: Cannot make XHRs from within a fake async test. Request URL: https://site--vowsandveils--5dl8fyl4jyqm.code.run/venues/notifications/U1"
+    ]
+  },
+  {
+    "test": "Homepage - Event display API (Firestore reads) fills eventDisplayInfo (title, venue, time, budget, guests, vendors)",
+    "errors": [
+      "Expected null to be 'The wedding of Alice and Bob'.",
+      "Expected null to be 'The Venue'.",
+      "Expected 'object' to be 'string'.",
+      "TypeError: Cannot read properties of null (reading 'length')"
+    ]
+  },
+  {
+    "test": "Homepage - Event display API (Firestore reads) sets venueName to \"Venue not found\" when venue document is missing",
+    "errors": [
+      "Expected null to be 'Venue not found'."
+    ]
+  },
+  {
+    "test": "Homepage - Event display API (Firestore reads) uses fallback \"Unknown Service (companyID) (pending)\" when vendor query is empty and order is pending",
+    "errors": [
+      "Expected null to equal [ <jasmine.objectContaining(Object({ companyID: 'C9', serviceName: 'Unknown Service (C9) (pending)', status: 'pending' }))> ]."
+    ]
+  },
+  {
+    "test": "Homepage - Event display API (Firestore reads) handles permission-denied when fetching vendors (orders) by setting selectedVendors=null",
+    "errors": [
+      "Expected null to be 'The wedding of A and B'.",
+      "Expected null to be 'Venue'."
+    ]
+  },
+  {
+    "test": "Homepage - Event display API (Firestore reads) sets guest counts to 0 when guest query fails",
+    "errors": [
+      "Expected null to be 0.",
+      "Expected null to be 0."
+    ]
+  },
+  {
+    "test": "Homepage - Event display API (Firestore reads) sets hasEvent=false when event document is missing",
+    "errors": [
+      "Expected null to be false."
+    ]
+  },
+  {
+    "test": "Homepage - Event display API (Firestore reads) sets venueName to \"Unable to load venue\" when venue fetch throws",
+    "errors": [
+      "Expected null to be 'Unable to load venue'."
+    ]
+  }
+]
