@@ -2,8 +2,7 @@
 Wedding event management app (Under development) 
 https://mango-mushroom-00c4ce01e.2.azurestaticapps.net/
 
-[![Frontend Coverage](https://codecov.io/gh/Pixel-Perfect-SDP/Vows-n-Veils/branch/main/graph/badge.svg?flag=frontend)](https://app.codecov.io/gh/Pixel-Perfect-SDP/Vows-n-Veils?flags=frontend)
-[![Backend Coverage](https://codecov.io/gh/Pixel-Perfect-SDP/Vows-n-Veils/branch/main/graph/badge.svg?flag=backend)](https://app.codecov.io/gh/Pixel-Perfect-SDP/Vows-n-Veils?flags=backend)
+[![Coverage](https://codecov.io/gh/Pixel-Perfect-SDP/Vows-n-Veils/branch/main/graph/badge.svg?flag=frontend)](https://app.codecov.io/gh/Pixel-Perfect-SDP/Vows-n-Veils?flags=frontend)
 
 Testing Coverage: https://app.codecov.io/gh/Pixel-Perfect-SDP/Vows-n-Veils/tree/main
 
@@ -59,8 +58,17 @@ For end-to-end (e2e) testing, run:
 ng e2e
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+# Environment Variables (for Vows & Veils Project)
 
-## Additional Resources
+These are the environment variables required to run the backend locally or deploy it to Azure.  
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+| Variable Name | Example Value / Placeholder | Description |
+|----------------|-----------------------------|--------------|
+| FIREBASE_PROJECT_ID | `ppep-2651c` | Firebase project ID used by the app |
+| FIREBASE_CLIENT_EMAIL | `firebase-adminsdk-fbsvc@ppep-2651c.iam.gserviceaccount.com` | Firebase service account email |
+| FIREBASE_PRIVATE_KEY | `-----BEGIN PRIVATE KEY----- ... -----END PRIVATE KEY-----` *(store securely)* | Firebase Admin SDK private key used for server-side authentication |
+| FIREBASE_STORAGE_BUCKET | `ppep-2651c.firebasestorage.app` | Firebase storage bucket for venue and event images |
+| VISUAL_CROSSING_API_KEY | `YOUR_VISUAL_CROSSING_API_KEY` | API key for weather integration (used in dashboard) |
+| PORT | `3000` | Port number for local backend server |
+
+---
