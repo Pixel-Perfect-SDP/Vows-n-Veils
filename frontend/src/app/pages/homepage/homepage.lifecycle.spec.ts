@@ -49,12 +49,18 @@ describe('Homepage – lifecycle & countdown', () => {
 
   function resolveDoc(data: any) { return { exists: () => true, data: () => data }; }
   function missingDoc() { return { exists: () => false }; }
+  function stubAsyncDependencies() {
+    spyOn(comp, 'fetchNearbyTrail').and.stub();
+    spyOn(comp as any, 'loadChecklist').and.resolveTo();
+    spyOn(comp as any, 'fetchNotifications').and.resolveTo();
+  }
 
   it('ngOnInit (has event): sets hasEvent, eventData, calls getEventDataForDisplay and sets interval', fakeAsync(async () => {
     // Arrange: Firestore doc exists
     const dateTime = { toDate: () => new Date('2030-06-10T12:00:00Z') };
     getDocSpy.and.resolveTo(resolveDoc({ Date_Time: dateTime, VenueID: 'V1' }));
 
+    stubAsyncDependencies();
     // Keep heavy logic out of this test
     const gedSpy = spyOn(comp as any, 'getEventDataForDisplay').and.resolveTo();
     const fetchVwSpy = spyOn(comp as any, 'fetchVenueAndWeather').and.callFake(() => {});
@@ -90,6 +96,7 @@ describe('Homepage – lifecycle & countdown', () => {
   it('ngOnInit (no event): sets hasEvent=false, clears eventData, no weather call', fakeAsync(() => {
     getDocSpy.and.resolveTo(missingDoc());
 
+    stubAsyncDependencies();
     const gedSpy = spyOn(comp as any, 'getEventDataForDisplay').and.resolveTo();
     const fetchVwSpy = spyOn(comp as any, 'fetchVenueAndWeather').and.callFake(() => {});
     const setIntSpy = spyOn(window, 'setInterval').and.returnValue(88 as any);

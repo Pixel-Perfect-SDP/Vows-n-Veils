@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpTestingController } from '@angular/common/http/testing';
 import { of } from 'rxjs';
+import { signal } from '@angular/core';
 
 import { Homepage } from './homepage';
 import { AuthService } from '../../core/auth';
@@ -23,7 +24,7 @@ describe('Homepage – notifications & checklist', () => {
   let updateDocSpy: jasmine.Spy;
   let deleteDocSpy: jasmine.Spy;
 
-  const authStub = { user: () => ({ uid: 'U1' }) } as AuthService;
+  const authStub = { user: signal({ uid: 'U1' }) } as unknown as AuthService;
   const dataServiceStub = {
     getVenueById: () => of({ address: '123 Street' }),
     getWeatherCrossing: () => of({}),

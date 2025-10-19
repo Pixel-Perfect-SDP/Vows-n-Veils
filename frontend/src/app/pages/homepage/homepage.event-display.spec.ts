@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { signal } from '@angular/core';
 import { Homepage } from './homepage';
 import { AuthService } from '../../core/auth';
 import { provideHttpClient } from '@angular/common/http';
@@ -16,15 +17,9 @@ describe('Homepage – Event display API (Firestore reads)', () => {
 
   // ---------- Auth mock ----------
   const user = { uid: 'U1', email: 'u@mail.test' } as any;
+  const userSignal = signal(user);
   const authMock: Partial<AuthService> = {
-    user: {
-      get: () => user,
-      set: () => {},
-      update: () => {},
-      asReadonly: () => ({ get: () => user }),
-      [Symbol.for('ɵWRITABLE_SIGNAL')]: true,
-      [Symbol.for('SIGNAL')]: true,
-    } as any, // waitForUser will see this immediately
+    user: userSignal,
   };
 
   // ---------- Firestore spies ----------
@@ -60,6 +55,7 @@ describe('Homepage – Event display API (Firestore reads)', () => {
   };
 
   beforeEach(async () => {
+    userSignal.set(user);
     await TestBed.configureTestingModule({
       imports: [Homepage],
       providers: [provideHttpClient(), provideHttpClientTesting(),
