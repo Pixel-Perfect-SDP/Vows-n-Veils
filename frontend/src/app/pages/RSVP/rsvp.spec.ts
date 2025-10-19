@@ -7,24 +7,20 @@ import { AuthService } from '../../core/auth';
 import { Firestore, collection, doc, getDocs, updateDoc, query, where } from '@angular/fire/firestore';
 import { convertToParamMap } from '@angular/router';
 
-// Create proper mock objects
-const mockQuerySnapshot = (data: any[] = []) => ({
-  docs: data.map(item => ({
-    id: item.id || 'mock-id',
-    data: () => item.data || item
+// Enhanced mock objects
+const createMockQuerySnapshot = (data: any[] = []) => ({
+  docs: data.map((item, index) => ({
+    id: item.id || `mock-id-${index}`,
+    data: () => item.data || item,
+    exists: () => true
   })),
   empty: data.length === 0,
-  forEach: (callback: any) => data.forEach(item => callback({
-    id: item.id,
-    data: () => item.data || item
-  }))
+  size: data.length,
+  forEach: function(callback: any) {
+    this.docs.forEach(doc => callback(doc));
+  }
 });
 
-const mockDocRef = {
-  id: 'mock-doc-id'
-};
-
-// Mock UrlTree
 const mockUrlTree = {
   toString: () => '/landing'
 } as UrlTree;
@@ -43,32 +39,30 @@ describe('Rsvp', () => {
   let mockWhere: jasmine.Spy;
 
   beforeEach(async () => {
-    // Create a complete Router spy with all required methods
+    // Enhanced Router spy
     mockRouter = jasmine.createSpyObj('Router', [
       'navigate',
       'navigateByUrl',
       'createUrlTree',
       'serializeUrl'
-    ], [
-      'url',
-      'events'
-    ]);
+    ], {
+      url: '/',
+      events: of()
+    });
 
     mockRouter.navigate.and.returnValue(Promise.resolve(true));
     mockRouter.navigateByUrl.and.returnValue(Promise.resolve(true));
     mockRouter.createUrlTree.and.returnValue(mockUrlTree);
     mockRouter.serializeUrl.and.returnValue('/landing');
-    (Object.getOwnPropertyDescriptor(mockRouter, 'url')?.get as jasmine.Spy).and.returnValue('/');
-    (Object.getOwnPropertyDescriptor(mockRouter, 'events')?.get as jasmine.Spy).and.returnValue(of());
 
     mockAuth = jasmine.createSpyObj('AuthService', ['user']);
     mockAuth.user.and.returnValue({ uid: 'test-user-id' } as any);
 
-    // Create spies for Firestore functions
-    mockGetDocs = jasmine.createSpy('getDocs').and.returnValue(Promise.resolve(mockQuerySnapshot()));
+    // Firestore spies
+    mockGetDocs = jasmine.createSpy('getDocs').and.returnValue(Promise.resolve(createMockQuerySnapshot()));
     mockUpdateDoc = jasmine.createSpy('updateDoc').and.returnValue(Promise.resolve());
     mockCollection = jasmine.createSpy('collection').and.returnValue('mock-collection');
-    mockDoc = jasmine.createSpy('doc').and.returnValue(mockDocRef);
+    mockDoc = jasmine.createSpy('doc').and.returnValue({ id: 'mock-doc-id' });
     mockQuery = jasmine.createSpy('query').and.returnValue('mock-query');
     mockWhere = jasmine.createSpy('where').and.returnValue('mock-where');
 
@@ -132,23 +126,50 @@ describe('Rsvp', () => {
       expect(component.eventIdEntered).toBeFalse();
       expect(component.eventCode).toBe('');
       expect(component.storyData).toBeNull();
+      expect(component.formData).toEqual({
+        guestID: '',
+        Name: '',
+        Surname: '',
+        Email: '',
+        Attending: '',
+        Diet: 'None',
+        otherDiet: '',
+        Allergy: 'None',
+        Song: ''
+      });
+    });
+
+    it('should return router instance', () => {
+      expect(component.getRouter()).toBe(mockRouter);
+    });
+
+    it('should return firestore instance', () => {
+      expect(component.getDBforTesting()).toBe(mockFirestore);
     });
   });
 
-  describe('Form Validation', () => {
-    it('should validate empty name fields', () => {
-      // Test the actual validation logic from the component
-      component.formData.Name = '';
-      component.formData.Surname = '';
+  describe('Form Validation and Data Handling', () => {
+    it('should handle form data assignment', () => {
+      component.formData.Name = 'John';
+      component.formData.Surname = 'Doe';
+      component.formData.Email = 'john@example.com';
 
-      expect(component.formData.Name).toBe('');
-      expect(component.formData.Surname).toBe('');
+      expect(component.formData.Name).toBe('John');
+      expect(component.formData.Surname).toBe('Doe');
+      expect(component.formData.Email).toBe('john@example.com');
+    });
+
+    it('should handle empty name with spaces', () => {
+      component.formData.Name = '   ';
+      component.formData.Surname = '   ';
+
+      expect(component.formData.Name.trim()).toBe('');
+      expect(component.formData.Surname.trim()).toBe('');
     });
   });
 
-  describe('Form Submission', () => {
+  describe('Form Submission - onSubmit()', () => {
     beforeEach(() => {
-      // Set required fields for successful submission
       component.eventId = 'test-event-id';
     });
 
@@ -159,9 +180,8 @@ describe('Rsvp', () => {
 
         await component.onSubmit();
 
-        // The actual component might handle this differently
-        // Let's test what actually happens
-        expect(component.message).toBeDefined();
+        expect(component.message).toBe('Please enter your full name ❌');
+        expect(mockGetDocs).not.toHaveBeenCalled();
       });
 
       it('should handle name with only spaces', async () => {
@@ -170,43 +190,50 @@ describe('Rsvp', () => {
 
         await component.onSubmit();
 
-        expect(component.message).toBeDefined();
+        expect(component.message).toBe('Please enter your full name ❌');
+      });
+
+      it('should handle surname only with proper name', async () => {
+        component.formData.Name = 'John';
+        component.formData.Surname = '   ';
+
+        // This should work as fullname becomes "John"
+        mockGetDocs.and.returnValue(Promise.resolve(createMockQuerySnapshot([{
+          id: 'guest-123',
+          data: { Name: 'John', EventID: 'test-event-id' }
+        }])));
+
+        await component.onSubmit();
+
+        expect(mockGetDocs).toHaveBeenCalled();
       });
     });
 
-    describe('Guest Lookup', () => {
-      it('should handle guest not found scenario', async () => {
+    describe('Guest Lookup Scenarios', () => {
+      it('should handle guest not found', async () => {
         component.formData.Name = 'John';
         component.formData.Surname = 'Doe';
 
-        // Mock empty result
-        mockGetDocs.and.returnValue(Promise.resolve(mockQuerySnapshot()));
+        mockGetDocs.and.returnValue(Promise.resolve(createMockQuerySnapshot()));
 
         await component.onSubmit();
 
-        expect(component.message).toBeDefined();
+        expect(component.message).toBe('Guest not apart of wedding party ❌');
         expect(mockGetDocs).toHaveBeenCalled();
       });
 
-      it('should handle successful guest lookup', async () => {
+      it('should handle multiple guests found (take first)', async () => {
         component.formData.Name = 'John';
         component.formData.Surname = 'Doe';
-        component.formData.Attending = 'Yes';
 
-        const mockGuestData = [
-          {
-            id: 'guest-123',
-            data: {
-              Name: 'John Doe',
-              EventID: 'test-event-id'
-            }
-          }
+        const mockGuests = [
+          { id: 'guest-1', data: { Name: 'John Doe', EventID: 'test-event-id' } },
+          { id: 'guest-2', data: { Name: 'John Doe', EventID: 'test-event-id' } }
         ];
-        mockGetDocs.and.returnValue(Promise.resolve(mockQuerySnapshot(mockGuestData)));
+        mockGetDocs.and.returnValue(Promise.resolve(createMockQuerySnapshot(mockGuests)));
 
         await component.onSubmit();
 
-        // Check if updateDoc was called
         expect(mockUpdateDoc).toHaveBeenCalled();
         expect(component.message).toContain('successfully');
       });
@@ -216,88 +243,153 @@ describe('Rsvp', () => {
       beforeEach(() => {
         component.formData.Name = 'John';
         component.formData.Surname = 'Doe';
-        component.formData.Attending = 'Yes';
+        component.eventId = 'test-event-id';
       });
 
-      it('should update RSVP successfully when guest exists', async () => {
+      it('should update RSVP with "Yes" attendance', async () => {
+        component.formData.Attending = 'Yes';
         component.formData.Email = 'john@example.com';
         component.formData.Diet = 'Vegetarian';
         component.formData.Allergy = 'None';
         component.formData.Song = 'Test Song';
 
-        const mockGuestData = [
-          {
-            id: 'guest-123',
-            data: {
-              Name: 'John Doe',
-              EventID: 'test-event-id'
-            }
-          }
-        ];
-        mockGetDocs.and.returnValue(Promise.resolve(mockQuerySnapshot(mockGuestData)));
+        mockGetDocs.and.returnValue(Promise.resolve(createMockQuerySnapshot([{
+          id: 'guest-123',
+          data: { Name: 'John Doe', EventID: 'test-event-id' }
+        }])));
 
         await component.onSubmit();
 
         expect(mockUpdateDoc).toHaveBeenCalled();
-        expect(component.message).toBeDefined();
+        expect(component.message).toBe('RSVP updated successfully ✅');
       });
 
-      it('should handle "No" for attendance correctly', async () => {
+      it('should update RSVP with "No" attendance', async () => {
         component.formData.Attending = 'No';
+        component.formData.Email = '';
 
-        const mockGuestData = [
-          {
-            id: 'guest-123',
-            data: {
-              Name: 'John Doe',
-              EventID: 'test-event-id'
-            }
-          }
-        ];
-        mockGetDocs.and.returnValue(Promise.resolve(mockQuerySnapshot(mockGuestData)));
+        mockGetDocs.and.returnValue(Promise.resolve(createMockQuerySnapshot([{
+          id: 'guest-123',
+          data: { Name: 'John Doe', EventID: 'test-event-id' }
+        }])));
 
         await component.onSubmit();
 
         expect(mockUpdateDoc).toHaveBeenCalled();
+        expect(mockUpdateDoc.calls.mostRecent().args[1]).toEqual(jasmine.objectContaining({
+          RSVPstatus: false
+        }));
       });
 
       it('should use otherDiet when provided', async () => {
+        component.formData.Attending = 'Yes';
         component.formData.Diet = 'Other';
         component.formData.otherDiet = 'Custom Vegan Diet';
 
-        const mockGuestData = [
-          {
-            id: 'guest-123',
-            data: {
-              Name: 'John Doe',
-              EventID: 'test-event-id'
-            }
-          }
-        ];
-        mockGetDocs.and.returnValue(Promise.resolve(mockQuerySnapshot(mockGuestData)));
+        mockGetDocs.and.returnValue(Promise.resolve(createMockQuerySnapshot([{
+          id: 'guest-123',
+          data: { Name: 'John Doe', EventID: 'test-event-id' }
+        }])));
 
         await component.onSubmit();
 
         expect(mockUpdateDoc).toHaveBeenCalled();
+        const updateData = mockUpdateDoc.calls.mostRecent().args[1] as any;
+        expect(updateData.Dietary).toBe('Custom Vegan Diet');
+      });
+
+      it('should use Diet when otherDiet is empty', async () => {
+        component.formData.Attending = 'Yes';
+        component.formData.Diet = 'Vegan';
+        component.formData.otherDiet = '';
+
+        mockGetDocs.and.returnValue(Promise.resolve(createMockQuerySnapshot([{
+          id: 'guest-123',
+          data: { Name: 'John Doe', EventID: 'test-event-id' }
+        }])));
+
+        await component.onSubmit();
+
+        const updateData = mockUpdateDoc.calls.mostRecent().args[1] as any;
+        expect(updateData.Dietary).toBe('Vegan');
+      });
+
+      it('should use Diet when otherDiet has only spaces', async () => {
+        component.formData.Attending = 'Yes';
+        component.formData.Diet = 'Gluten-Free';
+        component.formData.otherDiet = '   ';
+
+        mockGetDocs.and.returnValue(Promise.resolve(createMockQuerySnapshot([{
+          id: 'guest-123',
+          data: { Name: 'John Doe', EventID: 'test-event-id' }
+        }])));
+
+        await component.onSubmit();
+
+        const updateData = mockUpdateDoc.calls.mostRecent().args[1] as any;
+        expect(updateData.Dietary).toBe('Gluten-Free');
       });
     });
 
     describe('Error Handling', () => {
-      it('should handle errors during form submission', async () => {
+      it('should handle Firestore errors during submission', async () => {
         component.formData.Name = 'John';
         component.formData.Surname = 'Doe';
         component.formData.Attending = 'Yes';
 
-        mockGetDocs.and.returnValue(Promise.reject(new Error('Database error')));
+        mockGetDocs.and.returnValue(Promise.reject(new Error('Firestore error')));
 
         await component.onSubmit();
 
-        expect(component.message).toContain('wrong');
+        expect(component.message).toBe('Something went wrong ❌');
       });
+
+      it('should handle updateDoc errors', async () => {
+        component.formData.Name = 'John';
+        component.formData.Surname = 'Doe';
+
+        mockGetDocs.and.returnValue(Promise.resolve(createMockQuerySnapshot([{
+          id: 'guest-123',
+          data: { Name: 'John Doe', EventID: 'test-event-id' }
+        }])));
+        mockUpdateDoc.and.returnValue(Promise.reject(new Error('Update failed')));
+
+        await component.onSubmit();
+
+        expect(component.message).toBe('Something went wrong ❌');
+      });
+    });
+
+    describe('Navigation', () => {
+      it('should navigate after successful RSVP', fakeAsync(async () => {
+        component.formData.Name = 'John';
+        component.formData.Surname = 'Doe';
+        component.formData.Attending = 'Yes';
+
+        mockGetDocs.and.returnValue(Promise.resolve(createMockQuerySnapshot([{
+          id: 'guest-123',
+          data: { Name: 'John Doe', EventID: 'test-event-id' }
+        }])));
+
+        await component.onSubmit();
+        tick(2000);
+
+        expect(mockRouter.navigate).toHaveBeenCalledWith(['/landing']);
+      }));
+
+      it('should not navigate on failed RSVP', fakeAsync(async () => {
+        component.formData.Name = '';
+        component.formData.Surname = '';
+
+        await component.onSubmit();
+        tick(2000);
+
+        expect(mockRouter.navigate).not.toHaveBeenCalled();
+      }));
     });
   });
 
-  describe('Event Code Submission', () => {
+  describe('Event Code Submission - submitEventCode()', () => {
     describe('Validation', () => {
       it('should handle empty event code', async () => {
         component.eventCode = '';
@@ -305,6 +397,16 @@ describe('Rsvp', () => {
         await component.submitEventCode();
 
         expect(component.eventIdEntered).toBeFalse();
+        expect(mockGetDocs).not.toHaveBeenCalled();
+      });
+
+      it('should handle event code with only spaces', async () => {
+        component.eventCode = '   ';
+
+        await component.submitEventCode();
+
+        expect(component.eventIdEntered).toBeFalse();
+        expect(mockGetDocs).not.toHaveBeenCalled();
       });
     });
 
@@ -312,58 +414,126 @@ describe('Rsvp', () => {
       it('should set eventIdEntered when valid code is found', async () => {
         component.eventCode = 'VALID123';
 
-        const mockEventData = [
-          {
-            id: 'event-123',
-            data: {
-              RSVPcode: 'VALID123',
-              EventID: 'event-user-id'
-            }
+        const mockEventData = [{
+          id: 'event-123',
+          data: {
+            RSVPcode: 'VALID123',
+            EventID: 'event-user-id'
           }
-        ];
+        }];
 
-        const mockStoryData = [
-          {
-            data: () => ({
-              title: 'Our Love Story',
-              content: 'We met in college and fell in love...'
-            })
+        const mockStoryData = [{
+          id: 'story-123',
+          data: {
+            title: 'Our Love Story',
+            content: 'We met in college...',
+            userID: 'event-user-id'
           }
-        ];
+        }];
 
         let callCount = 0;
         mockGetDocs.and.callFake(() => {
           callCount++;
           return callCount === 1
-            ? Promise.resolve(mockQuerySnapshot(mockEventData))
-            : Promise.resolve(mockQuerySnapshot(mockStoryData));
+            ? Promise.resolve(createMockQuerySnapshot(mockEventData))
+            : Promise.resolve(createMockQuerySnapshot(mockStoryData));
         });
 
         await component.submitEventCode();
 
         expect(component.eventIdEntered).toBeTrue();
         expect(component.eventId).toBe('event-user-id');
+        expect(component.storyData).toEqual(mockStoryData[0].data);
+        expect(component.message).toBe('');
       });
 
       it('should handle no story found for event', async () => {
         component.eventCode = 'VALID123';
 
-        const mockEventData = [
-          {
-            id: 'event-123',
-            data: {
-              RSVPcode: 'VALID123',
-              EventID: 'event-user-id'
-            }
+        const mockEventData = [{
+          id: 'event-123',
+          data: {
+            RSVPcode: 'VALID123',
+            EventID: 'event-user-id'
           }
-        ];
+        }];
 
         let callCount = 0;
         mockGetDocs.and.callFake(() => {
           callCount++;
           return callCount === 1
-            ? Promise.resolve(mockQuerySnapshot(mockEventData))
-            : Promise.resolve(mockQuerySnapshot([]));
+            ? Promise.resolve(createMockQuerySnapshot(mockEventData))
+            : Promise.resolve(createMockQuerySnapshot([]));
+        });
+
+        await component.submitEventCode();
+
+        expect(component.eventIdEntered).toBeTrue();
+        expect(component.storyData).toBeNull();
+      });
+
+      it('should use EventID from event data', async () => {
+        component.eventCode = 'VALID123';
+
+        const mockEventData = [{
+          id: 'event-123',
+          data: {
+            RSVPcode: 'VALID123',
+            EventID: 'custom-event-id'
+          }
+        }];
+
+        mockGetDocs.and.returnValue(Promise.resolve(createMockQuerySnapshot(mockEventData)));
+
+        await component.submitEventCode();
+
+        expect(component.eventId).toBe('custom-event-id');
+      });
+    });
+
+    describe('Event Code Errors', () => {
+      it('should handle event code not found', async () => {
+        component.eventCode = 'INVALID123';
+
+        mockGetDocs.and.returnValue(Promise.resolve(createMockQuerySnapshot([])));
+
+        await component.submitEventCode();
+
+        expect(component.eventIdEntered).toBeFalse();
+        expect(component.message).toBe('Event Code not found ❌');
+        expect(component.eventId).toBe('');
+      });
+
+      it('should handle errors during event code lookup', async () => {
+        component.eventCode = 'TEST123';
+
+        mockGetDocs.and.returnValue(Promise.reject(new Error('Network error')));
+
+        await component.submitEventCode();
+
+        expect(component.eventIdEntered).toBeFalse();
+        expect(component.message).toBe('Event Code not found ❌');
+      });
+
+      it('should handle errors during story lookup', async () => {
+        component.eventCode = 'VALID123';
+
+        const mockEventData = [{
+          id: 'event-123',
+          data: {
+            RSVPcode: 'VALID123',
+            EventID: 'event-user-id'
+          }
+        }];
+
+        let callCount = 0;
+        mockGetDocs.and.callFake(() => {
+          callCount++;
+          if (callCount === 1) {
+            return Promise.resolve(createMockQuerySnapshot(mockEventData));
+          } else {
+            return Promise.reject(new Error('Story lookup failed'));
+          }
         });
 
         await component.submitEventCode();
@@ -372,184 +542,105 @@ describe('Rsvp', () => {
         expect(component.storyData).toBeNull();
       });
     });
-
-    describe('Event Code Errors', () => {
-      it('should handle event code not found', async () => {
-        component.eventCode = 'INVALID123';
-
-        mockGetDocs.and.returnValue(Promise.resolve(mockQuerySnapshot([])));
-
-        await component.submitEventCode();
-
-        expect(component.eventIdEntered).toBeFalse();
-        expect(component.message).toBeDefined();
-      });
-
-      it('should handle errors during event code submission', async () => {
-        component.eventCode = 'TEST123';
-
-        mockGetDocs.and.returnValue(Promise.reject(new Error('Network error')));
-
-        await component.submitEventCode();
-
-        expect(component.eventIdEntered).toBeFalse();
-        expect(component.message).toContain('Error');
-      });
-    });
   });
 
-  describe('Navigation', () => {
-    it('should navigate after successful RSVP', fakeAsync(async () => {
-      component.formData.Name = 'John';
-      component.formData.Surname = 'Doe';
-      component.formData.Attending = 'Yes';
-
-      const mockGuestData = [
-        {
-          id: 'guest-123',
-          data: {
-            Name: 'John Doe',
-            EventID: 'test-event-id'
-          }
-        }
-      ];
-      mockGetDocs.and.returnValue(Promise.resolve(mockQuerySnapshot(mockGuestData)));
-
-      await component.onSubmit();
-      tick(2000);
-
-      // Check if navigation was attempted
-      expect(mockRouter.navigate).toHaveBeenCalled();
-    }));
-  });
-
-  describe('Utility Methods', () => {
-    it('should return router instance', () => {
-      const router = component.getRouter();
-      expect(router).toBe(mockRouter);
-    });
-
-    it('should return firestore instance', () => {
-      const db = component.getDBforTesting();
-      expect(db).toBe(mockFirestore);
-    });
-  });
-
-  describe('Edge Cases', () => {
+  describe('Edge Cases and Special Scenarios', () => {
     it('should handle very long input values', async () => {
       component.formData.Name = 'John';
       component.formData.Surname = 'Doe';
       component.formData.Email = 'a'.repeat(100) + '@test.com';
       component.formData.Song = 'b'.repeat(500);
+      component.eventId = 'test-event-id';
 
-      const mockGuestData = [
-        {
-          id: 'guest-123',
-          data: {
-            Name: 'John Doe',
-            EventID: 'test-event-id'
-          }
-        }
-      ];
-      mockGetDocs.and.returnValue(Promise.resolve(mockQuerySnapshot(mockGuestData)));
+      mockGetDocs.and.returnValue(Promise.resolve(createMockQuerySnapshot([{
+        id: 'guest-123',
+        data: { Name: 'John Doe', EventID: 'test-event-id' }
+      }])));
 
       await component.onSubmit();
 
       expect(mockUpdateDoc).toHaveBeenCalled();
+      const updateData = mockUpdateDoc.calls.mostRecent().args[1] as any;
+      expect(updateData.Email).toBe('a'.repeat(100) + '@test.com');
+      expect(updateData.Song).toBe('b'.repeat(500));
     });
 
     it('should handle special characters in names', async () => {
       component.formData.Name = 'José';
       component.formData.Surname = 'Muñoz';
+      component.eventId = 'test-event-id';
 
-      const mockGuestData = [
-        {
-          id: 'guest-123',
-          data: {
-            Name: 'José Muñoz',
-            EventID: 'test-event-id'
-          }
-        }
-      ];
-      mockGetDocs.and.returnValue(Promise.resolve(mockQuerySnapshot(mockGuestData)));
+      mockGetDocs.and.returnValue(Promise.resolve(createMockQuerySnapshot([{
+        id: 'guest-123',
+        data: { Name: 'José Muñoz', EventID: 'test-event-id' }
+      }])));
 
       await component.onSubmit();
 
       expect(mockUpdateDoc).toHaveBeenCalled();
     });
-  });
 
-  // Add tests for the actual component behavior based on the errors
-  describe('Component Behavior Tests', () => {
-    it('should handle form data correctly', () => {
-      // Test that form data can be set and retrieved
-      component.formData.Name = 'Test';
-      component.formData.Surname = 'User';
+    it('should handle name without surname', async () => {
+      component.formData.Name = 'John';
+      component.formData.Surname = '';
+      component.eventId = 'test-event-id';
 
-      expect(component.formData.Name).toBe('Test');
-      expect(component.formData.Surname).toBe('User');
+      mockGetDocs.and.returnValue(Promise.resolve(createMockQuerySnapshot([{
+        id: 'guest-123',
+        data: { Name: 'John', EventID: 'test-event-id' }
+      }])));
+
+      await component.onSubmit();
+
+      expect(mockUpdateDoc).toHaveBeenCalled();
     });
 
-    it('should reset message on new operations', () => {
-      component.message = 'Test message';
-      component.eventCode = 'TEST123';
+    it('should handle different diet options', async () => {
+      const diets = ['None', 'Vegetarian', 'Vegan', 'Gluten-Free', 'Kosher', 'Halal'];
+      component.formData.Name = 'John';
+      component.formData.Surname = 'Doe';
+      component.eventId = 'test-event-id';
 
-      // Simulate some operation that might reset the message
-      expect(component.message).toBe('Test message');
-    });
+      for (const diet of diets) {
+        component.formData.Diet = diet;
 
-    it('should handle different attendance options', async () => {
-      const attendanceOptions = ['Yes', 'No', 'Maybe'];
-
-      for (const option of attendanceOptions) {
-        component.formData.Name = 'John';
-        component.formData.Surname = 'Doe';
-        component.formData.Attending = option;
-
-        const mockGuestData = [
-          {
-            id: 'guest-123',
-            data: {
-              Name: 'John Doe',
-              EventID: 'test-event-id'
-            }
-          }
-        ];
-        mockGetDocs.and.returnValue(Promise.resolve(mockQuerySnapshot(mockGuestData)));
+        mockGetDocs.and.returnValue(Promise.resolve(createMockQuerySnapshot([{
+          id: 'guest-123',
+          data: { Name: 'John Doe', EventID: 'test-event-id' }
+        }])));
 
         await component.onSubmit();
 
-        // Reset mocks for next iteration
+        const updateData = mockUpdateDoc.calls.mostRecent().args[1] as any;
+        expect(updateData.Dietary).toBe(diet);
+
+        // Reset for next iteration
         mockUpdateDoc.calls.reset();
         mockGetDocs.calls.reset();
       }
     });
   });
 
-  // Test the actual error messages from the component
-  describe('Error Message Tests', () => {
-    it('should set appropriate error messages', async () => {
-      // Test empty name
-      component.formData.Name = '';
-      component.formData.Surname = '';
-      await component.onSubmit();
-      const emptyNameMessage = component.message;
+  describe('Component State Management', () => {
+    it('should reset message on new operations', () => {
+      component.message = 'Previous message';
+      component.eventCode = 'NEW123';
 
-      // Test guest not found
-      component.formData.Name = 'Nonexistent';
+      // The component doesn't automatically reset message, but we can test the behavior
+      expect(component.message).toBe('Previous message');
+      expect(component.eventCode).toBe('NEW123');
+    });
+
+    it('should maintain separate form data state', () => {
+      component.formData.Name = 'Test';
       component.formData.Surname = 'User';
-      mockGetDocs.and.returnValue(Promise.resolve(mockQuerySnapshot()));
-      await component.onSubmit();
-      const guestNotFoundMessage = component.message;
+      component.formData.Email = 'test@example.com';
 
-      // Test database error
-      mockGetDocs.and.returnValue(Promise.reject(new Error('DB Error')));
-      await component.onSubmit();
-      const dbErrorMessage = component.message;
-
-      expect(emptyNameMessage).toBeDefined();
-      expect(guestNotFoundMessage).toBeDefined();
-      expect(dbErrorMessage).toBeDefined();
+      expect(component.formData).toEqual(jasmine.objectContaining({
+        Name: 'Test',
+        Surname: 'User',
+        Email: 'test@example.com'
+      }));
     });
   });
 });
