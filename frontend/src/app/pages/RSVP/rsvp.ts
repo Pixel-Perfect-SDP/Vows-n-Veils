@@ -160,15 +160,11 @@ export class Rsvp
       if (!querySnapshotCode.empty) {
         this.eventIdEntered = true;
         this.message = '';
-        const eventDoc = querySnapshotCode.docs[0].data();
-        //this.eventId = querySnapshotCode.docs[0].id;
-
-        const eventData: any = querySnapshotCode.docs[0].data();
-        const eventIDValue = eventData.EventID;
+        this.eventId = querySnapshotCode.docs[0].id;
 
         //for story couple
         const storyCollection = collection(this.db, "Story");
-        const qStory= query(storyCollection, where("userID", "==", eventIDValue));
+        const qStory= query(storyCollection, where("userID", "==", this.eventId));
         const storySnapshot = await getDocs(qStory);
 
         if (!storySnapshot.empty) {
@@ -177,7 +173,7 @@ export class Rsvp
         else{
           this.storyData = null; // No story found for this event
         }
-      } 
+      }
       else {
         this.eventIdEntered = false;
         this.message = 'Event Code not found ❌';
@@ -187,7 +183,7 @@ export class Rsvp
     } catch (err) {
       console.error(err);
       this.eventIdEntered = false;
-      this.message = 'Error checking Event Code ❌';
+      this.message = 'Event Code not found ❌';
     }
   }
 
